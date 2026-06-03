@@ -3063,7 +3063,9 @@ def export_data_csv():
     )
 
 
+# Initialize database on import (Gunicorn/production compatibility)
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     print("\n[SUCCESS] GOAT backend running at http://localhost:5050\n")
     app.run(port=5050, debug=True)
