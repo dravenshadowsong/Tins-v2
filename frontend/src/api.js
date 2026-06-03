@@ -1,5 +1,5 @@
 // API helper — all calls to the backend in one place
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:5050/api";
+export const BASE = import.meta.env.VITE_API_URL || "https://tins-v2-1.onrender.com/api";
 
 async function req(method, path, body) {
   const token = localStorage.getItem("goat_token");
@@ -20,6 +20,8 @@ export const api = {
   login:         (data)      => req("POST", "/auth/login", data),
   me:            ()          => req("GET",  "/auth/me"),
   logout:        ()          => req("POST", "/auth/logout"),
+  changePassword:(data)      => req("POST", "/auth/change-password", data),
+  loginSupabase: (data)      => req("POST", "/auth/login-supabase", data),
 
   // Children
   getChildren:    ()          => req("GET",  "/children"),

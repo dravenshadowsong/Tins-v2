@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api";
+import { api, BASE } from "../api";
 import { DOMAINS } from "../data/questions";
+import { supabase } from "../supabaseClient";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -28,6 +29,10 @@ export default function Dashboard() {
   const [editingPuzzleId, setEditingPuzzleId] = useState(null);
   const [editingPuzzleJSON, setEditingPuzzleJSON] = useState("");
   const [formMsg, setFormMsg] = useState("");
+  const [showPassModal, setShowPassModal] = useState(false);
+  const [passForm, setPassForm] = useState({ old_password: "", new_password: "" });
+  const [passError, setPassError] = useState("");
+  const [passSuccess, setPassSuccess] = useState("");
 
   useEffect(() => {
     const cachedUser = localStorage.getItem("goat_user");
@@ -97,6 +102,9 @@ export default function Dashboard() {
                 + Register New Child
               </button>
             )}
+            <button className="btn btn-outline" onClick={() => setShowPassModal(true)}>
+              🔑 Change Password
+            </button>
             <button className="btn btn-outline" onClick={() => {
               localStorage.clear();
               navigate("/login");
@@ -123,6 +131,9 @@ export default function Dashboard() {
             </button>
             <button className={`btn ${activeTab === "puzzles" ? "btn-primary" : "btn-ghost"}`} onClick={() => setActiveTab("puzzles")}>
               🧩 Question Bank
+            </button>
+            <button className={`btn ${activeTab === "science" ? "btn-primary" : "btn-ghost"}`} onClick={() => setActiveTab("science")}>
+              🔬 Scientific Foundations
             </button>
           </>
         )}
@@ -260,7 +271,7 @@ export default function Dashboard() {
                     <h3 style={{ margin: 0, fontWeight: 800, color: "#4c1d95" }}>📥 Longitudinal Talent Data Export</h3>
                     <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#6d28d9" }}>Download standard CSV format comprising registered profiles, top domain results, and test scores.</p>
                   </div>
-                  <a href="http://localhost:5050/api/export/csv" download className="btn btn-primary" style={{ background: "#5b4cf0" }}>
+                  <a href={`${BASE}/export/csv`} download className="btn btn-primary" style={{ background: "#5b4cf0" }}>
                     Export CSV Ledger (.csv)
                   </a>
                 </div>
@@ -281,13 +292,35 @@ export default function Dashboard() {
             <form onSubmit={async (e) => {
               e.preventDefault();
               try {
-                await api.createUser(newUser);
-                setFormMsg(`Successfully created user: ${newUser.name}`);
+                // Sign up on Supabase Auth
+                const { data, error } = await supabase.auth.signUp({
+                  email: newUser.email,
+                  password: newUser.password,
+                  options: {
+                    data: {
+                      name: newUser.name,
+                      role: newUser.role
+                    }
+                  }
+                });
+                if (error) throw error;
+                
+                setFormMsg(`Successfully registered user ${newUser.name} on Supabase!`);
                 setNewUser({ name: "", email: "", password: "", role: "facilitator", center_id: "" });
                 const u = await api.getUsers();
                 setUsers(u);
               } catch (err) {
-                alert("Failed to create account. Check if email is unique.");
+                console.error("Supabase signUp failed, trying fallback:", err);
+                // Fallback for offline SQLite mode
+                try {
+                  await api.createUser(newUser);
+                  setFormMsg(`Successfully created local user: ${newUser.name}`);
+                  setNewUser({ name: "", email: "", password: "", role: "facilitator", center_id: "" });
+                  const u = await api.getUsers();
+                  setUsers(u);
+                } catch (fallbackErr) {
+                  alert("Failed to create account. Check if email is unique.");
+                }
               }
             }}>
               <div className="form-group">
@@ -750,6 +783,218 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* SCIENTIFIC FOUNDATIONS TAB */}
+      {activeTab === "science" && role === "master_admin" && (
+        <div className="card" style={{ padding: "32px", borderRadius: "16px" }}>
+          <div style={{ borderBottom: "2px solid #e5e7eb", paddingBottom: "16px", marginBottom: "24px" }}>
+            <span className="domain-badge" style={{ background: "#fee2e2", color: "#dc2626", fontWeight: 700 }}>CONFIDENTIAL — FOR INTERNAL USE & STAKEHOLDER REVIEW</span>
+            <h2 style={{ fontSize: "28px", fontWeight: 900, color: "#1e1b4b", marginTop: "8px" }}>Scientific Foundations & System Design</h2>
+          </div>
+
+          <div style={{ marginBottom: "32px", textAlign: "center" }}>
+            <img 
+              src="/multiple_intelligences_grid.png" 
+              alt="Multiple Intelligences Grid" 
+              style={{ maxWidth: "600px", width: "100%", borderRadius: "16px", border: "1px solid #e5e7eb", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+            {/* Executive Summary */}
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>Executive Summary</h3>
+              <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px" }}>
+                This note establishes the credibility of the <strong>Greatest of All Talents System (GOAT)</strong> proposed for <strong>Project WHY, New Delhi</strong>. It sets out the scientific foundations of the system's design, the rationale for its framework choices, the limitations of comparable existing tools, and the specific design decisions made to address the realities of underprivileged children aged 9–15 in an Indian urban context.
+              </p>
+              <div style={{ background: "#eef2ff", border: "1.5px solid #c7d2fe", color: "#3730a3", padding: "16px", borderRadius: "12px", fontSize: "14.5px", lineHeight: "1.6", marginTop: "16px" }}>
+                <strong>Core Claim:</strong> GOAT is a five-phase, evidence-grounded system for identifying and nurturing natural talent in children aged 9–15, designed to be bias-aware, literacy-independent in its discovery phase, mother-tongue-compatible, and validated by trained facilitator observation — not algorithmic output alone.
+              </div>
+            </div>
+
+            {/* Section 1 */}
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>1. The Problem We Are Solving</h3>
+              <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px" }}>
+                India produces approximately <strong>14.5 million school dropouts per year</strong>, the majority from economically disadvantaged urban and semi-urban households. Research consistently shows that the primary driver is not lack of ability — it is the failure of educational systems to identify, validate, and nurture the specific abilities each child naturally possesses.
+              </p>
+              <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px" }}>
+                Project WHY works with children in some of Delhi’s most underserved communities. These children face compounding disadvantages:
+              </p>
+              <ul style={{ paddingLeft: "20px", color: "#4b5563", lineHeight: "1.6", fontSize: "14.5px" }}>
+                <li style={{ marginBottom: "8px" }}><strong>Limited exposure to diverse domains:</strong> Most have never painted, played an instrument, or used a computer before arriving at Project WHY.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Assessment in a second or third language (English):</strong> This systematically suppresses performance on verbal and linguistic tasks.</li>
+                <li style={{ marginBottom: "8px" }}><strong>No existing formal mechanism:</strong> Lack of structural tools to identify talent outside of standard academic performance and sports.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Social and familial pressure:</strong> Heavy pressure to pursue immediate income-generating paths rather than talent-aligned ones.</li>
+              </ul>
+            </div>
+
+            {/* Section 2 */}
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>2. Scientific Foundations</h3>
+              <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px", marginBottom: "20px" }}>
+                The system draws on four independently validated research traditions. These represent the mainstream of talent science as of 2026 and are cross-referenced to identify areas of convergence:
+              </p>
+
+              <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", padding: "18px", borderRadius: "12px", marginBottom: "16px" }}>
+                <h4 style={{ color: "#5b4cf0", fontSize: "15px", fontWeight: 800, margin: "0 0 8px 0" }}>2.1 Cattell-Horn-Carroll (CHC) Theory of Cognitive Abilities</h4>
+                <p style={{ color: "#4b5563", fontSize: "14px", margin: 0, lineHeight: "1.6" }}>
+                  CHC theory is the most psychometrically validated model of human cognitive ability, developed over six decades of factor-analytic research. It identifies broad ability domains—including fluid intelligence (Gf), crystallized intelligence (Gc), visual-spatial processing (Gv), short-term memory, and psychomotor speed—each with established independence. GOAT uses CHC's taxonomy as the backbone for its 8-domain framework.
+                </p>
+              </div>
+
+              <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", padding: "18px", borderRadius: "12px", marginBottom: "16px" }}>
+                <h4 style={{ color: "#5b4cf0", fontSize: "15px", fontWeight: 800, margin: "0 0 8px 0" }}>2.2 Howard Gardner's Theory of Multiple Intelligences</h4>
+                <p style={{ color: "#4b5563", fontSize: "14px", margin: 0, lineHeight: "1.6" }}>
+                  Gardner's framework identified 8 intelligences, challenging the dominant view that intelligence is a single general factor (g). While facing criticism for psychometric validation, Gardner's framework provides a child-accessible conceptual map that provides an effective linguistic bridge to children and facilitators.
+                </p>
+              </div>
+
+              <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", padding: "18px", borderRadius: "12px", marginBottom: "16px" }}>
+                <h4 style={{ color: "#5b4cf0", fontSize: "15px", fontWeight: 800, margin: "0 0 8px 0" }}>2.3 Gagné's Differentiated Model of Giftedness and Talent (DMGT)</h4>
+                <p style={{ color: "#4b5563", fontSize: "14px", margin: 0, lineHeight: "1.6" }}>
+                  Gagné's DMGT is critical for one specific design decision in GOAT: the distinction between <strong>natural abilities (aptitudes)</strong> and <strong>developed talents (systematically trained skills)</strong>. This prevents the system from confusing exposure with ability. It also establishes the basis for GOAT Phase 4 (facilitator review) and Phase 5 (mentor matching).
+                </p>
+              </div>
+
+              <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", padding: "18px", borderRadius: "12px", marginBottom: "20px" }}>
+                <h4 style={{ color: "#5b4cf0", fontSize: "15px", fontWeight: 800, margin: "0 0 8px 0" }}>2.4 Torrance's Creativity Research & Divergent Thinking</h4>
+                <p style={{ color: "#4b5563", fontSize: "14px", margin: 0, lineHeight: "1.6" }}>
+                  E. Paul Torrance's longitudinal research demonstrated that divergent thinking is a measurable, stable ability in children from age 8 onwards, and is a stronger predictor of adult creative achievement than IQ. Domain 2 (Creative & Artistic) in GOAT uses Torrance-inspired task types (picture completion, unusual uses) that are image-based and literacy-independent.
+                </p>
+              </div>
+
+              {/* Framework table */}
+              <div style={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: "12px", marginTop: "24px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", background: "#fff" }}>
+                  <thead>
+                    <tr style={{ background: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+                      <th style={{ textAlign: "left", padding: "12px 16px", color: "#5b4cf0", fontWeight: 800 }}>Framework / Source</th>
+                      <th style={{ textAlign: "left", padding: "12px 16px", color: "#5b4cf0", fontWeight: 800 }}>How it supports this system</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 700 }}>CHC Theory</td>
+                      <td style={{ padding: "12px 16px", color: "#4b5563" }}>Maps each GOAT domain to an independently validated cognitive ability construct.</td>
+                    </tr>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 700 }}>Gardner (1983)</td>
+                      <td style={{ padding: "12px 16px", color: "#4b5563" }}>Provides child-accessible language and 8-way domain taxonomy used in GOAT.</td>
+                    </tr>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 700 }}>Gagné DMGT</td>
+                      <td style={{ padding: "12px 16px", color: "#4b5563" }}>Basis for separating aptitude from exposure; justifies facilitator layer.</td>
+                    </tr>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 700 }}>Torrance TTCT</td>
+                      <td style={{ padding: "12px 16px", color: "#4b5563" }}>Validates picture-based, literacy-independent creativity assessment.</td>
+                    </tr>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 700 }}>Mayer-Salovey EQ</td>
+                      <td style={{ padding: "12px 16px", color: "#4b5563" }}>Basis for the EQ component in Phase 3 integrated scoring.</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: "12px 16px", fontWeight: 700 }}>Raven's Matrices</td>
+                      <td style={{ padding: "12px 16px", color: "#4b5563" }}>Supports short, culturally fair fluid intelligence assessment in Domain 3.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Section 4 */}
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>3. Why Existing Tools Are Insufficient</h3>
+              <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px" }}>
+                Several established tools address related problems but fall short for Project WHY’s specific population:
+              </p>
+              <ul style={{ paddingLeft: "20px", color: "#4b5563", lineHeight: "1.6", fontSize: "14.5px" }}>
+                <li style={{ marginBottom: "8px" }}><strong>Myers-Briggs Type Indicator (MBTI):</strong> Measures personality type, not capability. A personality classification does not tell you if a child has exceptional spatial reasoning or musical aptitude.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Gallup StrengthsFinder:</strong> Measures self-reported preference patterns in adults, requires strong English literacy, and is not validated for children under 15.</li>
+                <li style={{ marginBottom: "8px" }}><strong>ProMytheUs:</strong> The closest comparable tool. However, it lacks a human validation layer, has no published inter-rater reliability data, and displays significant English-language bias.</li>
+              </ul>
+              <div style={{ background: "#d1f7ec", border: "1.5px solid rgba(0, 184, 148, 0.2)", color: "#00b894", padding: "16px", borderRadius: "12px", fontSize: "14.5px", lineHeight: "1.6", marginTop: "16px" }}>
+                <strong>Key Differentiator:</strong> GOAT does not replace existing tools—it builds on their valid instincts while adding three layers they lack: a published scientific framework, a mandatory human validation checkpoint, and mother-tongue compatibility in all assessment tasks.
+              </div>
+            </div>
+
+            {/* Section 5 */}
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>4. Core Design Decisions & Justifications</h3>
+              <ul style={{ paddingLeft: "20px", color: "#4b5563", lineHeight: "1.6", fontSize: "14.5px" }}>
+                <li style={{ marginBottom: "8px" }}><strong>Literacy-Independent Discovery Phase:</strong> The discovery funnel uses picture selection, drag-and-drop, and visual puzzles—zero text reading required. Literacy levels among Delhi’s underprivileged kids vary widely; gatekeeping by reading will miss high spatial, physical, or creative talent.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Mother-Tongue Assessment:</strong> All language-domain tasks are administered in the child's first language (English or Hindi). A verbally gifted Hindi speaker assessed in English would represent a false negative.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Mandatory Facilitator Validation:</strong> No 20-minute test is an absolute verdict. A trained facilitator spends 10 minutes observing the child to capture and flag test anxiety, lucky guessing, or suppressed performance.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Exposure-Corrected Scoring:</strong> Records prior exposure levels. Zero-exposure children are compared against zero-exposure cohort baselines, correcting long-standing inequities in standardized testing.</li>
+              </ul>
+            </div>
+
+            {/* Section 7 */}
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>5. Pilot Validation Roadmap</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginTop: "16px" }}>
+                <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "20px" }}>
+                  <h5 style={{ fontSize: "14px", fontWeight: 800, color: "#5b4cf0", margin: "0 0 8px 0" }}>Phase A — Pilot (Months 1–3)</h5>
+                  <p style={{ fontSize: "13px", lineHeight: "1.5", color: "#6b7280", margin: 0 }}>Administer GOAT to 30–50 children. Compare GOAT domain output against blind facilitator assessment. Target: ≥70% concordance.</p>
+                </div>
+                <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "20px" }}>
+                  <h5 style={{ fontSize: "14px", fontWeight: 800, color: "#5b4cf0", margin: "0 0 8px 0" }}>Phase B — Reliability (Months 4–6)</h5>
+                  <p style={{ fontSize: "13px", lineHeight: "1.5", color: "#6b7280", margin: 0 }}>Re-administer GOAT to the same cohort 8 weeks later without intervening instruction. Target: ≥80% test-retest reliability.</p>
+                </div>
+                <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "20px" }}>
+                  <h5 style={{ fontSize: "14px", fontWeight: 800, color: "#5b4cf0", margin: "0 0 8px 0" }}>Phase C — Longitudinal (Year 2)</h5>
+                  <p style={{ fontSize: "13px", lineHeight: "1.5", color: "#6b7280", margin: 0 }}>Track whether children placed in mentor programs aligned with their GOAT domain show greater attendance and fulfillment than comparison groups.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ borderTop: "1px solid #e5e7eb", marginTop: "32px", paddingTop: "16px", display: "flex", justifyContent: "space-between", fontSize: "12.5px", color: "#9ca3af", flexWrap: "wrap", gap: "12px" }}>
+            <p style={{ margin: 0 }}>© 2026 Project WHY · Talent Systems Design Team</p>
+            <p style={{ margin: 0 }}>For questions regarding the scientific basis of this system, please contact the Talent Systems Design Team.</p>
+          </div>
+        </div>
+      )}
+
+      {showPassModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
+          <div className="card" style={{ width: "100%", maxWidth: "400px", padding: "24px", borderRadius: "12px", background: "#fff", border: "1px solid #e5e7eb", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}>
+            <h3 style={{ margin: "0 0 16px 0", fontWeight: 800, fontSize: "18px", color: "#1e1b4b" }}>Change Portal Password</h3>
+            {passError && <div style={{ color: "#dc2626", background: "#fee2e2", padding: "8px 12px", borderRadius: "6px", fontSize: "13px", marginBottom: "12px", fontWeight: 600 }}>⚠️ {passError}</div>}
+            {passSuccess && <div style={{ color: "#166534", background: "#f0fdf4", padding: "8px 12px", borderRadius: "6px", fontSize: "13px", marginBottom: "12px", fontWeight: 600 }}>✅ {passSuccess}</div>}
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setPassError("");
+              setPassSuccess("");
+              try {
+                await api.changePassword(passForm);
+                setPassSuccess("Password updated successfully!");
+                setPassForm({ old_password: "", new_password: "" });
+                setTimeout(() => {
+                  setShowPassModal(false);
+                  setPassSuccess("");
+                }, 1500);
+              } catch (err) {
+                setPassError("Failed to change password. Double check current password.");
+              }
+            }}>
+              <div className="form-group" style={{ marginBottom: "12px" }}>
+                <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", fontWeight: 700 }}>Current Password</label>
+                <input type="password" value={passForm.old_password} onChange={e => setPassForm({ ...passForm, old_password: e.target.value })} required style={{ border: "1.5px solid #d1d5db", borderRadius: "8px", height: "38px", width: "100%", padding: "0 8px", fontSize: "14px" }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: "20px" }}>
+                <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", fontWeight: 700 }}>New Password</label>
+                <input type="password" value={passForm.new_password} onChange={e => setPassForm({ ...passForm, new_password: e.target.value })} required style={{ border: "1.5px solid #d1d5db", borderRadius: "8px", height: "38px", width: "100%", padding: "0 8px", fontSize: "14px" }} />
+              </div>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button type="button" className="btn btn-outline" onClick={() => { setShowPassModal(false); setPassError(""); setPassSuccess(""); }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ background: "#5b4cf0" }}>Update Password</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

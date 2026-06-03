@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { supabase } from "../supabaseClient";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("facilitator@why.org");
-  const [password, setPassword] = useState("why123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -14,20 +15,29 @@ export default function Login() {
     setLoading(true);
     setErrorMsg("");
     try {
-      const result = await api.login({ email, password });
+      // 1. Sign in via Supabase Auth client
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      // 2. Exchange Supabase session token for local session
+      const result = await api.loginSupabase({ token: data.session.access_token });
       localStorage.setItem("goat_token", result.token);
       localStorage.setItem("goat_user", JSON.stringify(result.user));
       navigate("/dashboard");
     } catch (err) {
-      setErrorMsg("Login failed. Please check your credentials or wait for database update.");
+      console.error("Supabase login failed, trying fallback:", err);
+      // Fallback for offline testing or legacy seeded accounts
+      try {
+        const result = await api.login({ email, password });
+        localStorage.setItem("goat_token", result.token);
+        localStorage.setItem("goat_user", JSON.stringify(result.user));
+        navigate("/dashboard");
+      } catch (fallbackErr) {
+        setErrorMsg("Login failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickSelect = (selEmail, selPass) => {
-    setEmail(selEmail);
-    setPassword(selPass);
   };
 
   return (
@@ -72,47 +82,6 @@ export default function Login() {
             {loading ? "Verifying Credentials..." : "Sign In to Portal"}
           </button>
         </form>
-
-        <div className="card" style={{ padding: "18px 20px", borderRadius: "12px", background: "#FAFAFC", border: "1px dashed rgba(91, 76, 240, 0.25)" }}>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: "12px", fontWeight: 800, color: "#5B4CF0", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-            🔑 Test Credentials Select (Click to Auto-fill)
-          </h4>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px" }}>
-            <button 
-              type="button" 
-              onClick={() => handleQuickSelect("master@why.org", "why123")} 
-              className="btn btn-ghost" 
-              style={{ padding: "6px 8px", fontSize: "11px", minHeight: "30px", justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              👑 Master Admin
-            </button>
-            <button 
-              type="button" 
-              onClick={() => handleQuickSelect("admin@why.org", "why123")} 
-              className="btn btn-ghost" 
-              style={{ padding: "6px 8px", fontSize: "11px", minHeight: "30px", justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              🛡️ Admin
-            </button>
-            <button 
-              type="button" 
-              onClick={() => handleQuickSelect("facilitator@why.org", "why123")} 
-              className="btn btn-ghost" 
-              style={{ padding: "6px 8px", fontSize: "11px", minHeight: "30px", justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              🧑‍🏫 Facilitator
-            </button>
-            <button 
-              type="button" 
-              onClick={() => handleQuickSelect("mentor@why.org", "why123")} 
-              className="btn btn-ghost" 
-              style={{ padding: "6px 8px", fontSize: "11px", minHeight: "30px", justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              🤝 Mentor
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
   );

@@ -1,0 +1,38 @@
+# Python Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# Node Dependencies & Builds
+node_modules/
+dist/
+dist-ssr/
+.eslintcache
+
+# Local Environments & Credentials
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local Databases
+*.db
+*.sqlite3
+
+# Logs & OS Files
+*.log
+logs/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local agents and scratch folders
+.agents/
+scratch/
+
