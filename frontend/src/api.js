@@ -22,6 +22,7 @@ export const api = {
   logout:        ()          => req("POST", "/auth/logout"),
   changePassword:(data)      => req("POST", "/auth/change-password", data),
   loginSupabase: (data)      => req("POST", "/auth/login-supabase", data),
+  register:      (data)      => req("POST", "/auth/register", data),
 
   // Children
   getChildren:    ()          => req("GET",  "/children"),
@@ -53,6 +54,7 @@ export const api = {
   getUsers:        ()          => req("GET",  "/admin/users"),
   createUser:      (data)      => req("POST", "/admin/users", data),
   deleteUser:      (id)        => req("DELETE", `/admin/users/${id}`),
+  approveUser:     (id, data)  => req("PUT",    `/admin/users/${id}/approve`, data),
   getCenters:      ()          => req("GET",  "/centers"),
   createCenter:    (data)      => req("POST", "/centers", data),
   getWorkshops:    ()          => req("GET",  "/workshops"),

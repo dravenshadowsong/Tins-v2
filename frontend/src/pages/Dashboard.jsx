@@ -85,6 +85,34 @@ export default function Dashboard() {
 
   const role = user?.role || "facilitator";
 
+  if (role.startsWith("pending_")) {
+    const reqRole = role.replace("pending_", "").toUpperCase();
+    return (
+      <div className="auth-layout" style={{ padding: "80px 10px", textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
+        <div className="card" style={{ width: "100%", maxWidth: "500px", padding: "40px 30px", borderRadius: "16px", border: "1.5px solid rgba(91, 76, 240, 0.12)", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ fontSize: "56px", marginBottom: "16px" }}>⏳</div>
+          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#1e1b4b", margin: "0 0 12px 0" }}>Account Pending Approval</h1>
+          <p className="text-light" style={{ fontSize: "14.5px", lineHeight: "1.6", marginBottom: "24px" }}>
+            Hello <strong>{user?.name}</strong>! Your request to join as a <strong style={{ color: "#5b4cf0" }}>{reqRole}</strong> is currently pending review. 
+            A system administrator must approve your account once before you can access the portal features.
+          </p>
+          <div style={{ padding: "12px", background: "#f5f3ff", borderRadius: "8px", color: "#6d28d9", fontSize: "13.5px", fontWeight: 600, marginBottom: "24px" }}>
+            Registered Email: {user?.email}
+          </div>
+          <button className="btn btn-outline btn-full" onClick={() => {
+            localStorage.clear();
+            navigate("/login");
+          }} style={{ fontWeight: 700 }}>
+            Sign Out & Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const pendingUsers = users.filter(u => u.role && u.role.startsWith("pending_"));
+  const activeUsers = users.filter(u => !u.role || !u.role.startsWith("pending_"));
+
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 15px" }}>
       {/* Header Banner */}
@@ -121,11 +149,14 @@ export default function Dashboard() {
           📊 Analytics Dashboard
         </button>
 
+        {(role === "master_admin" || role === "admin") && (
+          <button className={`btn ${activeTab === "users" ? "btn-primary" : "btn-ghost"}`} onClick={() => setActiveTab("users")}>
+            👥 User Accounts
+          </button>
+        )}
+
         {role === "master_admin" && (
           <>
-            <button className={`btn ${activeTab === "users" ? "btn-primary" : "btn-ghost"}`} onClick={() => setActiveTab("users")}>
-              👥 User Accounts
-            </button>
             <button className={`btn ${activeTab === "centers" ? "btn-primary" : "btn-ghost"}`} onClick={() => setActiveTab("centers")}>
               🏢 Center Registry
             </button>
@@ -284,112 +315,207 @@ export default function Dashboard() {
       )}
 
       {/* USER ACCOUNTS TAB */}
-      {activeTab === "users" && role === "master_admin" && (
-        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px" }}>
-          {/* Add User Panel */}
-          <div className="card" style={{ padding: "20px", borderRadius: "12px", height: "fit-content" }}>
-            <h3 style={{ margin: "0 0 16px 0", fontWeight: 800 }}>Add System Account</h3>
-            <form onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                // Sign up on Supabase Auth
-                const { data, error } = await supabase.auth.signUp({
-                  email: newUser.email,
-                  password: newUser.password,
-                  options: {
-                    data: {
-                      name: newUser.name,
-                      role: newUser.role
-                    }
-                  }
-                });
-                if (error) throw error;
-                
-                setFormMsg(`Successfully registered user ${newUser.name} on Supabase!`);
-                setNewUser({ name: "", email: "", password: "", role: "facilitator", center_id: "" });
-                const u = await api.getUsers();
-                setUsers(u);
-              } catch (err) {
-                console.error("Supabase signUp failed, trying fallback:", err);
-                // Fallback for offline SQLite mode
+      {activeTab === "users" && (role === "master_admin" || role === "admin") && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          
+          {/* Pending Approvals Section */}
+          {pendingUsers.length > 0 && (
+            <div className="card" style={{ padding: "24px", borderRadius: "16px", border: "2px solid #5b4cf0", background: "#fcfcff" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                <span style={{ fontSize: "24px" }}>⏳</span>
+                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", margin: 0 }}>Pending Account Approvals</h2>
+              </div>
+              <p className="text-light" style={{ fontSize: "14px", marginBottom: "20px" }}>
+                The following users self-registered and require approval. Please assign them a role and optional center to grant them system access.
+              </p>
+              
+              <div className="table-wrap">
+                <table className="goat-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email Address</th>
+                      <th>Requested Role</th>
+                      <th>Assign Center</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pendingUsers.map(u => {
+                      const reqRole = u.role.replace("pending_", "");
+                      return (
+                        <tr key={u.id}>
+                          <td style={{ fontWeight: 700 }}>{u.name}</td>
+                          <td>{u.email}</td>
+                          <td>
+                            <span className="domain-badge" style={{ background: "#e0f2fe", color: "#0369a1", fontSize: "11px", fontWeight: 700 }}>
+                              {reqRole.toUpperCase()} (PENDING)
+                            </span>
+                          </td>
+                          <td>
+                            <select 
+                              id={`center-select-${u.id}`}
+                              style={{ height: "32px", border: "1.5px solid #d1d5db", borderRadius: "6px", fontSize: "13px", padding: "0 4px" }}
+                            >
+                              <option value="">-- No Center --</option>
+                              {centers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                          </td>
+                          <td>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                              <button 
+                                className="btn btn-primary btn-sm" 
+                                style={{ background: "#10b981", borderColor: "#10b981", fontWeight: 700 }}
+                                onClick={async () => {
+                                  const selCenter = document.getElementById(`center-select-${u.id}`)?.value || null;
+                                  try {
+                                    await api.approveUser(u.id, { role: reqRole, center_id: selCenter });
+                                    setFormMsg(`Successfully approved ${u.name} as ${reqRole.toUpperCase()}`);
+                                    const allUsers = await api.getUsers();
+                                    setUsers(allUsers);
+                                  } catch (err) {
+                                    alert("Failed to approve user.");
+                                  }
+                                }}
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                className="btn btn-ghost btn-sm" 
+                                style={{ color: "#ef4444", fontWeight: 700 }}
+                                onClick={async () => {
+                                  if (confirm(`Reject and delete registration for ${u.name}?`)) {
+                                    try {
+                                      await api.deleteUser(u.id);
+                                      setFormMsg(`Rejected registration for ${u.name}`);
+                                      const allUsers = await api.getUsers();
+                                      setUsers(allUsers);
+                                    } catch (err) {
+                                      alert("Failed to reject user.");
+                                    }
+                                  }
+                                }}
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* User Creator & List Grid */}
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px" }}>
+            {/* Add User Panel */}
+            <div className="card" style={{ padding: "20px", borderRadius: "12px", height: "fit-content" }}>
+              <h3 style={{ margin: "0 0 16px 0", fontWeight: 800 }}>Add System Account</h3>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
                 try {
-                  await api.createUser(newUser);
-                  setFormMsg(`Successfully created local user: ${newUser.name}`);
+                  // Sign up on Supabase Auth
+                  const { data, error } = await supabase.auth.signUp({
+                    email: newUser.email,
+                    password: newUser.password,
+                    options: {
+                      data: {
+                        name: newUser.name,
+                        role: newUser.role
+                      }
+                    }
+                  });
+                  if (error) throw error;
+                  
+                  setFormMsg(`Successfully registered user ${newUser.name} on Supabase!`);
                   setNewUser({ name: "", email: "", password: "", role: "facilitator", center_id: "" });
                   const u = await api.getUsers();
                   setUsers(u);
-                } catch (fallbackErr) {
-                  alert("Failed to create account. Check if email is unique.");
+                } catch (err) {
+                  console.error("Supabase signUp failed, trying fallback:", err);
+                  // Fallback for offline SQLite mode
+                  try {
+                    await api.createUser(newUser);
+                    setFormMsg(`Successfully created local user: ${newUser.name}`);
+                    setNewUser({ name: "", email: "", password: "", role: "facilitator", center_id: "" });
+                    const u = await api.getUsers();
+                    setUsers(u);
+                  } catch (fallbackErr) {
+                    alert("Failed to create account. Check if email is unique.");
+                  }
                 }
-              }
-            }}>
-              <div className="form-group">
-                <label>Account Name</label>
-                <input type="text" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} required />
-              </div>
-              <div className="form-group">
-                <label>Email Address</label>
-                <input type="email" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} required />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} required />
-              </div>
-              <div className="form-group">
-                <label>System Role</label>
-                <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} style={{ width: "100%", height: "38px", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "0 8px" }}>
-                  <option value="master_admin">👑 Master Admin</option>
-                  <option value="admin">🛡️ Admin</option>
-                  <option value="facilitator">🧑‍🏫 Facilitator</option>
-                  <option value="mentor">🤝 Mentor</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Assigned Center</label>
-                <select value={newUser.center_id} onChange={e => setNewUser({ ...newUser, center_id: e.target.value })} style={{ width: "100%", height: "38px", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "0 8px" }}>
-                  <option value="">-- No Assigned Center --</option>
-                  {centers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-              <button type="submit" className="btn btn-primary btn-full mt-16">Create Account</button>
-            </form>
-          </div>
+              }}>
+                <div className="form-group">
+                  <label>Account Name</label>
+                  <input type="text" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input type="email" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <label>System Role</label>
+                  <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} style={{ width: "100%", height: "38px", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "0 8px" }}>
+                    <option value="master_admin">👑 Master Admin</option>
+                    <option value="admin">🛡️ Admin</option>
+                    <option value="facilitator">🧑‍🏫 Facilitator</option>
+                    <option value="mentor">🤝 Mentor</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Assigned Center</label>
+                  <select value={newUser.center_id} onChange={e => setNewUser({ ...newUser, center_id: e.target.value })} style={{ width: "100%", height: "38px", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "0 8px" }}>
+                    <option value="">-- No Assigned Center --</option>
+                    {centers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <button type="submit" className="btn btn-primary btn-full mt-16">Create Account</button>
+              </form>
+            </div>
 
-          {/* User List Panel */}
-          <div className="card" style={{ padding: "20px", borderRadius: "12px" }}>
-            <h3 style={{ margin: "0 0 16px 0", fontWeight: 800 }}>Active System Users</h3>
-            <div className="table-wrap">
-              <table className="goat-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Center</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u.id}>
-                      <td>{u.id}</td>
-                      <td style={{ fontWeight: 600 }}>{u.name}</td>
-                      <td>{u.email}</td>
-                      <td><span style={{ fontSize: "11px", fontWeight: 700 }} className="domain-badge">{u.role.toUpperCase()}</span></td>
-                      <td>{centers.find(c => c.id === u.center_id)?.name || "Global / Main"}</td>
-                      <td>
-                        <button className="btn btn-ghost btn-sm" style={{ color: "#ef4444" }} onClick={async () => {
-                          if (confirm(`Are you sure you want to delete ${u.name}?`)) {
-                            await api.deleteUser(u.id);
-                            setUsers(users.filter(x => x.id !== u.id));
-                          }
-                        }}>Delete</button>
-                      </td>
+            {/* User List Panel */}
+            <div className="card" style={{ padding: "20px", borderRadius: "12px" }}>
+              <h3 style={{ margin: "0 0 16px 0", fontWeight: 800 }}>Active System Users</h3>
+              <div className="table-wrap">
+                <table className="goat-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Center</th>
+                      <th>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {activeUsers.map(u => (
+                      <tr key={u.id}>
+                        <td>{u.id}</td>
+                        <td style={{ fontWeight: 600 }}>{u.name}</td>
+                        <td>{u.email}</td>
+                        <td><span style={{ fontSize: "11px", fontWeight: 700 }} className="domain-badge">{u.role.toUpperCase()}</span></td>
+                        <td>{centers.find(c => c.id === u.center_id)?.name || "Global / Main"}</td>
+                        <td>
+                          <button className="btn btn-ghost btn-sm" style={{ color: "#ef4444" }} onClick={async () => {
+                            if (confirm(`Are you sure you want to delete ${u.name}?`)) {
+                              await api.deleteUser(u.id);
+                              setUsers(users.filter(x => x.id !== u.id));
+                            }
+                          }}>Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

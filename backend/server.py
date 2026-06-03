@@ -558,6 +558,32 @@ def login():
         "user": {"id": row["id"], "name": row["name"], "email": row["email"], "role": row["role"]},
     })
 
+@app.route("/api/auth/register", methods=["POST"])
+def register():
+    data = request.json or {}
+    name = data.get("name")
+    email = data.get("email", "").strip().lower()
+    password = data.get("password")
+    role = data.get("role", "pending_facilitator")
+    
+    if not name or not email or not password:
+        return jsonify({"error": "Missing fields"}), 400
+        
+    if role not in ("pending_facilitator", "pending_mentor"):
+        role = "pending_facilitator"
+        
+    db = get_db()
+    try:
+        db.execute("""
+            INSERT INTO users (name, email, password_hash, role)
+            VALUES (?, ?, ?, ?)
+        """, (name, email, hash_password(password), role))
+        db.commit()
+    except Exception as e:
+        return jsonify({"error": "Email already exists or invalid data"}), 400
+        
+    return jsonify({"status": "success", "message": "Registration successful, pending approval."}), 201
+
 @app.route("/api/auth/login-supabase", methods=["POST"])
 def login_supabase():
     data = request.json or {}
@@ -2687,7 +2713,7 @@ def list_users():
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/admin/users", methods=["POST"])
-@require_role(["master_admin"])
+@require_role(["master_admin", "admin"])
 def create_user_tms():
     data = request.json or {}
     name = data.get("name")
@@ -2710,13 +2736,58 @@ def create_user_tms():
         return jsonify({"error": str(e)}), 400
     return jsonify({"status": "success"}), 201
 
-@app.route("/api/admin/users/<int:uid>", methods=["DELETE"])
-@require_role(["master_admin"])
+@app.route("/api/admin/users/<uid>", methods=["DELETE"])
+@require_role(["master_admin", "admin"])
 def delete_user_tms(uid):
     db = get_db()
     db.execute("DELETE FROM users WHERE id=?", (uid,))
     db.commit()
     return jsonify({"status": "success"})
+
+@app.route("/api/admin/users/<uid>/approve", methods=["PUT"])
+@require_role(["master_admin", "admin"])
+def approve_user_tms(uid):
+    data = request.json or {}
+    approved_role = data.get("role")
+    center_id = data.get("center_id")
+    
+    db = get_db()
+    user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    if not user_row:
+        return jsonify({"error": "User not found"}), 404
+        
+    if not approved_role:
+        current_role = user_row["role"]
+        if current_role.startswith("pending_"):
+            approved_role = current_role.replace("pending_", "")
+        else:
+            approved_role = current_role
+            
+    if approved_role not in ("facilitator", "mentor", "admin", "master_admin"):
+        approved_role = "facilitator"
+        
+    try:
+        if center_id:
+            db.execute("UPDATE users SET role=?, center_id=? WHERE id=?", (approved_role, center_id, uid))
+        else:
+            db.execute("UPDATE users SET role=? WHERE id=?", (approved_role, uid))
+        db.commit()
+        
+        # Supabase sync
+        supabase_url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+        supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if supabase_url and supabase_key:
+            try:
+                from supabase import create_client
+                sp_client = create_client(supabase_url, supabase_key)
+                sp_client.table("users").update({"role": approved_role}).eq("email", user_row["email"]).execute()
+                print(f"[SUPABASE SYNC] Approved user role {approved_role} for {user_row['email']}")
+            except Exception as e:
+                print(f"[SUPABASE WARNING] Failed to sync approved user role: {e}")
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+        
+    return jsonify({"status": "success", "role": approved_role})
 
 # ── CENTER MANAGEMENT ENDPOINTS ─────────────────────────────────────────────
 @app.route("/api/centers", methods=["GET"])
