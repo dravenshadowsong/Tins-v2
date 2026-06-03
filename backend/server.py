@@ -36,6 +36,39 @@ except Exception as e:
 app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), "db", "goat.db")
 
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    import traceback
+    db_url = os.environ.get("DATABASE_URL")
+    supabase_url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+    
+    db_status = "unknown"
+    db_error = None
+    db_type = "unknown"
+    try:
+        db = get_db()
+        db.execute("SELECT 1")
+        db_status = "connected"
+        if "SQLite" in str(type(db)):
+            db_type = "sqlite"
+        else:
+            db_type = "postgres"
+    except Exception as e:
+        db_status = "failed"
+        db_error = str(e) + "\n" + traceback.format_exc()
+        
+    return jsonify({
+        "status": "healthy" if db_status == "connected" else "degraded",
+        "has_postgres": HAS_POSTGRES,
+        "db_type": db_type,
+        "db_status": db_status,
+        "db_error": db_error,
+        "env_keys": list(os.environ.keys()),
+        "has_db_url": bool(db_url),
+        "db_url_length": len(db_url) if db_url else 0,
+        "has_supabase_url": bool(supabase_url),
+    })
+
 
 # ── CORS (manual, no dependency needed) ──────────────────────────────────────
 @app.after_request
