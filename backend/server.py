@@ -2,7 +2,40 @@
 GOAT Backend — Flask + SQLite
 Greatest of All Talents System for Project WHY
 """
+from flask import request, jsonify # Ensure these are imported at the top
 
+# Add the explicit POST handler for logins
+@app.route("/auth/login", methods=["POST"])
+def auth_login_gate():
+    try:
+        data = request.json
+        email = data.get("email")
+        password = data.get("password")
+        
+        # 1. Forward the request to Supabase Auth to confirm their credentials match
+        auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        user_id = auth_response.user.id
+        
+        # 2. Check the user profile permissions in your profiles table
+        profile_query = supabase.table("profiles").select("role", "is_approved").eq("id", user_id).single().execute()
+        profile = profile_query.data
+        
+        if not profile:
+            return jsonify({"error": "Profile records not initialized."}), 404
+            
+        # 3. Handle structural gate rules: Block unapproved accounts
+        if not profile.get("is_approved"):
+            return jsonify({"error": "Your account is pending registration approval from the Master Admin."}), 403
+            
+        # 4. Success payload back to frontend dashboard
+        return jsonify({
+            "token": auth_response.session.access_token,
+            "role": profile.get("role"),
+            "user": auth_response.user
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 from dotenv import load_dotenv
 load_dotenv()
 
