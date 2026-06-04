@@ -33,6 +33,13 @@ export default function DeepAssessment() {
   const cid = params.get("cid");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("goat_token");
+    if (!token) {
+      navigate(`/login?redirect=${encodeURIComponent(`/assess/${sid}?cid=${cid}`)}`);
+    }
+  }, [navigate, sid, cid]);
+
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [startedAt, setStartedAt] = useState(Date.now());

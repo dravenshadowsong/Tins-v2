@@ -462,6 +462,16 @@ def require_user():
         return None, (jsonify({"error": "Login required"}), 401)
     return user, None
 
+def require_auth(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user, error = require_user()
+        if error:
+            return error
+        return f(*args, **kwargs)
+    return decorated_function
+
 def require_role(allowed_roles):
     def decorator(f):
         from functools import wraps
@@ -2003,6 +2013,7 @@ def submit_discovery(sid):
     return jsonify({"status": "success", "count": len(generated_tasks)})
 
 @app.route("/api/sessions/<int:sid>/submit", methods=["POST"])
+@require_auth
 def submit_session(sid):
     """
     Receives all responses, runs the scoring engine, saves results.
@@ -2010,6 +2021,7 @@ def submit_session(sid):
     return analyze_and_save_session(sid, request.json)
 
 @app.route("/api/sessions/<int:sid>/analyze", methods=["POST"])
+@require_auth
 def analyze_session(sid):
     """
     Receives structured questionnaire and puzzle responses, analyses metrics,
@@ -3344,6 +3356,370 @@ def export_data_csv():
         mimetype="text/csv",
         headers={"Content-disposition": "attachment; filename=TINS_Talent_Export.csv"}
     )
+
+
+@app.route("/api/sessions/<int:sid>/pdf", methods=["GET"])
+def export_session_pdf(sid):
+    # 1. Verification of the token (allow token in headers or query params)
+    token = request.args.get("token")
+    user = None
+    if token:
+        try:
+            sb_user_resp = supabase.auth.get_user(token)
+            if sb_user_resp and sb_user_resp.user:
+                user = sb_user_resp.user
+        except Exception as e:
+            print(f"[AUTH WARNING] Failed to verify Supabase token for PDF: {e}")
+            
+    if not user:
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token_h = auth.replace("Bearer ", "", 1).strip()
+            try:
+                sb_user_resp = supabase.auth.get_user(token_h)
+                if sb_user_resp and sb_user_resp.user:
+                    user = sb_user_resp.user
+            except Exception as e:
+                pass
+                
+    if not user:
+        # Check fallback local session check
+        if token:
+            row = get_db().execute("""
+                SELECT u.id, u.name, u.email, u.role
+                FROM auth_sessions s
+                JOIN users u ON u.id = s.user_id
+                WHERE s.token = ? AND s.expires_at > datetime('now')
+            """, (token,)).fetchone()
+            if row:
+                user = dict(row)
+                
+    if not user:
+        return jsonify({"error": "Unauthorized. A valid token is required to download this report."}), 401
+        
+    db = get_db()
+    session = db.execute("SELECT * FROM sessions WHERE id=?", (sid,)).fetchone()
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+        
+    child = db.execute("SELECT * FROM children WHERE id=?", (session["child_id"],)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    notes = db.execute("SELECT * FROM facilitator_notes WHERE session_id=? ORDER BY created_at DESC", (sid,)).fetchall()
+    
+    # 2. Setup ReportLab PDF document in memory
+    import io
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    
+    pdf_buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        pdf_buffer,
+        pagesize=letter,
+        rightMargin=54, leftMargin=54, topMargin=54, bottomMargin=54
+    )
+    
+    # Premium Style Palette
+    primary_color = colors.HexColor("#5B4CF0")    # Indigo
+    secondary_color = colors.HexColor("#00B8A9")  # Teal
+    text_color = colors.HexColor("#2D3436")       # Dark Charcoal
+    light_bg = colors.HexColor("#F8F9FA")         # Light Grey
+    border_color = colors.HexColor("#E2E8F0")     # Light Border
+    
+    # Typography Styles
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CoverTitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=24,
+        leading=30,
+        textColor=primary_color,
+        spaceAfter=15,
+        alignment=1 # Center
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CoverSubtitle',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=12,
+        leading=16,
+        textColor=colors.HexColor("#64748B"),
+        spaceAfter=30,
+        alignment=1 # Center
+    )
+    
+    h1_style = ParagraphStyle(
+        'Header1',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=16,
+        leading=20,
+        textColor=primary_color,
+        spaceBefore=15,
+        spaceAfter=10,
+        keepWithNext=True
+    )
+    
+    body_style = ParagraphStyle(
+        'ReportBody',
+        parent=styles['BodyText'],
+        fontName='Helvetica',
+        fontSize=9.5,
+        leading=14,
+        textColor=text_color,
+        spaceAfter=10
+    )
+    
+    italic_style = ParagraphStyle(
+        'ReportItalic',
+        parent=body_style,
+        fontName='Helvetica-Oblique',
+        textColor=colors.HexColor("#4A4A4A")
+    )
+    
+    table_cell_style = ParagraphStyle(
+        'TableCell',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9,
+        leading=11,
+        textColor=text_color
+    )
+    
+    table_header_style = ParagraphStyle(
+        'TableHeader',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        leading=11,
+        textColor=colors.white
+    )
+    
+    story = []
+    
+    # PAGE 1: COVER PAGE
+    story.append(Spacer(1, 1.2 * inch))
+    story.append(Paragraph("TINS TALENT ASSESSMENT REPORT", title_style))
+    story.append(Paragraph("Professional Multi-Aptitude Profile & Development Roadmap", subtitle_style))
+    
+    # Divider block
+    divider_data = [[""]]
+    divider_table = Table(divider_data, colWidths=[5 * inch], rowHeights=[4])
+    divider_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), secondary_color),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+        ('TOPPADDING', (0,0), (-1,-1), 0),
+    ]))
+    story.append(divider_table)
+    story.append(Spacer(1, 0.4 * inch))
+    
+    # Safely convert dates in python
+    created_val = session["completed_at"] or session["created_at"]
+    try:
+        if isinstance(created_val, str):
+            if "." in created_val:
+                created_val = created_val.split(".")[0]
+            if "T" in created_val:
+                dt = datetime.strptime(created_val, "%Y-%m-%dT%H:%M:%S")
+            else:
+                dt = datetime.strptime(created_val, "%Y-%m-%d %H:%M:%S")
+        else:
+            dt = created_val
+        formatted_date = dt.strftime("%B %d, %Y")
+    except Exception:
+        formatted_date = str(created_val)[:10]
+
+    # Student Metadata Box
+    metadata_data = [
+        [
+            Paragraph("<b>Student Name:</b>", body_style),
+            Paragraph(child["name"], body_style),
+            Paragraph("<b>Assessment Date:</b>", body_style),
+            Paragraph(formatted_date, body_style)
+        ],
+        [
+            Paragraph("<b>Age:</b>", body_style),
+            Paragraph(f"{child['age']} Years", body_style),
+            Paragraph("<b>Assessment ID:</b>", body_style),
+            Paragraph(f"TINS-S{sid}", body_style)
+        ],
+        [
+            Paragraph("<b>Language:</b>", body_style),
+            Paragraph(child["language"], body_style),
+            Paragraph("<b>Class:</b>", body_style),
+            Paragraph(child.get("school_year") or "N/A", body_style)
+        ]
+    ]
+    
+    meta_table = Table(metadata_data, colWidths=[1.3 * inch, 1.7 * inch, 1.3 * inch, 1.7 * inch])
+    meta_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), light_bg),
+        ('BOX', (0,0), (-1,-1), 1, border_color),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, border_color),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('RIGHTPADDING', (0,0), (-1,-1), 10),
+    ]))
+    story.append(meta_table)
+    story.append(Spacer(1, 1.5 * inch))
+    
+    story.append(Paragraph("<b>Organized by:</b> Project WHY Delhi", subtitle_style))
+    story.append(PageBreak())
+    
+    # PAGE 2: EXECUTIVE SUMMARY & APTITUDE BREAKDOWN
+    story.append(Paragraph("Executive Summary", h1_style))
+    
+    # Parse integrated score
+    integ = {}
+    if session["integrated_score"]:
+        try:
+            integ = json.loads(session["integrated_score"])
+        except Exception:
+            pass
+            
+    analysis = {}
+    if session["personality_data"]:
+        try:
+            analysis = json.loads(session["personality_data"])
+        except Exception:
+            pass
+            
+    sorted_scores = sorted(integ.items(), key=lambda x: x[1], reverse=True)
+    primary_domain = analysis.get("primary_domain") or (sorted_scores[0][0] if sorted_scores else "creative")
+    
+    DOMAINS_MAP = {
+        "kinesthetic": "Kinesthetic & Physical",
+        "creative": "Creative & Artistic",
+        "logical": "Logical & Analytical",
+        "spatial": "Spatial & Making",
+        "social": "Social & Leadership",
+        "language": "Language & Communication",
+        "naturalist": "Naturalist & Environmental",
+        "intrapersonal": "Intrapersonal & Reflective"
+    }
+    
+    primary_label = DOMAINS_MAP.get(primary_domain, primary_domain).upper()
+    
+    snapshot_text = f"Based on the TINS multi-dimensional assessment metrics, {child['name']} demonstrates strong cognitive potential in the {primary_label} domain. This natural aptitude highlights high comfort with open-ended problem solving and cognitive synthesis in these areas. Structured nurturing is recommended to help transition these innate indicators into long-term competencies."
+    story.append(Paragraph(snapshot_text, italic_style))
+    story.append(Spacer(1, 0.15 * inch))
+    
+    story.append(Paragraph("Aptitude Profile Analysis", h1_style))
+    
+    table_data = [[
+        Paragraph("Domain", table_header_style),
+        Paragraph("Score (%)", table_header_style),
+        Paragraph("Development Level", table_header_style)
+    ]]
+    
+    for dom_key, label in DOMAINS_MAP.items():
+        score = integ.get(dom_key, 50)
+        if score >= 75:
+            level = "Strong Indicators"
+        elif score >= 50:
+            level = "Emerging Indicators"
+        else:
+            level = "Needs Further Exploration"
+            
+        table_data.append([
+            Paragraph(label, table_cell_style),
+            Paragraph(f"{score}%", table_cell_style),
+            Paragraph(level, table_cell_style)
+        ])
+        
+    scores_table = Table(table_data, colWidths=[2.2 * inch, 1.2 * inch, 2.6 * inch])
+    scores_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), primary_color),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
+        ('GRID', (0,0), (-1,-1), 0.5, border_color),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_bg]),
+    ]))
+    story.append(scores_table)
+    story.append(PageBreak())
+    
+    # PAGE 3: ROADMAP & ACTION ITEMS
+    story.append(Paragraph("Development Roadmap: Next Steps", h1_style))
+    story.append(Paragraph("We have structured a targeted 30-day developmental plan to channelize these cognitive strengths:", body_style))
+    
+    action_plan = analysis.get("action_plan", {})
+    w1 = action_plan.get("week_1") or "Introductory workshops in primary domain."
+    w2 = action_plan.get("week_2") or "Collaborative projects and group exercises."
+    w3 = action_plan.get("week_3") or "Advanced challenge-based tasks."
+    w4 = action_plan.get("week_4") or "Mentorship check-in and showcase."
+    
+    roadmap_data = [
+        [Paragraph("<b>Week 1</b>", body_style), Paragraph(w1, body_style)],
+        [Paragraph("<b>Week 2</b>", body_style), Paragraph(w2, body_style)],
+        [Paragraph("<b>Week 3</b>", body_style), Paragraph(w3, body_style)],
+        [Paragraph("<b>Week 4</b>", body_style), Paragraph(w4, body_style)]
+    ]
+    roadmap_table = Table(roadmap_data, colWidths=[1.2 * inch, 4.8 * inch])
+    roadmap_table.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, border_color),
+        ('BACKGROUND', (0,0), (0,-1), light_bg),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
+    ]))
+    story.append(roadmap_table)
+    story.append(Spacer(1, 0.25 * inch))
+    
+    story.append(Paragraph("Nurturing Guidelines", h1_style))
+    story.append(Paragraph("<b>Home Nurturing:</b> Provide diverse design/physical materials, allow experimental thinking space, and avoid purely repetitive drills.", body_style))
+    story.append(Paragraph("<b>School Support:</b> Invite the student to lead collaborative group projects and present open-ended challenge questions.", body_style))
+    
+    # Facilitator Sign-off Box
+    story.append(Spacer(1, 0.4 * inch))
+    sig_data = [
+        [Paragraph("<b>Facilitator Signoff:</b>", body_style), Paragraph("<b>Date:</b>", body_style)],
+        [Paragraph("____________________________", body_style), Paragraph("____________________", body_style)]
+    ]
+    sig_table = Table(sig_data, colWidths=[3.2 * inch, 2.8 * inch])
+    sig_table.setStyle(TableStyle([
+        ('TOPPADDING', (0,0), (-1,-1), 15),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+    ]))
+    story.append(sig_table)
+    
+    # Header and Footer Canvas Draw Callback
+    def add_page_number(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8.5)
+        canvas.setFillColor(colors.HexColor("#94A3B8"))
+        
+        # Header (pages 2+)
+        if doc.page > 1:
+            canvas.drawString(54, 750, "TINS TALENT IDENTIFICATION SYSTEM REPORT")
+            canvas.drawRightString(letter[0]-54, 750, "PROJECT WHY DELHI")
+            canvas.setStrokeColor(colors.HexColor("#CBD5E1"))
+            canvas.setLineWidth(0.5)
+            canvas.line(54, 742, letter[0]-54, 742)
+            
+        # Footer
+        page_num = canvas.getPageNumber()
+        canvas.drawString(54, 36, "CONFIDENTIAL REPORT")
+        canvas.drawRightString(letter[0]-54, 36, f"Page {page_num} of 3")
+        canvas.restoreState()
+        
+    doc.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    
+    pdf_buffer.seek(0)
+    return Response(
+        pdf_buffer.getvalue(),
+        mimetype="application/pdf",
+        headers={"Content-disposition": f"attachment; filename={child['name'].replace(' ', '_')}_TINS_Talent_Report.pdf"}
+    )
+
 
 
 # Initialize database on import (Gunicorn/production compatibility)

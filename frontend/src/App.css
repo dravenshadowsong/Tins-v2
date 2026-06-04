@@ -767,4 +767,10 @@ label { font-size: 13px; font-weight: 500; color: var(--text-mid); margin-bottom
   }
 }
 
+@media screen {
+  .report-container {
+    display: none !important;
+  }
+}
+
 

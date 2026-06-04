@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { supabase } from "../supabaseClient";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const redirect = params.get("redirect");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -28,7 +30,11 @@ export default function Login() {
       const result = await api.loginSupabase({ token: data.session.access_token });
       localStorage.setItem("goat_token", result.token);
       localStorage.setItem("goat_user", JSON.stringify(result.user));
-      navigate("/dashboard");
+      if (redirect) {
+        navigate(redirect);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       console.error("Supabase login failed, trying fallback:", err);
       // Fallback for offline testing or legacy seeded accounts
@@ -36,7 +42,11 @@ export default function Login() {
         const result = await api.login({ email, password });
         localStorage.setItem("goat_token", result.token);
         localStorage.setItem("goat_user", JSON.stringify(result.user));
-        navigate("/dashboard");
+        if (redirect) {
+          navigate(redirect);
+        } else {
+          navigate("/dashboard");
+        }
       } catch (fallbackErr) {
         setErrorMsg("Login failed. Please check your credentials.");
       }

@@ -68,5 +68,6 @@ export const api = {
   editPuzzle:      (pid, data) => req("PUT",  `/puzzles/${pid}`, data),
   scheduleReassessment:(cid)   => req("POST", "/sessions/reassess", { child_id: cid }),
   getAnalytics:    ()          => req("GET",  "/analytics"),
+  downloadPDF:     (sid)       => `${BASE}/sessions/${sid}/pdf`,
 };
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { DISCOVERY_QUESTIONS } from "../data/questions";
+import { DISCOVERY_QUESTIONS, DOMAINS } from "../data/questions";
 import { api } from "../api";
 
 export default function Discovery() {
@@ -12,6 +12,7 @@ export default function Discovery() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [generating, setGenerating] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   const q = DISCOVERY_QUESTIONS[step];
   const total = DISCOVERY_QUESTIONS.length;
@@ -32,7 +33,8 @@ export default function Discovery() {
           child_id: parseInt(cid),
           answers: answers
         });
-        navigate(`/assess/${sid}?cid=${cid}`);
+        setGenerating(false);
+        setShowSummary(true);
       } catch (e) {
         console.error("Error creating AI assessment:", e);
         alert("Failed to build personalized assessment. Check if backend is running.");
@@ -43,6 +45,80 @@ export default function Discovery() {
 
   const selected = answers[q.id];
   const pct = Math.round((step / total) * 100);
+
+  const getTopDomains = () => {
+    const domainCounts = {};
+    DISCOVERY_QUESTIONS.forEach((quest) => {
+      const chosenOptIdx = answers[quest.id];
+      if (chosenOptIdx !== undefined) {
+        const opt = quest.options[chosenOptIdx];
+        if (opt && opt.domains) {
+          opt.domains.forEach(d => {
+            domainCounts[d] = (domainCounts[d] || 0) + 1;
+          });
+        }
+      }
+    });
+
+    return Object.entries(domainCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, val]) => ({
+        key,
+        count: val,
+        ...DOMAINS[key]
+      }));
+  };
+
+  if (showSummary) {
+    const topDomains = getTopDomains();
+    return (
+      <div className="card" style={{ padding: "40px 30px", maxWidth: "680px", margin: "20px auto", borderRadius: "20px", boxShadow: "var(--shadow)", border: "1px solid rgba(91, 76, 240, 0.15)" }}>
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <span style={{ fontSize: "64px", display: "block", marginBottom: "16px" }}>🎉</span>
+          <h1 style={{ fontSize: "28px", fontWeight: 800, color: "#5B4CF0", marginBottom: "8px" }}>Surface Profile Completed!</h1>
+          <p style={{ color: "var(--text-mid)", fontSize: "16px", maxWidth: "480px", margin: "0 auto" }}>
+            We've completed the initial screening of your child's natural cognitive leanings. Here is their preliminary profile!
+          </p>
+        </div>
+
+        <div style={{ marginBottom: "32px" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text)", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "1px" }}>Identified Cognitive Strengths</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {topDomains.slice(0, 3).map((dom, i) => (
+              <div key={dom.key} style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px 20px", borderRadius: "14px", border: `1px solid ${dom.color}22`, background: `${dom.color}08` }}>
+                <span style={{ fontSize: "32px", padding: "10px", borderRadius: "10px", background: `${dom.color}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>{dom.emoji}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                    <span style={{ fontWeight: 700, fontSize: "16px", color: "var(--text)" }}>{dom.label}</span>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: dom.color, background: `${dom.color}15`, padding: "2px 8px", borderRadius: "99px" }}>
+                      {i === 0 ? "PRIMARY STRENGTH" : "SECONDARY POTENTIAL"}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "13.5px", color: "var(--text-mid)" }}>
+                    Natural affinity detected during active decision-making challenges.
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: "var(--blue-light)", padding: "24px", borderRadius: "16px", border: "1px solid rgba(91, 76, 240, 0.15)", marginBottom: "32px", textAlign: "center" }}>
+          <h4 style={{ fontSize: "18px", fontWeight: 800, color: "#3C2EB9", marginBottom: "10px" }}>Unlock the Deep Assessment 🚀</h4>
+          <p style={{ fontSize: "14px", color: "var(--text-mid)", lineHeight: 1.6, marginBottom: "20px" }}>
+            The Surface Assessment provides a quick glimpse, but true talent development requires precision. Unlock the <strong>Deep Assessment</strong> to access interactive gamified mental puzzles, full validation reviews from domain-expert mentors, and a <strong>premium PDF reports dossier</strong>.
+          </p>
+          <button 
+            className="btn btn-primary btn-full btn-lg" 
+            style={{ background: "#5B4CF0", fontWeight: 700, borderRadius: "10px", boxShadow: "0 4px 12px rgba(91, 76, 240, 0.3)" }}
+            onClick={() => navigate(`/login?redirect=${encodeURIComponent(`/assess/${sid}?cid=${cid}`)}`)}
+          >
+            Unlock Deep Assessment & Mental Puzzles 🔑
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (generating) {
     return (

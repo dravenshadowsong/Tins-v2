@@ -199,6 +199,36 @@ function GrowthChart({ history }) {
   );
 }
 
+function TQGauge({ score, color }) {
+  const radius = 50;
+  const stroke = 8;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+  return (
+    <div style={{ position: "relative", width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg height={120} width={120}>
+        <circle stroke="rgba(108, 92, 231, 0.08)" fill="transparent" strokeWidth={stroke} r={normalizedRadius} cx={60} cy={60} />
+        <circle
+          stroke={color || "#6C5CE7"}
+          fill="transparent"
+          strokeWidth={stroke}
+          strokeDasharray={circumference + ' ' + circumference}
+          style={{ strokeDashoffset, transition: "stroke-dashoffset 1s ease-in-out", transform: "rotate(-90deg)", transformOrigin: "50% 50%" }}
+          r={normalizedRadius}
+          cx={60}
+          cy={60}
+          strokeLinecap="round"
+        />
+      </svg>
+      <div style={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--text)" }}>{score}%</span>
+        <span style={{ fontSize: "9px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>TQ Score</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Results() {
   const { sid } = useParams();
   const [params] = useSearchParams();
@@ -442,54 +472,245 @@ export default function Results() {
       support: ["Provide quiet spaces for reflection and independent projects", "Encourage journaling or writing to process thoughts and emotions"]
     }
   };
-
   const childPersona = PERSONAS[primaryDomain] || PERSONAS.creative;
   const guide = parentGuides[primaryDomain] || parentGuides.creative;
 
   const safeName = (child?.name || "Student").trim().replace(/\s+/g, "_");
   const personalizedSnapshot = `${child?.name || "The student"} appears to demonstrate strong developmental indicators in ${primaryLabel} activities, particularly in open-ended exploration and problem-solving styles. These findings suggest a natural comfort with ${primaryLabel} concepts. Secondary indicators also suggest potential in ${secondaryDomains.map(d => DOMAINS[d]?.label || d).join(" and ")} areas. Nurturing these talents in structured settings will provide a clearer picture of their long-term growth.`;
+  const pdfUrl = `${api.downloadPDF(sid)}?token=${localStorage.getItem("goat_token")}&cid=${cid}`;
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto", padding: "20px 10px" }}>
+    <div style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 10px" }}>
       
-      {/* ── TOP UTILITIES CONTROLS (Hidden during print) ──────────────────── */}
-      <div className="card hide-print" style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 12,
-        background: "#FFFFFF",
-        border: "1px solid rgba(91, 76, 240, 0.12)",
-        borderRadius: 14,
-        padding: "16px 20px",
-        marginBottom: 24
-      }}>
-        <div>
-          <h4 style={{ margin: 0, color: "#5B4CF0", fontWeight: 800 }}>TINS Premium Discovery Report Booklet</h4>
-          <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#8E9BAE", fontWeight: 600 }}>
-            Visualizing Early Talents &amp; Development Roadmap for {child?.name}
-          </p>
+      {/* ── SCREEN VIEW: MODERN WEB DASHBOARD (Hidden during print) ── */}
+      <div className="hide-print">
+        {/* Dashboard Control Panel */}
+        <div className="card" style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16,
+          background: "linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)",
+          border: "1px solid rgba(91, 76, 240, 0.15)",
+          borderRadius: 16,
+          padding: "20px 24px",
+          marginBottom: 24,
+          boxShadow: "0 10px 25px rgba(91, 76, 240, 0.04)"
+        }}>
+          <div>
+            <span style={{ fontSize: "11px", fontWeight: 800, color: "#5B4CF0", textTransform: "uppercase", letterSpacing: "1px", display: "block", marginBottom: "4px" }}>Active Talent Map</span>
+            <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 900, color: "var(--text)" }}>TINS Core Cognitive Dashboard</h1>
+            <p style={{ margin: "2px 0 0 0", fontSize: "14px", color: "var(--text-light)" }}>
+              Detailed profile analysis, roadmap, and validations for <strong>{child?.name}</strong> (Age {child?.age})
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <a
+              className="btn"
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ background: "#20BF6B", color: "#fff", display: "flex", alignItems: "center", gap: 8, fontWeight: 800, padding: "10px 22px", borderRadius: 10, textDecoration: "none", boxShadow: "0 4px 12px rgba(32, 191, 107, 0.2)" }}
+            >
+              📥 Download Premium PDF
+            </a>
+            <button
+              className="btn btn-ghost"
+              onClick={() => navigate("/")}
+              style={{ fontWeight: 700, padding: "10px 20px", borderRadius: 10 }}
+            >
+              Start New Quest
+            </button>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            className="btn btn-teal"
-            onClick={handleDownloadPDF}
-            style={{ background: "#20BF6B", color: "#fff", display: "flex", alignItems: "center", gap: 6, fontWeight: 800, padding: "8px 18px", borderRadius: 8 }}
-          >
-            📥 Print / Download PDF Booklet
-          </button>
-          <button
-            className="btn btn-ghost"
-            onClick={() => navigate("/")}
-            style={{ fontWeight: 700, padding: "8px 16px", borderRadius: 8 }}
-          >
-            Start New Quest
-          </button>
+
+        {/* Hero Section: Persona & TQ Score */}
+        <div className="card" style={{
+          display: "grid",
+          gridTemplateColumns: "1.6fr 1fr",
+          gap: 24,
+          background: "linear-gradient(135deg, rgba(91, 76, 240, 0.05) 0%, rgba(0, 184, 169, 0.05) 100%)",
+          border: "1px solid rgba(91, 76, 240, 0.12)",
+          borderRadius: 20,
+          padding: "32px",
+          marginBottom: 24,
+          alignItems: "center"
+        }}>
+          <div style={{ display: "flex", gap: 20, alignItems: "start", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "64px", lineHeight: 1, filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.1))" }}>{childPersona.emoji}</span>
+            <div style={{ flex: 1, minWidth: 280 }}>
+              <div style={{ display: "inline-flex", padding: "4px 10px", borderRadius: 99, background: "#5B4CF0", color: "#fff", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+                Primary Persona
+              </div>
+              <h2 style={{ fontSize: "28px", fontWeight: 900, color: "#3C2EB9", margin: "0 0 8px 0" }}>{childPersona.title}</h2>
+              <p style={{ fontSize: "15px", lineHeight: "1.6", color: "var(--text-mid)", marginBottom: 16 }}>{childPersona.desc}</p>
+              
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {childPersona.strengths.map(s => (
+                  <span key={s} style={{ fontSize: "12px", fontWeight: 700, color: "#0F6E56", background: "#E1F5EE", padding: "4px 10px", borderRadius: 6 }}>
+                    ✓ {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderLeft: "1px solid rgba(91, 76, 240, 0.15)", paddingLeft: 24 }}>
+            <TQGauge score={integ[primaryDomain] || 50} color={DOMAINS[primaryDomain]?.color} />
+            <div style={{ textAlign: "center", marginTop: 12 }}>
+              <span style={{ fontWeight: 800, color: "var(--text)", display: "block" }}>{primaryLabel} Aptitude</span>
+              <span style={{ fontSize: "12px", color: "var(--text-light)" }}>Outstanding developmental indicators</span>
+            </div>
+          </div>
         </div>
+
+        {/* Main Grid: Radar Chart & Domain Scores vs Guides & Potential */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }} className="summary-grid">
+          {/* Left Column: Aptitude Chart & Scores */}
+          <div className="card" style={{ padding: 24 }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 20 }}>Cognitive Talent Mapping</h3>
+            <div style={{ width: "100%", height: "240px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+              <RadarChart scores={integ} />
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {sorted.map(([domain, score]) => {
+                const d = DOMAINS[domain];
+                const interp = getInterpretation(score);
+                return (
+                  <div key={domain} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                      <span style={{ fontWeight: 700, color: "var(--text)" }}>{d?.emoji} {d?.label}</span>
+                      <span style={{ fontWeight: 800, color: d?.color }}>{score}% ({interp.label})</span>
+                    </div>
+                    <div style={{ height: 8, background: "rgba(0,0,0,0.04)", borderRadius: 99, overflow: "hidden" }}>
+                      <div style={{ width: `${score}%`, height: "100%", background: d?.color || "var(--blue)", borderRadius: 99 }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Column: Guides, Recommendations & Opportunities */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {/* Guide & Activities */}
+            <div className="card" style={{ padding: 24 }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>Parent Nurturing Playbook</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ background: "rgba(0, 184, 169, 0.04)", borderLeft: "4px solid var(--teal)", padding: 14, borderRadius: "0 8px 8px 0" }}>
+                  <span style={{ fontWeight: 800, color: "var(--teal)", display: "block", marginBottom: 4, fontSize: 13.5 }}>🛠️ Recommended At-Home Activities</span>
+                  <ul style={{ paddingLeft: 16, margin: 0, fontSize: "13px", lineHeight: 1.5, color: "var(--text-mid)", fontWeight: 600 }}>
+                    {guide.support.map(s => <li key={s}>{s}</li>)}
+                  </ul>
+                </div>
+                
+                <div style={{ background: "rgba(91, 76, 240, 0.04)", borderLeft: "4px solid var(--blue)", padding: 14, borderRadius: "0 8px 8px 0" }}>
+                  <span style={{ fontWeight: 800, color: "var(--blue)", display: "block", marginBottom: 4, fontSize: 13.5 }}>🎯 Key Motivators</span>
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--text-mid)" }}>
+                    Highly responsive to <strong>{guide.activities}</strong>. Best engaged via {guide.motivators}.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Hidden Opportunities (Untapped Potential) */}
+            <div className="card" style={{ padding: 24, border: untapped_potential.length > 0 ? "1.5px dashed #F7B731" : "1px solid var(--border)", background: untapped_potential.length > 0 ? "rgba(247, 183, 49, 0.02)" : "#fff" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 12 }}>Untapped Opportunities</h3>
+              
+              {untapped_potential.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {untapped_potential.map(u => (
+                    <div key={u} style={{ background: "rgba(247, 183, 49, 0.06)", border: "1px solid rgba(247, 183, 49, 0.2)", padding: 12, borderRadius: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ fontWeight: 800, fontSize: "14px", color: "#B7791F" }}>🔥 High Potential in {DOMAINS[u]?.label}</span>
+                        <span style={{ background: "#F7B731", color: "#fff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: 4 }}>Low Exposure</span>
+                      </div>
+                      <p style={{ fontSize: "12.5px", lineHeight: "1.5", color: "var(--text-mid)", margin: 0 }}>
+                        {child?.name} scored <strong>{integ[u]}%</strong> in {DOMAINS[u]?.label} challenges but has very limited exposure history. Providing basic workshops or toys in this area is highly recommended.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: "16px", background: "rgba(0, 184, 169, 0.03)", border: "1px dashed rgba(0, 184, 169, 0.2)", borderRadius: "10px", textAlign: "center", fontSize: "13.5px", color: "var(--teal)", fontWeight: 700 }}>
+                  🌿 All cognitive potentials align well with prior exposures. No significant hidden talents were left undeveloped!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 30-Day Developmental Plan Timeline */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>30-Day Developmental Roadmap</h3>
+          <p style={{ fontSize: "13.5px", color: "var(--text-light)", marginBottom: 20 }}>Personalized, week-by-week cognitive action plan recommended by Project WHY</p>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+            {[
+              { week: "Week 1", desc: analysis.action_plan?.week_1 || "Introductory workshops in primary domain", icon: "🌱" },
+              { week: "Week 2", desc: analysis.action_plan?.week_2 || "Collaborative projects and group exercises", icon: "🌿" },
+              { week: "Week 3", desc: analysis.action_plan?.week_3 || "Advanced challenge-based tasks", icon: "🌲" },
+              { week: "Week 4", desc: analysis.action_plan?.week_4 || "Mentorship check-in and showcase", icon: "🌳" }
+            ].map(item => (
+              <div key={item.week} style={{ background: "var(--surface-soft)", border: "1px solid var(--border)", padding: 16, borderRadius: 12, display: "flex", gap: 12, flexDirection: "column" }}>
+                <span style={{ fontSize: 24, height: 40, width: 40, borderRadius: 8, background: "rgba(108, 92, 231, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>{item.icon}</span>
+                <div>
+                  <span style={{ fontWeight: 800, color: "#5B4CF0", fontSize: 12, textTransform: "uppercase" }}>{item.week}</span>
+                  <p style={{ margin: "4px 0 0 0", fontSize: 13, lineHeight: 1.4, color: "var(--text-mid)", fontWeight: 500 }}>{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Growth Journey timeline and validations */}
+        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 24, marginBottom: 24 }} className="summary-grid">
+          {/* History Chart */}
+          <div className="card" style={{ padding: 24 }}>
+            <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>Longitudinal Journey Tracker</h3>
+            <GrowthChart history={history} />
+          </div>
+
+          {/* Validation Review summary */}
+          <div className="card" style={{ padding: 24, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Mentor Validation Status</h3>
+              <p style={{ fontSize: "13.5px", color: "var(--text-light)", marginBottom: 16 }}>Observations logged by facilitators during hands-on classes</p>
+              
+              {notes.length > 0 ? (
+                <div style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(91, 76, 240, 0.1)", borderRadius: 12, padding: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(0,0,0,0.06)", paddingBottom: 10, marginBottom: 12 }}>
+                    <span style={{ fontWeight: 700 }}>Reviewer: {notes[0].facilitator}</span>
+                    <span style={{ background: "#E1F5EE", color: "#0F6E56", fontWeight: 800, fontSize: 11, padding: "2px 8px", borderRadius: 4 }}>
+                      ✓ Validated
+                    </span>
+                  </div>
+                  <p style={{ margin: "0 0 8px 0", fontSize: "13px" }}><strong>Observed Strengths:</strong> {notes[0].strengths_observed || "Excellent spatial organization and teamwork."}</p>
+                  <p style={{ margin: "0 0 8px 0", fontSize: "13px" }}><strong>Observed Challenges:</strong> {notes[0].concerns || "None flagged."}</p>
+                  <p style={{ margin: 0, fontSize: "13px" }}><strong>Notes:</strong> {notes[0].notes || notes[0].evidence_notes}</p>
+                </div>
+              ) : (
+                <div style={{ padding: "24px 16px", background: "#FFFBF2", border: "1px dashed #E2B25B", borderRadius: 12, color: "#5D4037", textAlign: "center", fontWeight: 600, fontSize: 13.5 }}>
+                  💡 Facilitator review pending validation. Mentor observations can be logged below using the screen form.
+                </div>
+              )}
+            </div>
+
+            <button
+              className="btn btn-teal btn-lg btn-full"
+              style={{ marginTop: 20 }}
+              onClick={() => navigate(`/mentor/${cid}?domain=${primaryDomain}&sid=${sid}`)}
+            >
+              🤝 Find domain-expert mentors in {primaryLabel}
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      {/* ── 12-PAGE PREMIUM BOOKLET ────────────────────────────────────── */}
+      {/* ── PRINT VIEW: 12-PAGE BOOKLET ── */}
       <div className="report-container">
         
         {/* PAGE 1: COVER PAGE */}
@@ -824,11 +1045,11 @@ export default function Results() {
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "12px" }}>
-              <div style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(91, 76, 240, 0.1)", padding: "10px", borderRadius: "8px" }}>
+              <div style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(91, 76, 240, 0.15)", padding: "10px", borderRadius: "8px" }}>
                 <span style={{ fontWeight: 800, color: "#5B4CF0" }}>🏠 Home Activities</span>
                 <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>Support independent research, supply physical materials, and allow experimental play.</p>
               </div>
-              <div style={{ background: "rgba(0, 184, 169, 0.03)", border: "1px solid rgba(0, 184, 169, 0.1)", padding: "10px", borderRadius: "8px" }}>
+              <div style={{ background: "rgba(0, 184, 169, 0.03)", border: "1px solid rgba(0, 184, 169, 0.15)", padding: "10px", borderRadius: "8px" }}>
                 <span style={{ fontWeight: 800, color: "#00B8A9" }}>🏫 School Activities</span>
                 <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>Request the facilitator to offer open-ended challenge questions during classes.</p>
               </div>
@@ -1112,7 +1333,7 @@ export default function Results() {
               { key: "obs_creativity", label: "Creativity (1-5)", emoji: "🎨" },
               { key: "obs_communication", label: "Communication (1-5)", emoji: "💬" },
               { key: "obs_leadership", label: "Leadership (1-5)", emoji: "🤝" },
-              { key: "obs_focus", label: "Focus &amp; Attention (1-5)", emoji: "🎯" },
+              { key: "obs_focus", label: "Focus (1-5)", emoji: "🎯" },
               { key: "obs_curiosity", label: "Curiosity (1-5)", emoji: "🔍" }
             ].map((f) => (
               <div className="form-group" key={f.key}>
@@ -1181,15 +1402,17 @@ export default function Results() {
         </form>
       </div>
 
-      {/* ── CORE ACTIONS ROW ───────────────────────────────────────────── */}
+      {/* ── CORE ACTIONS ROW (Screen Only) ── */}
       <div className="button-stack hide-print" style={{ marginTop: 24 }}>
-        <button
+        <a
           className="btn btn-primary btn-lg btn-full"
-          onClick={handleDownloadPDF}
-          style={{ background: "#20BF6B", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+          href={pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ background: "#20BF6B", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", textDecoration: "none", boxShadow: "0 4px 12px rgba(32, 191, 107, 0.2)" }}
         >
-          📥 Download PDF Report
-        </button>
+          📥 Download Premium PDF Report
+        </a>
         <button
           className="btn btn-teal btn-lg btn-full"
           onClick={() => navigate(`/mentor/${cid}?domain=${primaryDomain}&sid=${sid}`)}
