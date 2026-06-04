@@ -10,9 +10,10 @@ from supabase import create_client, Client
 # 1. Initialize your Flask App
 app = Flask(__name__)
 CORS(app) # Enables standard cross-origin configuration automatically
-# 2. Initialize your Supabase Client Link
-supabase_url = os.environ.get("SUPABASE_URL") or "YOUR_SUPABASE_PROJECT_URL"
-supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "YOUR_SUPABASE_KEY"
+# 2. Initialize your Supabase Client with real fallback strings
+supabase_url = os.environ.get("SUPABASE_URL") or "https://ubsjcfaokemckctswnzi.supabase.co"
+supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVic2pjZmFva2VtY2tjdHN3bnppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQxMzk4NCwiZXhwIjoyMDk1OTg5OTg0fQ.qzh7UKIFmvmKP-mQ5Ev7OoKAWRGXP9hfADbP64RxBNE"
+supabase: Client = create_client(supabase_url, supabase_key)
 supabase: Client = create_client(supabase_url, supabase_key)
 # 2. Setup your explicit routes correctly using the @app prefix
 @app.route("/auth/login", methods=["POST", "OPTIONS"])
