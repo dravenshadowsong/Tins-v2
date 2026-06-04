@@ -65,7 +65,7 @@ def auth_login_gate():
             row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
             metadata = getattr(user, 'user_metadata', {}) or {}
             name = metadata.get("name") or email.split("@")[0]
-            role = metadata.get("role") or "facilitator"
+            role = resolve_user_role(email, metadata)
             
             if not row:
                 # Synchronize user locally if not found
@@ -118,7 +118,7 @@ def auth_login_gate():
             row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
             metadata = getattr(user, 'user_metadata', {}) or {}
             name = metadata.get("name") or email.split("@")[0]
-            role = metadata.get("role") or "facilitator"
+            role = resolve_user_role(email, metadata)
             
             if not row:
                 # Synchronize user locally if not found
@@ -353,6 +353,36 @@ def close_db(e=None):
     if db:
         db.close()
 
+def resolve_user_role(email, metadata):
+    # Hardcoded master accounts
+    if email == "dravenshadowsong@gmail.com":
+        return "master_admin"
+    if email == "master@why.org":
+        return "master_admin"
+    if email == "admin@why.org":
+        return "admin"
+    if email == "facilitator@why.org":
+        return "facilitator"
+    if email == "mentor@why.org":
+        return "mentor"
+        
+    # Check if a role is explicitly passed in metadata
+    if metadata and isinstance(metadata, dict):
+        meta_role = metadata.get("role")
+        if meta_role:
+            return meta_role
+            
+    # Default to current database role if user exists
+    try:
+        db = get_db()
+        row = db.execute("SELECT role FROM users WHERE email = ?", (email,)).fetchone()
+        if row and row["role"]:
+            return row["role"]
+    except Exception as e:
+        print(f"[DATABASE WARNING] Failed to fetch existing role for {email}: {e}")
+        
+    return "facilitator"
+
 def hash_password(password, salt=None):
     salt = salt or secrets.token_hex(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 120000)
@@ -383,7 +413,7 @@ def current_user():
                 row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                 metadata = getattr(sb_user, 'user_metadata', {}) or {}
                 name = metadata.get("name") or email.split("@")[0]
-                role = metadata.get("role") or "facilitator"
+                role = resolve_user_role(email, metadata)
                 
                 if row:
                     if row["role"] != role:
