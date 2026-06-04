@@ -16,30 +16,36 @@ supabase_url = os.environ.get("SUPABASE_URL") or "YOUR_SUPABASE_PROJECT_URL"
 supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "YOUR_SUPABASE_KEY"
 supabase: Client = create_client(supabase_url, supabase_key)
 
-# --- Your login route block goes below here ---
-@app.route("/auth/login", methods=["POST"])
+# Force both path matching variations explicitly
+@app.route("/auth/login", methods=["POST", "OPTIONS"])
+@app.route("/auth/login/", methods=["POST", "OPTIONS"])
 def auth_login_gate():
+    # Handle preflight options requests directly inside the route
+    if request.method == "OPTIONS":
+        return jsonify({"status": "CORS_PREFLIGHT_OK"}), 200
+        
     try:
-        data = request.json
+        data = request.json or {}
         email = data.get("email")
         password = data.get("password")
         
-        # 1. Forward the request to Supabase Auth to confirm their credentials match
+        if not email or not password:
+            return jsonify({"error": "Missing email or password fields."}), 400
+        
+        # Authenticate via Supabase Auth client
         auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
         user_id = auth_response.user.id
         
-        # 2. Check the user profile permissions in your profiles table
+        # Check permissions in your profiles table
         profile_query = supabase.table("profiles").select("role", "is_approved").eq("id", user_id).single().execute()
         profile = profile_query.data
         
         if not profile:
             return jsonify({"error": "Profile records not initialized."}), 404
             
-        # 3. Handle structural gate rules: Block unapproved accounts
         if not profile.get("is_approved"):
-            return jsonify({"error": "Your account is pending registration approval from the Master Admin."}), 403
+            return jsonify({"error": "Your account is pending registration approval."}), 403
             
-        # 4. Success payload back to frontend dashboard
         return jsonify({
             "token": auth_response.session.access_token,
             "role": profile.get("role"),
