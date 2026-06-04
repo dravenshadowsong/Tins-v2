@@ -73,9 +73,9 @@ def auth_login_gate():
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                 if is_postgres:
-                    db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role))
+                    db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, "supabase_auth"))
                 else:
-                    db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+                    db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
                 db.commit()
                 row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                 
@@ -122,9 +122,9 @@ def auth_login_gate():
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                 if is_postgres:
-                    db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role))
+                    db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, "supabase_auth"))
                 else:
-                    db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+                    db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
                 db.commit()
                 row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                 
@@ -357,9 +357,9 @@ def current_user():
                     db_url = os.environ.get("DATABASE_URL")
                     is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                     if is_postgres:
-                        db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role))
+                        db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role, "supabase_auth"))
                     else:
-                        db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+                        db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
                     db.commit()
                     row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                     if row:
