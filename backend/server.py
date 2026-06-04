@@ -65,10 +65,9 @@ def auth_login_gate():
             row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
             if not row:
                 # Synchronize user locally if not found
-                name = getattr(user, 'user_metadata', {}).get("name") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else None
-                if not name:
-                    name = email.split("@")[0]
-                role = getattr(user, 'user_metadata', {}).get("role") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else "facilitator"
+                metadata = getattr(user, 'user_metadata', {}) or {}
+                name = metadata.get("name") or email.split("@")[0]
+                role = metadata.get("role") or "facilitator"
                 
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
@@ -114,10 +113,9 @@ def auth_login_gate():
             row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
             if not row:
                 # Synchronize user locally if not found
-                name = getattr(user, 'user_metadata', {}).get("name") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else None
-                if not name:
-                    name = email.split("@")[0]
-                role = getattr(user, 'user_metadata', {}).get("role") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else "facilitator"
+                metadata = getattr(user, 'user_metadata', {}) or {}
+                name = metadata.get("name") or email.split("@")[0]
+                role = metadata.get("role") or "facilitator"
                 
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
@@ -376,8 +374,9 @@ def current_user():
                 if row:
                     return dict(row)
                 else:
-                    name = sb_user.user_metadata.get("name") or sb_user.email.split("@")[0]
-                    role = sb_user.user_metadata.get("role") or "facilitator"
+                    metadata = getattr(sb_user, 'user_metadata', {}) or {}
+                    name = metadata.get("name") or email.split("@")[0]
+                    role = metadata.get("role") or "facilitator"
                     db_url = os.environ.get("DATABASE_URL")
                     is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                     if is_postgres:
