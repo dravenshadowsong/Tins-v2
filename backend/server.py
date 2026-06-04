@@ -3,77 +3,67 @@ GOAT Backend — Flask + SQLite
 Greatest of All Talents System for Project WHY
 """
 import os
-from flask import Flask, request, jsonify
+import sqlite3
+import json
+import hashlib
+import secrets
+from datetime import datetime
+from dotenv import load_dotenv
+from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 from supabase import create_client, Client
 
-# 1. Initialize your Flask App
+load_dotenv()
+
+# --- Supabase Client Initialization ---
+supabase = None
+supabase_client = None
+
+try:
+    # 1. Fetch from Render environment variable OR use your project URL fallback
+    supabase_url = os.environ.get("SUPABASE_URL") or "https://ubsjcfaokemckctswnzi.supabase.co"
+    
+    # 2. Fetch from Render environment variable OR use your long service role key fallback
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVic2pjZmFva2VtY2tjdHN3bnppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQxMzk4NCwiZXhwIjoyMDk1OTg5OTg0fQ.qzh7UKIFmvmKP-mQ5Ev7OoKAWRGXP9hfADbP64RxBNE"
+    
+    if supabase_url and supabase_key:
+        supabase = create_client(supabase_url, supabase_key)
+        supabase_client = supabase
+        print("[SUCCESS] Python Supabase client initialized.")
+    else:
+        print("[DATABASE WARNING] Supabase URL or Key missing.")
+except Exception as e:
+    print(f"[DATABASE WARNING] Failed to initialize Supabase client: {e}")
+
 app = Flask(__name__)
-CORS(app) # Enables standard cross-origin configuration automatically
-# 2. Initialize your Supabase Client with real fallback strings
-supabase_url = os.environ.get("SUPABASE_URL") or "https://ubsjcfaokemckctswnzi.supabase.co"
-supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVic2pjZmFva2VtY2tjdHN3bnppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQxMzk4NCwiZXhwIjoyMDk1OTg5OTg0fQ.qzh7UKIFmvmKP-mQ5Ev7OoKAWRGXP9hfADbP64RxBNE"
-supabase: Client = create_client(supabase_url, supabase_key)
-supabase: Client = create_client(supabase_url, supabase_key)
-# 2. Setup your explicit routes correctly using the @app prefix
+CORS(app)  # Enables standard cross-origin configuration automatically
+
 @app.route("/auth/login", methods=["POST", "OPTIONS"])
 @app.route("/auth/login-supabase", methods=["POST", "OPTIONS"])
+@app.route("/api/auth/login", methods=["POST", "OPTIONS"])
+@app.route("/api/auth/login-supabase", methods=["POST", "OPTIONS"])
 def auth_login_gate():
-    # 1. Handle browser preflight checks instantly
     if request.method == "OPTIONS":
         return jsonify({"status": "CORS_PREFLIGHT_OK"}), 200
         
     try:
-        # 2. Extract incoming credentials from the frontend post payload
         data = request.json or {}
         email = data.get("email")
         password = data.get("password")
         
         if not email or not password:
-            return jsonify({"error": "Missing email or password fields."}), 400
-        
-        # 3. Authenticate via your Supabase Client Link (initialized further down your file)
+            return jsonify({"error": "Missing credentials"}), 400
+            
+        # Authenticate utilizing the active supabase instance variable
         auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
         
-        # 4. Return success payload back to frontend dashboard
         return jsonify({
             "token": auth_response.session.access_token,
             "user": auth_response.user
         }), 200
-
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-from dotenv import load_dotenv
-load_dotenv()
 
-import sqlite3
-import json
-import os
-import hashlib
-import secrets
-from flask import Flask, request, jsonify, g
-from datetime import datetime
-
-# ── Supabase Client Initialization ──────────────────────────────────────────
-supabase_client = None
-try:
-    from supabase import create_client, Client
-    supabase_url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-    # Prefer private service role key for backend operations to bypass RLS, fallback to anon key
-    service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-    if service_key == "your-secret-service-role-key":
-        service_key = None
-    supabase_key = service_key or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-    if supabase_url and supabase_key:
-        supabase_client = create_client(supabase_url, supabase_key)
-        key_type = "service_role" if service_key else "anon"
-        print(f"[SUCCESS] Python Supabase client initialized (Key: {key_type}).")
-    else:
-        print("[DATABASE WARNING] Supabase URL or Key missing in environment. Supabase sync disabled.")
-except Exception as e:
-    print(f"[DATABASE WARNING] Failed to initialize Supabase client: {e}. Supabase sync disabled.")
-
-app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), "db", "goat.db")
 
 @app.route("/api/health", methods=["GET"])
@@ -264,6 +254,35 @@ def current_user():
     token = auth.replace("Bearer ", "", 1).strip()
     if not token:
         return None
+        
+    # Check if this is a Supabase JWT token
+    if token.startswith("eyJ") and supabase:
+        try:
+            sb_user_resp = supabase.auth.get_user(token)
+            if sb_user_resp and sb_user_resp.user:
+                sb_user = sb_user_resp.user
+                email = sb_user.email
+                db = get_db()
+                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                if row:
+                    return dict(row)
+                else:
+                    name = sb_user.user_metadata.get("name") or sb_user.email.split("@")[0]
+                    role = sb_user.user_metadata.get("role") or "facilitator"
+                    db_url = os.environ.get("DATABASE_URL")
+                    is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
+                    if is_postgres:
+                        db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role))
+                    else:
+                        db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+                    db.commit()
+                    row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                    if row:
+                        return dict(row)
+        except Exception as e:
+            print(f"[AUTH WARNING] Failed to verify Supabase token: {e}")
+            
+    # Fallback to local session check
     row = get_db().execute("""
         SELECT u.id, u.name, u.email, u.role
         FROM auth_sessions s
@@ -610,26 +629,27 @@ def sync_static_tables_supabase():
 
 # ROUTES - Auth
 
-@app.route("/api/auth/login", methods=["POST"])
-def login():
-    data = request.json or {}
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password") or ""
-    db = get_db()
-    row = db.execute("SELECT * FROM users WHERE email=? AND active=1", (email,)).fetchone()
-    if not row or not check_password(password, row["password_hash"]):
-        return jsonify({"error": "Invalid email or password"}), 401
-
-    token = secrets.token_urlsafe(32)
-    db.execute("""
-        INSERT INTO auth_sessions (user_id, token, expires_at)
-        VALUES (?, ?, datetime('now', '+12 hours'))
-    """, (row["id"], token))
-    db.commit()
-    return jsonify({
-        "token": token,
-        "user": {"id": row["id"], "name": row["name"], "email": row["email"], "role": row["role"]},
-    })
+# Legacy login route commented out to prevent route conflicts with auth_login_gate
+# @app.route("/api/auth/login", methods=["POST"])
+# def login():
+#     data = request.json or {}
+#     email = (data.get("email") or "").strip().lower()
+#     password = data.get("password") or ""
+#     db = get_db()
+#     row = db.execute("SELECT * FROM users WHERE email=? AND active=1", (email,)).fetchone()
+#     if not row or not check_password(password, row["password_hash"]):
+#         return jsonify({"error": "Invalid email or password"}), 401
+# 
+#     token = secrets.token_urlsafe(32)
+#     db.execute("""
+#         INSERT INTO auth_sessions (user_id, token, expires_at)
+#         VALUES (?, ?, datetime('now', '+12 hours'))
+#     """, (row["id"], token))
+#     db.commit()
+#     return jsonify({
+#         "token": token,
+#         "user": {"id": row["id"], "name": row["name"], "email": row["email"], "role": row["role"]},
+#     })
 
 @app.route("/api/auth/register", methods=["POST"])
 def register():
@@ -657,61 +677,62 @@ def register():
         
     return jsonify({"status": "success", "message": "Registration successful, pending approval."}), 201
 
-@app.route("/api/auth/login-supabase", methods=["POST"])
-def login_supabase():
-    data = request.json or {}
-    sb_token = data.get("token")
-    if not sb_token:
-        return jsonify({"error": "Token is required"}), 400
-        
-    supabase_url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-    if not supabase_url:
-        return jsonify({"error": "Supabase URL not configured on server"}), 500
-        
-    import urllib.request
-    import urllib.error
-    req_url = f"{supabase_url.rstrip('/')}/auth/v1/user"
-    headers = {
-        "Authorization": f"Bearer {sb_token}",
-        "apikey": os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
-    }
-    req = urllib.request.Request(req_url, headers=headers)
-    try:
-        with urllib.request.urlopen(req) as response:
-            user_data = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        return jsonify({"error": "Invalid Supabase session"}), 401
-    except Exception as e:
-        return jsonify({"error": f"Failed to connect to Supabase Auth: {e}"}), 500
-        
-    user_id = user_data.get("id")
-    email = user_data.get("email")
-    
-    db = get_db()
-    row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
-    if not row:
-        name = user_data.get("user_metadata", {}).get("name", "New User")
-        role = user_data.get("user_metadata", {}).get("role", "facilitator")
-        db_url = os.environ.get("DATABASE_URL")
-        is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
-        if is_postgres:
-            db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user_id, name, email, role))
-        else:
-            db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
-        db.commit()
-        row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
-        
-    token = secrets.token_urlsafe(32)
-    db.execute("""
-        INSERT INTO auth_sessions (user_id, token, expires_at)
-        VALUES (?, ?, datetime('now', '+12 hours'))
-    """, (row["id"], token))
-    db.commit()
-    
-    return jsonify({
-        "token": token,
-        "user": {"id": row["id"], "name": row["name"], "email": row["email"], "role": row["role"]}
-    })
+# Legacy login_supabase route commented out to prevent route conflicts with auth_login_gate
+# @app.route("/api/auth/login-supabase", methods=["POST"])
+# def login_supabase():
+#     data = request.json or {}
+#     sb_token = data.get("token")
+#     if not sb_token:
+#         return jsonify({"error": "Token is required"}), 400
+#         
+#     supabase_url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+#     if not supabase_url:
+#         return jsonify({"error": "Supabase URL not configured on server"}), 500
+#         
+#     import urllib.request
+#     import urllib.error
+#     req_url = f"{supabase_url.rstrip('/')}/auth/v1/user"
+#     headers = {
+#         "Authorization": f"Bearer {sb_token}",
+#         "apikey": os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
+#     }
+#     req = urllib.request.Request(req_url, headers=headers)
+#     try:
+#         with urllib.request.urlopen(req) as response:
+#             user_data = json.loads(response.read().decode("utf-8"))
+#     except urllib.error.HTTPError as e:
+#         return jsonify({"error": "Invalid Supabase session"}), 401
+#     except Exception as e:
+#         return jsonify({"error": f"Failed to connect to Supabase Auth: {e}"}), 500
+#         
+#     user_id = user_data.get("id")
+#     email = user_data.get("email")
+#     
+#     db = get_db()
+#     row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+#     if not row:
+#         name = user_data.get("user_metadata", {}).get("name", "New User")
+#         role = user_data.get("user_metadata", {}).get("role", "facilitator")
+#         db_url = os.environ.get("DATABASE_URL")
+#         is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
+#         if is_postgres:
+#             db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user_id, name, email, role))
+#         else:
+#             db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+#         db.commit()
+#         row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+#         
+#     token = secrets.token_urlsafe(32)
+#     db.execute("""
+#         INSERT INTO auth_sessions (user_id, token, expires_at)
+#         VALUES (?, ?, datetime('now', '+12 hours'))
+#     """, (row["id"], token))
+#     db.commit()
+#     
+#     return jsonify({
+#         "token": token,
+#         "user": {"id": row["id"], "name": row["name"], "email": row["email"], "role": row["role"]}
+#     })
 
 @app.route("/api/auth/me", methods=["GET"])
 def me():
