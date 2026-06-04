@@ -2,9 +2,21 @@
 GOAT Backend — Flask + SQLite
 Greatest of All Talents System for Project WHY
 """
-from flask import request, jsonify # Ensure these are imported at the top
+import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from supabase import create_client, Client
 
-# Add the explicit POST handler for logins
+# 1. Initialize your Flask App
+app = Flask(__name__)
+CORS(app) # Enables standard cross-origin configuration automatically
+
+# 2. Initialize your Supabase Client Link
+supabase_url = os.environ.get("SUPABASE_URL") or "YOUR_SUPABASE_PROJECT_URL"
+supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "YOUR_SUPABASE_KEY"
+supabase: Client = create_client(supabase_url, supabase_key)
+
+# --- Your login route block goes below here ---
 @app.route("/auth/login", methods=["POST"])
 def auth_login_gate():
     try:
