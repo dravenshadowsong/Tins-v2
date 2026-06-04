@@ -63,18 +63,23 @@ def auth_login_gate():
                 
             db = get_db()
             row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            metadata = getattr(user, 'user_metadata', {}) or {}
+            name = metadata.get("name") or email.split("@")[0]
+            role = metadata.get("role") or "facilitator"
+            
             if not row:
                 # Synchronize user locally if not found
-                metadata = getattr(user, 'user_metadata', {}) or {}
-                name = metadata.get("name") or email.split("@")[0]
-                role = metadata.get("role") or "facilitator"
-                
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                 if is_postgres:
                     db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, "supabase_auth"))
                 else:
                     db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
+                db.commit()
+                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            elif row and row["role"] != role:
+                # Synchronize local database role if it differs from Supabase Auth metadata
+                db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
                 db.commit()
                 row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                 
@@ -111,18 +116,23 @@ def auth_login_gate():
                 
             db = get_db()
             row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            metadata = getattr(user, 'user_metadata', {}) or {}
+            name = metadata.get("name") or email.split("@")[0]
+            role = metadata.get("role") or "facilitator"
+            
             if not row:
                 # Synchronize user locally if not found
-                metadata = getattr(user, 'user_metadata', {}) or {}
-                name = metadata.get("name") or email.split("@")[0]
-                role = metadata.get("role") or "facilitator"
-                
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                 if is_postgres:
                     db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, "supabase_auth"))
                 else:
                     db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
+                db.commit()
+                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            elif row and row["role"] != role:
+                # Synchronize local database role if it differs from Supabase Auth metadata
+                db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
                 db.commit()
                 row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                 
@@ -371,12 +381,17 @@ def current_user():
                 email = sb_user.email
                 db = get_db()
                 row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                metadata = getattr(sb_user, 'user_metadata', {}) or {}
+                name = metadata.get("name") or email.split("@")[0]
+                role = metadata.get("role") or "facilitator"
+                
                 if row:
+                    if row["role"] != role:
+                        db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
+                        db.commit()
+                        row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
                     return dict(row)
                 else:
-                    metadata = getattr(sb_user, 'user_metadata', {}) or {}
-                    name = metadata.get("name") or email.split("@")[0]
-                    role = metadata.get("role") or "facilitator"
                     db_url = os.environ.get("DATABASE_URL")
                     is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                     if is_postgres:
@@ -483,8 +498,13 @@ def init_db():
                         VALUES (%s, %s, %s, %s, %s)
                     """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
             
-            conn.commit()
-            cursor.close()
+            # Ensure dravenshadowsong@gmail.com is master_admin in remote Postgres
+            try:
+                cursor.execute("UPDATE users SET role = 'master_admin' WHERE email = 'dravenshadowsong@gmail.com'")
+                conn.commit()
+            except Exception as pg_update_err:
+                print(f"Failed to update remote Postgres role for dravenshadowsong@gmail.com: {pg_update_err}")
+                
             conn.close()
             print("[SUCCESS] PostgreSQL/Supabase initialized successfully!")
             return
@@ -693,6 +713,16 @@ def init_db():
             
     db.commit()
     db.close()
+    
+    # Ensure dravenshadowsong@gmail.com is master_admin in local SQLite
+    try:
+        sqlite_db = sqlite3.connect(DB_PATH)
+        sqlite_db.execute("UPDATE users SET role = 'master_admin' WHERE email = 'dravenshadowsong@gmail.com'")
+        sqlite_db.commit()
+        sqlite_db.close()
+    except Exception as local_update_err:
+        print(f"Failed to update local SQLite role for dravenshadowsong@gmail.com: {local_update_err}")
+        
     print("[SUCCESS] SQLite database initialized successfully!")
     sync_static_tables_supabase()
 
