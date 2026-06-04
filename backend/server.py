@@ -48,21 +48,106 @@ def auth_login_gate():
         
     try:
         data = request.json or {}
-        email = data.get("email")
-        password = data.get("password")
         
-        if not email or not password:
-            return jsonify({"error": "Missing credentials"}), 400
+        # 1. Validate the Request Body Key Names / Token
+        token = data.get("token") or data.get("sb_token") or data.get("access_token")
+        
+        if token:
+            # Authenticate via Supabase access token (token exchange flow)
+            sb_user_resp = supabase.auth.get_user(token)
+            user = getattr(sb_user_resp, 'user', None)
+            email = getattr(user, 'email', None) if user else None
             
-        # Authenticate utilizing the active supabase instance variable
-        auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-        
-        return jsonify({
-            "token": auth_response.session.access_token,
-            "user": auth_response.user
-        }), 200
+            if not email:
+                raise ValueError("Invalid token or missing email in token")
+                
+            db = get_db()
+            row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            if not row:
+                # Synchronize user locally if not found
+                name = getattr(user, 'user_metadata', {}).get("name") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else None
+                if not name:
+                    name = email.split("@")[0]
+                role = getattr(user, 'user_metadata', {}).get("role") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else "facilitator"
+                
+                db_url = os.environ.get("DATABASE_URL")
+                is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
+                if is_postgres:
+                    db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role))
+                else:
+                    db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+                db.commit()
+                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                
+            user_payload = {
+                "id": row["id"] if row else user.id,
+                "name": row["name"] if row else name,
+                "email": row["email"] if row else email,
+                "role": row["role"] if row else role
+            }
+            
+            return jsonify({
+                "token": token,
+                "user": user_payload
+            }), 200
+            
+        else:
+            # Authenticate utilizing credentials (email/password flow)
+            email = data.get("email") or data.get("emailAddress") or data.get("username")
+            password = data.get("password")
+            
+            if not email or not password:
+                return jsonify({"error": "Missing credentials"}), 400
+                
+            # Authenticate utilizing the active supabase instance variable
+            auth_response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            
+            # Ensure proper response structure of supabase.auth.sign_in_with_password()
+            session = getattr(auth_response, 'session', None)
+            user = getattr(auth_response, 'user', None)
+            access_token = session.access_token if session else None
+            
+            if not access_token:
+                raise ValueError("Failed to retrieve access token from authentication response")
+                
+            db = get_db()
+            row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            if not row:
+                # Synchronize user locally if not found
+                name = getattr(user, 'user_metadata', {}).get("name") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else None
+                if not name:
+                    name = email.split("@")[0]
+                role = getattr(user, 'user_metadata', {}).get("role") if (user and hasattr(user, 'user_metadata') and user.user_metadata) else "facilitator"
+                
+                db_url = os.environ.get("DATABASE_URL")
+                is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
+                if is_postgres:
+                    db.execute("INSERT INTO users (id, name, email, role) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role))
+                else:
+                    db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", (name, email, role))
+                db.commit()
+                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                
+            user_payload = {
+                "id": row["id"] if row else user.id,
+                "name": row["name"] if row else name,
+                "email": row["email"] if row else email,
+                "role": row["role"] if row else role
+            }
+            
+            return jsonify({
+                "token": access_token,
+                "user": user_payload
+            }), 200
+            
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        import traceback
+        print("====== AUTH GATEWAY CRASH LOG ======")
+        print(f"Exception Type: {type(e)}")
+        print(f"Exception Details: {str(e)}")
+        traceback.print_exc()
+        print("====================================")
+        return jsonify({"error": str(e), "message": "Authentication pipeline failed internally"}), 400
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "db", "goat.db")
 
