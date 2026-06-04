@@ -38,6 +38,18 @@ except Exception as e:
 app = Flask(__name__)
 CORS(app)  # Enables standard cross-origin configuration automatically
 
+class ApiFallbackMiddleware(object):
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+        
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        if path and path != '/' and not path.startswith('/api/'):
+            environ['PATH_INFO'] = '/api' + path
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = ApiFallbackMiddleware(app.wsgi_app)
+
 @app.route("/auth/login", methods=["POST", "OPTIONS"])
 @app.route("/auth/login-supabase", methods=["POST", "OPTIONS"])
 @app.route("/api/auth/login", methods=["POST", "OPTIONS"])
@@ -741,6 +753,48 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?)
             """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
             
+    # Dynamic SQLite migration to ensure old database versions have all required columns
+    try:
+        expected_columns = {
+            "users": {
+                "active": "INTEGER DEFAULT 1",
+                "center_id": "INTEGER REFERENCES centers(id) ON DELETE SET NULL",
+                "student_id": "INTEGER"
+            },
+            "children": {
+                "exp_kinesthetic": "INTEGER DEFAULT 0",
+                "exp_creative": "INTEGER DEFAULT 0",
+                "exp_logical": "INTEGER DEFAULT 0",
+                "exp_spatial": "INTEGER DEFAULT 0",
+                "exp_social": "INTEGER DEFAULT 0",
+                "exp_language": "INTEGER DEFAULT 0",
+                "exp_naturalist": "INTEGER DEFAULT 0",
+                "exp_intrapersonal": "INTEGER DEFAULT 0",
+                "center_id": "INTEGER REFERENCES centers(id) ON DELETE SET NULL"
+            },
+            "sessions": {
+                "domain_flags": "TEXT",
+                "tq_scores": "TEXT",
+                "eq_score": "INTEGER",
+                "visualizer_score": "INTEGER",
+                "personality_data": "TEXT",
+                "integrated_score": "TEXT",
+                "top_domain": "TEXT",
+                "generated_tasks": "TEXT",
+                "status": "TEXT DEFAULT 'in_progress'",
+                "completed_at": "TEXT"
+            }
+        }
+        for table, cols in expected_columns.items():
+            cursor = db.execute(f"PRAGMA table_info({table})")
+            existing_cols = {row[1] for row in cursor.fetchall()}
+            for col, col_def in cols.items():
+                if col not in existing_cols:
+                    print(f"[MIGRATION] Adding missing column {col} to table {table}...")
+                    db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}")
+    except Exception as migration_err:
+        print(f"[MIGRATION WARNING] Failed to migrate local SQLite schema: {migration_err}")
+
     db.commit()
     db.close()
     
