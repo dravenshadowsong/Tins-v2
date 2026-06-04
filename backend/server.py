@@ -142,12 +142,36 @@ def auth_login_gate():
             
     except Exception as e:
         import traceback
+        tb_str = traceback.format_exc()
         print("====== AUTH GATEWAY CRASH LOG ======")
         print(f"Exception Type: {type(e)}")
         print(f"Exception Details: {str(e)}")
-        traceback.print_exc()
+        print(tb_str)
         print("====================================")
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "debug_logs.txt"), "a", encoding="utf-8") as f:
+                f.write(f"\n====== {datetime.now()} ======\n")
+                f.write(f"Exception Type: {type(e)}\n")
+                f.write(f"Exception Details: {str(e)}\n")
+                f.write(tb_str)
+                f.write("====================================\n")
+        except Exception as log_err:
+            print(f"Failed to write to debug_logs.txt: {log_err}")
+            
         return jsonify({"error": str(e), "message": "Authentication pipeline failed internally"}), 400
+
+@app.route("/api/debug/logs", methods=["GET"])
+def get_debug_logs():
+    try:
+        log_path = os.path.join(os.path.dirname(__file__), "debug_logs.txt")
+        if os.path.exists(log_path):
+            with open(log_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            return content, 200, {"Content-Type": "text/plain; charset=utf-8"}
+        else:
+            return "No debug logs found.", 200
+    except Exception as e:
+        return f"Error reading logs: {e}", 500
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "db", "goat.db")
 
