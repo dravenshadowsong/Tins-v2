@@ -8,7 +8,7 @@ env_path = os.path.join(os.path.dirname(__file__), "backend", ".env")
 load_dotenv(dotenv_path=env_path)
 
 supabase_url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-supabase_key = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 
 print("=== Supabase Synchronization Integration Test ===")
 print("URL:", supabase_url)

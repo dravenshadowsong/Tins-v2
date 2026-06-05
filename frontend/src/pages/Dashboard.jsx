@@ -45,13 +45,24 @@ export default function Dashboard() {
 
     async function loadData() {
       try {
+        // 1. Fetch fresh user profile from backend
+        let activeUser = parsed;
+        const profileResponse = await api.me().catch(() => null);
+        if (profileResponse && profileResponse.user) {
+          activeUser = profileResponse.user;
+          setUser(profileResponse.user);
+          localStorage.setItem("goat_user", JSON.stringify(profileResponse.user));
+        }
+
+        const activeRole = (activeUser.role || "").toLowerCase();
+
         const stats = await api.getAnalytics().catch(() => null);
         setAnalytics(stats);
 
         const kids = await api.getChildren().catch(() => []);
         setChildren(kids);
 
-        if (parsed.role === "master_admin" || parsed.role === "admin") {
+        if (activeRole === "master_admin" || activeRole === "admin") {
           const u = await api.getUsers().catch(() => []);
           setUsers(u);
           const c = await api.getCenters().catch(() => []);
@@ -60,12 +71,12 @@ export default function Dashboard() {
           setWorkshops(w);
         }
 
-        if (parsed.role === "master_admin") {
+        if (activeRole === "master_admin") {
           const p = await api.getPuzzles().catch(() => []);
           setPuzzles(p);
         }
 
-        if (parsed.role === "mentor") {
+        if (activeRole === "mentor") {
           const w = await api.getWorkshops().catch(() => []);
           setWorkshops(w);
         }
@@ -83,7 +94,7 @@ export default function Dashboard() {
     return <div style={{ textAlign: "center", marginTop: 80, color: "#6b7280", fontSize: "16px", fontWeight: 500 }}>Loading Portal Workspace...</div>;
   }
 
-  const role = user?.role || "facilitator";
+  const role = (user?.role || "facilitator").toLowerCase();
 
   if (role.startsWith("pending_")) {
     const reqRole = role.replace("pending_", "").toUpperCase();
@@ -110,8 +121,8 @@ export default function Dashboard() {
     );
   }
 
-  const pendingUsers = users.filter(u => u.role && u.role.startsWith("pending_"));
-  const activeUsers = users.filter(u => !u.role || !u.role.startsWith("pending_"));
+  const pendingUsers = users.filter(u => u.role && u.role.toLowerCase().startsWith("pending_"));
+  const activeUsers = users.filter(u => !u.role || !u.role.toLowerCase().startsWith("pending_"));
 
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 15px" }}>

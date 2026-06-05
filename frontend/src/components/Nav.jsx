@@ -21,13 +21,16 @@ export default function Nav() {
   };
 
   const getRoleLabel = (role) => {
+    if (!role) return "";
     const roles = {
       master_admin: "Master Admin",
       admin: "Admin",
       facilitator: "Facilitator",
-      mentor: "Mentor"
+      mentor: "Mentor",
+      pending_facilitator: "Pending Facilitator",
+      pending_mentor: "Pending Mentor"
     };
-    return roles[role] || role;
+    return roles[role.toLowerCase()] || role;
   };
 
   return (

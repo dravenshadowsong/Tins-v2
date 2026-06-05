@@ -219,6 +219,7 @@ def health_check():
     return jsonify({
         "status": "healthy" if db_status == "connected" else "degraded",
         "has_postgres": HAS_POSTGRES,
+        "postgres_import_error": POSTGRES_IMPORT_ERROR,
         "db_type": db_type,
         "db_status": db_status,
         "db_error": db_error,
@@ -243,12 +244,15 @@ def options_handler(path):
     return jsonify({}), 200
 
 # ── Database connection ───────────────────────────────────────────────────────
+HAS_POSTGRES = False
+POSTGRES_IMPORT_ERROR = None
 try:
     import psycopg2
     import psycopg2.extras
     HAS_POSTGRES = True
-except ImportError:
-    HAS_POSTGRES = False
+except Exception as e:
+    import traceback
+    POSTGRES_IMPORT_ERROR = str(e) + "\n" + traceback.format_exc()
 
 class PostgresCursorWrapper:
     def __init__(self, pg_cursor, is_insert=False):
@@ -378,18 +382,37 @@ def resolve_user_role(email, metadata):
     if email == "mentor@why.org":
         return "mentor"
         
+    # Check remote Supabase profiles table first
+    if supabase_client:
+        try:
+            res = supabase_client.table("profiles").select("role, is_approved").eq("email", email).execute()
+            if res.data:
+                profile = res.data[0]
+                role = profile.get("role")
+                is_approved = profile.get("is_approved")
+                if role:
+                    role_str = str(role).lower()
+                    if is_approved:
+                        return role_str
+                    else:
+                        if not role_str.startswith("pending_"):
+                            return "pending_" + role_str
+                        return role_str
+        except Exception as e:
+            print(f"[SUPABASE WARNING] Failed to fetch profile role for {email}: {e}")
+            
     # Check if a role is explicitly passed in metadata
     if metadata and isinstance(metadata, dict):
         meta_role = metadata.get("role")
         if meta_role:
-            return meta_role
+            return str(meta_role).lower()
             
     # Default to current database role if user exists
     try:
         db = get_db()
         row = db.execute("SELECT role FROM users WHERE email = ?", (email,)).fetchone()
         if row and row["role"]:
-            return row["role"]
+            return str(row["role"]).lower()
     except Exception as e:
         print(f"[DATABASE WARNING] Failed to fetch existing role for {email}: {e}")
         
@@ -3108,7 +3131,7 @@ def approve_user_tms(uid):
             try:
                 from supabase import create_client
                 sp_client = create_client(supabase_url, supabase_key)
-                sp_client.table("users").update({"role": approved_role}).eq("email", user_row["email"]).execute()
+                sp_client.table("profiles").update({"role": approved_role, "is_approved": True}).eq("email", user_row["email"]).execute()
                 print(f"[SUPABASE SYNC] Approved user role {approved_role} for {user_row['email']}")
             except Exception as e:
                 print(f"[SUPABASE WARNING] Failed to sync approved user role: {e}")
