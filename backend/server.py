@@ -223,6 +223,13 @@ def health_check():
         "db_type": db_type,
         "db_status": db_status,
         "db_error": db_error,
+        "render_env": {
+            "GIT_BRANCH": os.environ.get("RENDER_GIT_BRANCH"),
+            "GIT_COMMIT": os.environ.get("RENDER_GIT_COMMIT"),
+            "SERVICE_ID": os.environ.get("RENDER_SERVICE_ID"),
+            "SERVICE_NAME": os.environ.get("RENDER_SERVICE_NAME"),
+            "EXTERNAL_URL": os.environ.get("RENDER_EXTERNAL_URL"),
+        },
         "env_keys": list(os.environ.keys()),
         "has_db_url": bool(db_url),
         "db_url_length": len(db_url) if db_url else 0,
