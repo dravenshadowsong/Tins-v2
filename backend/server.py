@@ -15,6 +15,52 @@ from supabase import create_client, Client
 
 load_dotenv()
 
+# Automatically rewrite IPv6 direct connection to IPv4 pooler connection string if present
+db_url = os.environ.get("DATABASE_URL")
+if db_url and "db.ubsjcfaokemckctswnzi.supabase.co" in db_url:
+    import re
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    # Match password and database name from postgresql://postgres:PASSWORD@db.ubsjcfaokemckctswnzi.supabase.co:5432/DBNAME
+    match = re.search(r"postgresql://postgres:([^@]+)@db\.ubsjcfaokemckctswnzi\.supabase\.co:5432/(.+)", db_url)
+    if match:
+        password = match.group(1)
+        dbname = match.group(2)
+        project_ref = "ubsjcfaokemckctswnzi"
+        
+        # Default fallback values (verified working for this project)
+        pooler_host = "aws-1-ap-southeast-2.pooler.supabase.com"
+        pooler_port = 6543
+        
+        # Try to dynamically query the Supabase Management API if token is available
+        access_token = os.environ.get("SUPABASE_ACCESS_TOKEN")
+        if access_token:
+            try:
+                import urllib.request
+                import json
+                api_url = f"https://api.supabase.com/v1/projects/{project_ref}/config/database/pooler"
+                req = urllib.request.Request(
+                    api_url, 
+                    headers={
+                        "Authorization": f"Bearer {access_token}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    res_data = json.loads(response.read().decode('utf-8'))
+                    if isinstance(res_data, list) and len(res_data) > 0:
+                        config = res_data[0]
+                        pooler_host = config.get("db_host") or pooler_host
+                        pooler_port = config.get("db_port") or pooler_port
+                        print(f"[DATABASE INFO] Dynamically fetched pooler settings: {pooler_host}:{pooler_port}")
+            except Exception as api_err:
+                print(f"[DATABASE WARNING] Failed to dynamically fetch pooler configuration: {api_err}. Using hardcoded fallback.")
+        
+        rewritten_url = f"postgresql://postgres.{project_ref}:{password}@{pooler_host}:{pooler_port}/{dbname}"
+        os.environ["DATABASE_URL"] = rewritten_url
+        print(f"[DATABASE INFO] Rewrote DATABASE_URL from IPv6 direct connection to IPv4 Connection Pooler ({pooler_host}:{pooler_port}).")
+
 # --- Supabase Client Initialization ---
 supabase = None
 supabase_client = None
@@ -538,47 +584,72 @@ def init_db():
             
             # Seed data for postgres
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM mentors")
-            if cursor.fetchone()[0] == 0:
-                cursor.execute("""
-                    INSERT INTO mentors (id, name, domain, bio, contact) VALUES
-                    (1, 'Anita Sharma',    'creative',       'Art teacher, 12 yrs experience', 'anita@why.org'),
-                    (2, 'Rahul Gupta',     'logical',        'Math tutor, IIT graduate',       'rahul@why.org'),
-                    (3, 'Priya Mehta',     'kinesthetic',    'Dance instructor, Kathak',       'priya@why.org'),
-                    (4, 'Suresh Kumar',    'spatial',        'Carpenter & craft trainer',      'suresh@why.org'),
-                    (5, 'Deepa Nair',      'social',         'Community organiser, 8 yrs',     'deepa@why.org'),
-                    (6, 'Arjun Singh',     'language',       'Theatre director, storyteller',  'arjun@why.org'),
-                    (7, 'Meena Iyer',      'naturalist',     'Botanist, nature educator',      'meena@why.org'),
-                    (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@why.org')
-                """)
             
-            cursor.execute("SELECT COUNT(*) FROM users")
-            if cursor.fetchone()[0] == 0:
-                cursor.execute("""
-                    INSERT INTO users (name, email, password_hash, role) VALUES
-                    ('Master Admin', 'master@why.org', %s, 'master_admin'),
-                    ('Admin Account', 'admin@why.org', %s, 'admin'),
-                    ('Demo Facilitator', 'facilitator@why.org', %s, 'facilitator'),
-                    ('Demo Mentor', 'mentor@why.org', %s, 'mentor'),
-                    ('Demo Student', 'student@why.org', %s, 'student'),
-                    ('Demo Parent', 'parent@why.org', %s, 'parent')
-                """, (hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123")))
-                
-            cursor.execute("SELECT COUNT(*) FROM centers")
-            if cursor.fetchone()[0] == 0:
-                cursor.execute("""
-                    INSERT INTO centers (name, location) VALUES
-                    ('New Delhi Center', 'Okhla, New Delhi'),
-                    ('Mumbai Center', 'Dharavi, Mumbai')
-                """)
-            
-            cursor.execute("SELECT COUNT(*) FROM puzzles")
-            if cursor.fetchone()[0] == 0:
-                for p in DEFAULT_AI_PUZZLES:
+            # 1. Seed mentors
+            try:
+                cursor.execute("SELECT COUNT(*) FROM mentors")
+                if cursor.fetchone()[0] == 0:
                     cursor.execute("""
-                        INSERT INTO puzzles (key, type, domain, component, data)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
+                        INSERT INTO mentors (id, name, domain, bio, contact) VALUES
+                        (1, 'Anita Sharma',    'creative',       'Art teacher, 12 yrs experience', 'anita@why.org'),
+                        (2, 'Rahul Gupta',     'logical',        'Math tutor, IIT graduate',       'rahul@why.org'),
+                        (3, 'Priya Mehta',     'kinesthetic',    'Dance instructor, Kathak',       'priya@why.org'),
+                        (4, 'Suresh Kumar',    'spatial',        'Carpenter & craft trainer',      'suresh@why.org'),
+                        (5, 'Deepa Nair',      'social',         'Community organiser, 8 yrs',     'deepa@why.org'),
+                        (6, 'Arjun Singh',     'language',       'Theatre director, storyteller',  'arjun@why.org'),
+                        (7, 'Meena Iyer',      'naturalist',     'Botanist, nature educator',      'meena@why.org'),
+                        (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@why.org')
+                    """)
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed mentors on Postgres: {e}")
+                conn.rollback()
+            
+            # 2. Seed users
+            try:
+                cursor.execute("SELECT COUNT(*) FROM users")
+                if cursor.fetchone()[0] == 0:
+                    cursor.execute("""
+                        INSERT INTO users (name, email, password_hash, role) VALUES
+                        ('Master Admin', 'master@why.org', %s, 'master_admin'),
+                        ('Admin Account', 'admin@why.org', %s, 'admin'),
+                        ('Demo Facilitator', 'facilitator@why.org', %s, 'facilitator'),
+                        ('Demo Mentor', 'mentor@why.org', %s, 'mentor'),
+                        ('Demo Student', 'student@why.org', %s, 'student'),
+                        ('Demo Parent', 'parent@why.org', %s, 'parent')
+                    """, (hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123")))
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed users on Postgres: {e} (Expected on Supabase due to UUID/FK constraints). Skipping.")
+                conn.rollback()
+                
+            # 3. Seed centers
+            try:
+                cursor.execute("SELECT COUNT(*) FROM centers")
+                if cursor.fetchone()[0] == 0:
+                    cursor.execute("""
+                        INSERT INTO centers (name, location) VALUES
+                        ('New Delhi Center', 'Okhla, New Delhi'),
+                        ('Mumbai Center', 'Dharavi, Mumbai')
+                    """)
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed centers on Postgres: {e}")
+                conn.rollback()
+                
+            # 4. Seed puzzles
+            try:
+                cursor.execute("SELECT COUNT(*) FROM puzzles")
+                if cursor.fetchone()[0] == 0:
+                    for p in DEFAULT_AI_PUZZLES:
+                        cursor.execute("""
+                            INSERT INTO puzzles (key, type, domain, component, data)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed puzzles on Postgres: {e}")
+                conn.rollback()
             
             # Ensure dravenshadowsong@gmail.com is master_admin in remote Postgres
             try:
@@ -586,6 +657,7 @@ def init_db():
                 conn.commit()
             except Exception as pg_update_err:
                 print(f"Failed to update remote Postgres role for dravenshadowsong@gmail.com: {pg_update_err}")
+                conn.rollback()
                 
             conn.close()
             print("[SUCCESS] PostgreSQL/Supabase initialized successfully!")
