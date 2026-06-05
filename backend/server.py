@@ -2043,6 +2043,7 @@ def submit_discovery(sid):
     return jsonify({"status": "success", "count": len(generated_tasks)})
 
 @app.route("/api/sessions/<int:sid>/submit", methods=["POST"])
+@app.route("/api/sessions/<int:sid>/submit/", methods=["POST"])
 @require_auth
 def submit_session(sid):
     """
@@ -2051,6 +2052,7 @@ def submit_session(sid):
     return analyze_and_save_session(sid, request.json)
 
 @app.route("/api/sessions/<int:sid>/analyze", methods=["POST"])
+@app.route("/api/sessions/<int:sid>/analyze/", methods=["POST"])
 @require_auth
 def analyze_session(sid):
     """
