@@ -484,53 +484,47 @@ def check_password(password, stored):
 
 def current_user():
     auth = request.headers.get("Authorization", "")
+
+    print("AUTH HEADER PRESENT:", bool(auth))
+
     if not auth.startswith("Bearer "):
+        print("NO BEARER TOKEN")
         return None
+
     token = auth.replace("Bearer ", "", 1).strip()
+
+    print("TOKEN START:", token[:20])
+
     if not token:
+        print("EMPTY TOKEN")
         return None
-        
+
     # Check if this is a Supabase JWT token
     if token.startswith("eyJ") and supabase:
         try:
+            print("VERIFYING SUPABASE TOKEN")
+
             sb_user_resp = supabase.auth.get_user(token)
+
+            print("SUPABASE RESPONSE:", sb_user_resp)
+
             if sb_user_resp and sb_user_resp.user:
+                print("SUPABASE USER FOUND")
+
                 sb_user = sb_user_resp.user
                 email = sb_user.email
-                db = get_db()
-                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
-                metadata = getattr(sb_user, 'user_metadata', {}) or {}
-                name = metadata.get("name") or email.split("@")[0]
-                role = resolve_user_role(email, metadata)
-                
-                if row:
-                    if row["role"] != role:
-                        db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
-                        db.commit()
-                        row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
-                    return dict(row)
-                else:
-                    db_url = os.environ.get("DATABASE_URL")
-                    is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
-                    if is_postgres:
-                        db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role, "supabase_auth"))
-                    else:
-                        db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
-                    db.commit()
-                    row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
-                    if row:
-                        return dict(row)
+
+                print("EMAIL:", email)
+
+                # keep your existing code here
+
+            else:
+                print("NO USER RETURNED BY SUPABASE")
+                return None
+
         except Exception as e:
-            print(f"[AUTH WARNING] Failed to verify Supabase token: {e}")
-            
-    # Fallback to local session check
-    row = get_db().execute("""
-        SELECT u.id, u.name, u.email, u.role
-        FROM auth_sessions s
-        JOIN users u ON u.id = s.user_id
-        WHERE s.token = ? AND s.expires_at > datetime('now')
-    """, (token,)).fetchone()
-    return dict(row) if row else None
+            print("SUPABASE ERROR:", str(e))
+            return None
 
 def require_user():
     user = current_user()
