@@ -1,6 +1,6 @@
 """
 GOAT Backend — Flask + SQLite
-Greatest of All Talents System for Project WHY
+Greatest of All Talents System
 """
 import os
 import sqlite3
@@ -2423,7 +2423,7 @@ DOMAIN_LABELS = {
 def add_note():
     data = request.json
     user = current_user()
-    facilitator_name = data.get("facilitator") or (user["name"] if user else "Project WHY Mentor")
+    facilitator_name = data.get("facilitator") or (user["name"] if user else "GOAT Mentor")
 
     db = get_db()
     cur = db.execute("""
@@ -2754,7 +2754,7 @@ ACTION_PLANS = {
         "week_1": "3D Structural Building: Build a self-supporting tower at least 30cm high using only paper and tape or cardboard boxes.",
         "week_2": "Perspective Sketching: Draw your classroom or room from 3 different angles (top-down map, eye-level, corner view).",
         "week_3": "Origami & Geometry: Create 3 folded paper figures (like a cup, a box, or a crane) without using scissors or glue.",
-        "week_4": "Navigation Walk: Draw a detailed map of the route from your home to the Project WHY center, indicating major landmarks."
+        "week_4": "Navigation Walk: Draw a detailed map of the route from your home to the center, indicating major landmarks."
     },
     "social": {
         "week_1": "Interactive Scenarios: Lead a group of 3 peers in selecting a game to play, ensuring everyone's opinion is heard and respected.",
@@ -3472,7 +3472,7 @@ def export_data_csv():
     return Response(
         output.getvalue(),
         mimetype="text/csv",
-        headers={"Content-disposition": "attachment; filename=TINS_Talent_Export.csv"}
+        headers={"Content-disposition": "attachment; filename=GOAT_Talent_Export.csv"}
     )
 
 
@@ -3624,7 +3624,7 @@ def export_session_pdf(sid):
     
     # PAGE 1: COVER PAGE
     story.append(Spacer(1, 1.2 * inch))
-    story.append(Paragraph("TINS TALENT ASSESSMENT REPORT", title_style))
+    story.append(Paragraph("GOAT TALENT ASSESSMENT REPORT", title_style))
     story.append(Paragraph("Professional Multi-Aptitude Profile & Development Roadmap", subtitle_style))
     
     # Divider block
@@ -3666,7 +3666,7 @@ def export_session_pdf(sid):
             Paragraph("<b>Age:</b>", body_style),
             Paragraph(f"{child['age']} Years", body_style),
             Paragraph("<b>Assessment ID:</b>", body_style),
-            Paragraph(f"TINS-S{sid}", body_style)
+            Paragraph(f"GOAT-S{sid}", body_style)
         ],
         [
             Paragraph("<b>Language:</b>", body_style),
@@ -3689,7 +3689,7 @@ def export_session_pdf(sid):
     story.append(meta_table)
     story.append(Spacer(1, 1.5 * inch))
     
-    story.append(Paragraph("<b>Organized by:</b> Project WHY Delhi", subtitle_style))
+    story.append(Paragraph("<b>Organized by:</b> GOAT Labs", subtitle_style))
     story.append(PageBreak())
     
     # PAGE 2: EXECUTIVE SUMMARY & APTITUDE BREAKDOWN
@@ -3726,7 +3726,7 @@ def export_session_pdf(sid):
     
     primary_label = DOMAINS_MAP.get(primary_domain, primary_domain).upper()
     
-    snapshot_text = f"Based on the TINS multi-dimensional assessment metrics, {child['name']} demonstrates strong cognitive potential in the {primary_label} domain. This natural aptitude highlights high comfort with open-ended problem solving and cognitive synthesis in these areas. Structured nurturing is recommended to help transition these innate indicators into long-term competencies."
+    snapshot_text = f"Based on the GOAT multi-dimensional assessment metrics, {child['name']} demonstrates strong cognitive potential in the {primary_label} domain. This natural aptitude highlights high comfort with open-ended problem solving and cognitive synthesis in these areas. Structured nurturing is recommended to help transition these innate indicators into long-term competencies."
     story.append(Paragraph(snapshot_text, italic_style))
     story.append(Spacer(1, 0.15 * inch))
     
@@ -3817,8 +3817,8 @@ def export_session_pdf(sid):
         
         # Header (pages 2+)
         if doc.page > 1:
-            canvas.drawString(54, 750, "TINS TALENT IDENTIFICATION SYSTEM REPORT")
-            canvas.drawRightString(letter[0]-54, 750, "PROJECT WHY DELHI")
+            canvas.drawString(54, 750, "GOAT TALENT IDENTIFICATION SYSTEM REPORT")
+            canvas.drawRightString(letter[0]-54, 750, "GOAT LABS")
             canvas.setStrokeColor(colors.HexColor("#CBD5E1"))
             canvas.setLineWidth(0.5)
             canvas.line(54, 742, letter[0]-54, 742)
@@ -3835,7 +3835,7 @@ def export_session_pdf(sid):
     return Response(
         pdf_buffer.getvalue(),
         mimetype="application/pdf",
-        headers={"Content-disposition": f"attachment; filename={child['name'].replace(' ', '_')}_TINS_Talent_Report.pdf"}
+        headers={"Content-disposition": f"attachment; filename={child['name'].replace(' ', '_')}_GOAT_Talent_Report.pdf"}
     )
 
 

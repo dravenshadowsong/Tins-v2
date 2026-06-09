@@ -34,7 +34,7 @@ export default function Welcome() {
       <header id="home" className="hero-section">
         <div className="hero-content">
           <div className="welcome-kicker">
-            <span className="kicker-dot" /> Project WHY · New Delhi, India
+            <span className="kicker-dot" /> Greatest of All Talents System
           </div>
           <h1>
             Discover the <br />
@@ -197,7 +197,7 @@ export default function Welcome() {
             {
               step: "04",
               title: "Facilitator Calibration",
-              desc: "Project WHY mentors spend 10 minutes checking in with the child, verifying score integrity against test anxiety or language gaps.",
+              desc: "GOAT mentors spend 10 minutes checking in with the child, verifying score integrity against test anxiety or language gaps.",
               emoji: "🤝",
               color: "#FDCB6E"
             },

@@ -39,7 +39,7 @@ export default function Nav() {
         <span className="brand-mark">G</span>
         <span className="brand-text">
           <span className="brand-name">GOAT</span>
-          <span className="brand-subtitle">Greatest of All Talents · Project WHY</span>
+          <span className="brand-subtitle">Greatest of All Talents System</span>
         </span>
       </Link>
 

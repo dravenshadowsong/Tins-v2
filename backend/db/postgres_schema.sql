@@ -1,4 +1,4 @@
--- PostgreSQL Schema for TINS Talent Management System
+-- PostgreSQL Schema for GOAT Talent Management System
 
 
 CREATE TABLE IF NOT EXISTS centers (

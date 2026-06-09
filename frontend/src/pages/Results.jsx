@@ -261,7 +261,7 @@ export default function Results() {
   const handleDownloadPDF = () => {
     const originalTitle = document.title;
     const safeName = (child?.name || "Student").trim().replace(/\s+/g, "_");
-    document.title = `${safeName}_TINS_Talent_Discovery_Report`;
+    document.title = `${safeName}_GOAT_Talent_Discovery_Report`;
     window.print();
     setTimeout(() => {
       document.title = originalTitle;
@@ -500,7 +500,7 @@ export default function Results() {
         }}>
           <div>
             <span style={{ fontSize: "11px", fontWeight: 800, color: "#5B4CF0", textTransform: "uppercase", letterSpacing: "1px", display: "block", marginBottom: "4px" }}>Active Talent Map</span>
-            <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 900, color: "var(--text)" }}>TINS Core Cognitive Dashboard</h1>
+            <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 900, color: "var(--text)" }}>GOAT Core Cognitive Dashboard</h1>
             <p style={{ margin: "2px 0 0 0", fontSize: "14px", color: "var(--text-light)" }}>
               Detailed profile analysis, roadmap, and validations for <strong>{child?.name}</strong> (Age {child?.age})
             </p>
@@ -645,7 +645,7 @@ export default function Results() {
         {/* 30-Day Developmental Plan Timeline */}
         <div className="card" style={{ padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>30-Day Developmental Roadmap</h3>
-          <p style={{ fontSize: "13.5px", color: "var(--text-light)", marginBottom: 20 }}>Personalized, week-by-week cognitive action plan recommended by Project WHY</p>
+          <p style={{ fontSize: "13.5px", color: "var(--text-light)", marginBottom: 20 }}>Personalized, week-by-week cognitive action plan recommended by GOAT System</p>
           
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
             {[
@@ -716,14 +716,14 @@ export default function Results() {
         {/* PAGE 1: COVER PAGE */}
         <div id="print-page-1" className="report-page cover-page">
           <div className="cover-header">
-            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>PROJECT WHY</span>
-            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>TINS V4</span>
+            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>GOAT LABS</span>
+            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>GOAT V4</span>
           </div>
           <div className="cover-hero">
             🧠 ✨ 🚀
           </div>
           <div className="cover-title-group">
-            <h1>TINS Talent Discovery &amp; Development Report</h1>
+            <h1>GOAT Talent Discovery &amp; Development Report</h1>
             <p>Understanding Potential. Building Futures.</p>
           </div>
           <div className="cover-footer">
@@ -734,8 +734,8 @@ export default function Results() {
             </div>
             <div style={{ textAlign: "right" }}>
               <strong>Assessment Date:</strong> {new Date(session.completed_at || session.created_at).toLocaleDateString()}<br />
-              <strong>Assessment ID:</strong> TINS-S{session.id}<br />
-              <strong>Facilitator:</strong> {notes[0]?.facilitator || "Project WHY Mentor"}
+              <strong>Assessment ID:</strong> GOAT-S{session.id}<br />
+              <strong>Facilitator:</strong> {notes[0]?.facilitator || "GOAT Mentor"}
             </div>
           </div>
         </div>
@@ -744,7 +744,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Executive Summary</span>
             </div>
             <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>WHO IS THIS CHILD?</h2>
@@ -773,7 +773,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 2</span>
           </div>
         </div>
@@ -782,7 +782,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Psychological Talent Map</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0", textAlign: "center" }}>DYNAMIC COGNITIVE MAP</h2>
@@ -817,7 +817,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 3</span>
           </div>
         </div>
@@ -826,7 +826,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Evidence Report</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>WHY THESE TALENTS WERE IDENTIFIED</h2>
@@ -868,7 +868,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 4</span>
           </div>
         </div>
@@ -877,7 +877,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Hidden Opportunities</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>HIDDEN COGNITIVE OPPORTUNITIES</h2>
@@ -927,7 +927,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 5</span>
           </div>
         </div>
@@ -936,7 +936,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Child Persona Profile</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>CHILD COGNITIVE PERSONA</h2>
@@ -965,7 +965,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 6</span>
           </div>
         </div>
@@ -974,7 +974,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Parent &amp; Mentor Guide</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>UNDERSTANDING YOUR CHILD</h2>
@@ -1013,7 +1013,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 7</span>
           </div>
         </div>
@@ -1022,7 +1022,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">30-Day Developmental Plan</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>DEVELOPMENT ROADMAP: NEXT STEPS</h2>
@@ -1064,7 +1064,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 8</span>
           </div>
         </div>
@@ -1073,7 +1073,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Exploration Pathways</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>DEVELOPMENT EXPLORATION PATHWAYS</h2>
@@ -1111,7 +1111,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 9</span>
           </div>
         </div>
@@ -1120,7 +1120,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Mentor Review</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>MENTOR VALIDATION &amp; REVIEW</h2>
@@ -1161,7 +1161,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 10</span>
           </div>
         </div>
@@ -1170,7 +1170,7 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Longitudinal Growth</span>
             </div>
             <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>DEVELOPMENT JOURNEY TIMELINE</h2>
@@ -1201,7 +1201,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 11</span>
           </div>
         </div>
@@ -1210,12 +1210,12 @@ export default function Results() {
         <div className="report-page">
           <div>
             <div className="report-page-header">
-              <span className="logo-group">🧠 TINS</span>
+              <span className="logo-group">🧠 GOAT</span>
               <span className="report-section-name">Methodology &amp; Disclosure</span>
             </div>
             <h2 style={{ fontSize: "18px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 10px 0" }}>ASSESSMENT METHODOLOGY</h2>
             <p style={{ fontSize: "12px", lineHeight: "1.5", color: "#57606F", margin: "0 0 16px 0" }}>
-              TINS uses a multi-faceted approach. Natural behavior, decision styles, and cognitive speed are analyzed dynamically through standardized puzzle banks.
+              GOAT uses a multi-faceted approach. Natural behavior, decision styles, and cognitive speed are analyzed dynamically through standardized puzzle banks.
             </p>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(91, 76, 240, 0.04)", padding: "8px 12px", borderRadius: "8px", fontSize: "11px", fontWeight: 800, color: "#5B4CF0", marginBottom: "16px", textAlign: "center" }}>
@@ -1248,7 +1248,7 @@ export default function Results() {
             </div>
           </div>
           <div className="report-page-footer">
-            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>GOAT Discovery &amp; Nurturing Report</span>
             <span>Page 12</span>
           </div>
         </div>

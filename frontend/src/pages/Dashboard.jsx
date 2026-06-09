@@ -130,7 +130,7 @@ export default function Dashboard() {
       <div className="page-header" style={{ marginBottom: "24px" }}>
         <div className="page-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800, color: "#1e1b4b" }}>TINS Talent Management Portal</h1>
+            <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800, color: "#1e1b4b" }}>GOAT Talent Management Portal</h1>
             <p className="text-light" style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
               Active Session: <strong style={{ color: "#5b4cf0" }}>{user?.name}</strong> | Role: <span className="domain-badge" style={{ background: "#5b4cf0", color: "#fff", padding: "2px 8px", fontSize: "11px", fontWeight: 700 }}>{role.toUpperCase()}</span>
             </p>
@@ -959,10 +959,10 @@ export default function Dashboard() {
                 India produces approximately <strong>14.5 million school dropouts per year</strong>, the majority from economically disadvantaged urban and semi-urban households. Research consistently shows that the primary driver is not lack of ability — it is the failure of educational systems to identify, validate, and nurture the specific abilities each child naturally possesses.
               </p>
               <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px" }}>
-                Project WHY works with children in some of Delhi’s most underserved communities. These children face compounding disadvantages:
+                The system works with children in underserved communities. These children face compounding disadvantages:
               </p>
               <ul style={{ paddingLeft: "20px", color: "#4b5563", lineHeight: "1.6", fontSize: "14.5px" }}>
-                <li style={{ marginBottom: "8px" }}><strong>Limited exposure to diverse domains:</strong> Most have never painted, played an instrument, or used a computer before arriving at Project WHY.</li>
+                <li style={{ marginBottom: "8px" }}><strong>Limited exposure to diverse domains:</strong> Most have never painted, played an instrument, or used a computer before arriving at the program.</li>
                 <li style={{ marginBottom: "8px" }}><strong>Assessment in a second or third language (English):</strong> This systematically suppresses performance on verbal and linguistic tasks.</li>
                 <li style={{ marginBottom: "8px" }}><strong>No existing formal mechanism:</strong> Lack of structural tools to identify talent outside of standard academic performance and sports.</li>
                 <li style={{ marginBottom: "8px" }}><strong>Social and familial pressure:</strong> Heavy pressure to pursue immediate income-generating paths rather than talent-aligned ones.</li>
@@ -1047,7 +1047,7 @@ export default function Dashboard() {
             <div>
               <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#1e1b4b", borderLeft: "4px solid #5b4cf0", paddingLeft: "12px", marginBottom: "12px" }}>3. Why Existing Tools Are Insufficient</h3>
               <p style={{ color: "#4b5563", lineHeight: "1.7", fontSize: "15px" }}>
-                Several established tools address related problems but fall short for Project WHY’s specific population:
+                Several established tools address related problems but fall short for our specific population:
               </p>
               <ul style={{ paddingLeft: "20px", color: "#4b5563", lineHeight: "1.6", fontSize: "14.5px" }}>
                 <li style={{ marginBottom: "8px" }}><strong>Myers-Briggs Type Indicator (MBTI):</strong> Measures personality type, not capability. A personality classification does not tell you if a child has exceptional spatial reasoning or musical aptitude.</li>
@@ -1091,7 +1091,7 @@ export default function Dashboard() {
           </div>
 
           <div style={{ borderTop: "1px solid #e5e7eb", marginTop: "32px", paddingTop: "16px", display: "flex", justifyContent: "space-between", fontSize: "12.5px", color: "#9ca3af", flexWrap: "wrap", gap: "12px" }}>
-            <p style={{ margin: 0 }}>© 2026 Project WHY · Talent Systems Design Team</p>
+            <p style={{ margin: 0 }}>© 2026 GOAT Labs · Talent Systems Design Team</p>
             <p style={{ margin: 0 }}>For questions regarding the scientific basis of this system, please contact the Talent Systems Design Team.</p>
           </div>
         </div>

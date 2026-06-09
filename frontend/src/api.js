@@ -1,5 +1,7 @@
 // API helper — all calls to the backend in one place
-export const BASE = "https://tins-v2-1.onrender.com/api";
+export const BASE = import.meta.env.DEV
+  ? "/api"
+  : (import.meta.env.VITE_API_URL || "https://tins-v2-1.onrender.com/api");
 
 async function req(method, path, body) {
   const token = localStorage.getItem("goat_token");

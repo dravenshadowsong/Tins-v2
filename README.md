@@ -1,5 +1,5 @@
-# TINS — Talent Identification & Nurturing System
-## Project WHY, New Delhi
+# GOAT — Greatest of All Talents System
+
 
 ---
 
@@ -28,7 +28,7 @@ pip install flask --break-system-packages
 
 ### 3. Install frontend dependencies
 ```bash
-cd tins/frontend
+cd tins_v2/frontend
 npm install
 cd ..
 ```
@@ -41,14 +41,14 @@ You need TWO terminal windows open at the same time.
 
 ### Terminal 1 — Backend
 ```bash
-cd tins/backend
+cd tins_v2/backend
 python3 server.py
 ```
-You should see: `✅  TINS backend running at http://localhost:5050`
+You should see: `✅  GOAT backend running at http://localhost:5050`
 
 ### Terminal 2 — Frontend
 ```bash
-cd tins/frontend
+cd tins_v2/frontend
 npm run dev
 ```
 You should see: `Local: http://localhost:5173`
@@ -77,11 +77,11 @@ Go to: **http://localhost:5173**
 
 ## File structure
 ```
-tins/
+tins_v2/
 ├── backend/
 │   ├── server.py          ← Flask API + scoring engine
 │   └── db/
-│       └── tins.db        ← SQLite database (auto-created on first run)
+│       └── goat.db        ← SQLite database (auto-created on first run)
 └── frontend/
     └── src/
         ├── pages/
@@ -120,4 +120,4 @@ tins/
 
 ---
 
-Built for Project WHY, New Delhi. May 2026.
+Built for GOAT Labs. May 2026.

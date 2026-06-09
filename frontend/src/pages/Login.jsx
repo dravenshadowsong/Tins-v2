@@ -102,7 +102,7 @@ export default function Login() {
       <div style={{ width: "100%", maxWidth: "440px" }}>
         
         <form className="card" onSubmit={isRegister ? handleRegister : handleLogin} style={{ padding: "30px 24px", marginBottom: "16px", borderRadius: "16px", border: "1px solid rgba(91, 76, 240, 0.12)" }}>
-          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 6px 0", textAlign: "center" }}>TINS System Portal</h1>
+          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 6px 0", textAlign: "center" }}>GOAT System Portal</h1>
           <p className="text-light" style={{ fontSize: "13.5px", textAlign: "center", marginBottom: "24px" }}>
             {isRegister ? "Create a Facilitator or Mentor Account" : "Talent Identification, Validation, Nurturing & Tracking"}
           </p>
