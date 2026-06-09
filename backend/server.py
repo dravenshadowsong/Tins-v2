@@ -484,47 +484,58 @@ def check_password(password, stored):
 
 def current_user():
     auth = request.headers.get("Authorization", "")
-
-    print("AUTH HEADER PRESENT:", bool(auth))
-
     if not auth.startswith("Bearer "):
-        print("NO BEARER TOKEN")
         return None
 
     token = auth.replace("Bearer ", "", 1).strip()
-
-    print("TOKEN START:", token[:20])
-
     if not token:
-        print("EMPTY TOKEN")
         return None
 
     # Check if this is a Supabase JWT token
     if token.startswith("eyJ") and supabase:
         try:
-            print("VERIFYING SUPABASE TOKEN")
-
             sb_user_resp = supabase.auth.get_user(token)
-
-            print("SUPABASE RESPONSE:", sb_user_resp)
-
             if sb_user_resp and sb_user_resp.user:
-                print("SUPABASE USER FOUND")
-
                 sb_user = sb_user_resp.user
                 email = sb_user.email
 
-                print("EMAIL:", email)
-
-                # keep your existing code here
-
+                db = get_db()
+                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                metadata = getattr(sb_user, 'user_metadata', {}) or {}
+                name = metadata.get("name") or email.split("@")[0]
+                role = resolve_user_role(email, metadata)
+                
+                if row:
+                    if row["role"] != role:
+                        db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
+                        db.commit()
+                        row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                    return dict(row)
+                else:
+                    db_url = os.environ.get("DATABASE_URL")
+                    is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
+                    if is_postgres:
+                        db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role, "supabase_auth"))
+                    else:
+                        db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
+                    db.commit()
+                    row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                    if row:
+                        return dict(row)
             else:
-                print("NO USER RETURNED BY SUPABASE")
                 return None
-
         except Exception as e:
-            print("SUPABASE ERROR:", str(e))
+            print(f"[AUTH ERROR] Supabase token verification failed: {e}")
             return None
+
+    # Fallback to local session check
+    row = get_db().execute("""
+        SELECT u.id, u.name, u.email, u.role
+        FROM auth_sessions s
+        JOIN users u ON u.id = s.user_id
+        WHERE s.token = ? AND s.expires_at > datetime('now')
+    """, (token,)).fetchone()
+    return dict(row) if row else None
 
 def require_user():
     user = current_user()
@@ -1147,22 +1158,25 @@ def create_child():
             
     db = get_db()
     if supabase_id is not None:
-        db.execute("""
-            INSERT INTO children
-              (id, name, age, language, school_year, gender,
-               exp_kinesthetic, exp_creative, exp_logical, exp_spatial,
-               exp_social, exp_language, exp_naturalist, exp_intrapersonal)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """, (
-            supabase_id,
-            data["name"], data["age"], data.get("language", "Hindi"),
-            data.get("school_year", ""), data.get("gender", ""),
-            data.get("exp_kinesthetic", 0), data.get("exp_creative", 0),
-            data.get("exp_logical", 0),    data.get("exp_spatial", 0),
-            data.get("exp_social", 0),     data.get("exp_language", 0),
-            data.get("exp_naturalist", 0), data.get("exp_intrapersonal", 0),
-        ))
-        db.commit()
+        if not isinstance(db, PostgresConnectionWrapper):
+            db.execute("""
+                INSERT INTO children
+                  (id, name, age, language, school_year, gender,
+                   exp_kinesthetic, exp_creative, exp_logical, exp_spatial,
+                   exp_social, exp_language, exp_naturalist, exp_intrapersonal)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, (
+                supabase_id,
+                data["name"], data["age"], data.get("language", "Hindi"),
+                data.get("school_year", ""), data.get("gender", ""),
+                data.get("exp_kinesthetic", 0), data.get("exp_creative", 0),
+                data.get("exp_logical", 0),    data.get("exp_spatial", 0),
+                data.get("exp_social", 0),     data.get("exp_language", 0),
+                data.get("exp_naturalist", 0), data.get("exp_intrapersonal", 0),
+            ))
+            db.commit()
+        else:
+            print("DEBUG: Postgres connection active. Skipping redundant local insert as Supabase client has already inserted into the shared Postgres instance.")
         child_id = supabase_id
     else:
         cur = db.execute("""
@@ -1227,11 +1241,14 @@ def create_session():
             
     db = get_db()
     if supabase_id is not None:
-        db.execute(
-            "INSERT INTO sessions (id, child_id, phase) VALUES (?,?,?)",
-            (supabase_id, child_id, "discovery")
-        )
-        db.commit()
+        if not isinstance(db, PostgresConnectionWrapper):
+            db.execute(
+                "INSERT INTO sessions (id, child_id, phase) VALUES (?,?,?)",
+                (supabase_id, child_id, "discovery")
+            )
+            db.commit()
+        else:
+            print("DEBUG: Postgres connection active. Skipping redundant local session insert as Supabase client has already inserted.")
         session_id = supabase_id
     else:
         cur = db.execute(
@@ -2514,25 +2531,28 @@ def create_match():
             
     db = get_db()
     if supabase_match_id is not None:
-        # Insert into local mentor_matches with explicit ID
-        db.execute("""
-            INSERT INTO mentor_matches (id, child_id, mentor_id, domain, plan)
-            VALUES (?,?,?,?,?)
-        """, (supabase_match_id, child_id, mentor_id, domain, json.dumps(plan)))
-        
-        # Insert into local milestones using Supabase IDs
-        for i, m in enumerate(plan):
-            if i < len(supabase_milestone_ids):
-                db.execute(
-                    "INSERT INTO milestones (id, match_id, title) VALUES (?,?,?)",
-                    (supabase_milestone_ids[i], supabase_match_id, m["title"])
-                )
-            else:
-                db.execute(
-                    "INSERT INTO milestones (match_id, title) VALUES (?,?)",
-                    (supabase_match_id, m["title"])
-                )
-        db.commit()
+        if not isinstance(db, PostgresConnectionWrapper):
+            # Insert into local mentor_matches with explicit ID
+            db.execute("""
+                INSERT INTO mentor_matches (id, child_id, mentor_id, domain, plan)
+                VALUES (?,?,?,?,?)
+            """, (supabase_match_id, child_id, mentor_id, domain, json.dumps(plan)))
+            
+            # Insert into local milestones using Supabase IDs
+            for i, m in enumerate(plan):
+                if i < len(supabase_milestone_ids):
+                    db.execute(
+                        "INSERT INTO milestones (id, match_id, title) VALUES (?,?,?)",
+                        (supabase_milestone_ids[i], supabase_match_id, m["title"])
+                    )
+                else:
+                    db.execute(
+                        "INSERT INTO milestones (match_id, title) VALUES (?,?)",
+                        (supabase_match_id, m["title"])
+                    )
+            db.commit()
+        else:
+            print("DEBUG: Postgres connection active. Skipping redundant local insert for match/milestones as Supabase client has already inserted.")
         match_id = supabase_match_id
     else:
         # Fallback to local auto-increment
