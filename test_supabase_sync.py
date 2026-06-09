@@ -37,7 +37,7 @@ try:
     if not mentors.data:
         print("Seeding mentors...")
         supabase.table("mentors").insert([
-            {"id": 1, "name": "Anita Sharma", "domain": "creative", "contact": "anita@why.org"}
+            {"id": 1, "name": "Anita Sharma", "domain": "creative", "contact": "anita@goat.com"}
         ]).execute()
 
     # 2. Test inserting a test child

@@ -426,13 +426,13 @@ def resolve_user_role(email, metadata):
     # Hardcoded master accounts
     if email == "dravenshadowsong@gmail.com":
         return "master_admin"
-    if email == "master@why.org":
+    if email == "master@goat.com":
         return "master_admin"
-    if email == "admin@why.org":
+    if email == "admin@goat.com":
         return "admin"
-    if email == "facilitator@why.org":
+    if email == "facilitator@goat.com":
         return "facilitator"
-    if email == "mentor@why.org":
+    if email == "mentor@goat.com":
         return "mentor"
         
     # Check remote Supabase profiles table first
@@ -596,14 +596,14 @@ def init_db():
                 if cursor.fetchone()[0] == 0:
                     cursor.execute("""
                         INSERT INTO mentors (id, name, domain, bio, contact) VALUES
-                        (1, 'Anita Sharma',    'creative',       'Art teacher, 12 yrs experience', 'anita@why.org'),
-                        (2, 'Rahul Gupta',     'logical',        'Math tutor, IIT graduate',       'rahul@why.org'),
-                        (3, 'Priya Mehta',     'kinesthetic',    'Dance instructor, Kathak',       'priya@why.org'),
-                        (4, 'Suresh Kumar',    'spatial',        'Carpenter & craft trainer',      'suresh@why.org'),
-                        (5, 'Deepa Nair',      'social',         'Community organiser, 8 yrs',     'deepa@why.org'),
-                        (6, 'Arjun Singh',     'language',       'Theatre director, storyteller',  'arjun@why.org'),
-                        (7, 'Meena Iyer',      'naturalist',     'Botanist, nature educator',      'meena@why.org'),
-                        (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@why.org')
+                        (1, 'Anita Sharma',    'creative',       'Art teacher, 12 yrs experience', 'anita@goat.com'),
+                        (2, 'Rahul Gupta',     'logical',        'Math tutor, IIT graduate',       'rahul@goat.com'),
+                        (3, 'Priya Mehta',     'kinesthetic',    'Dance instructor, Kathak',       'priya@goat.com'),
+                        (4, 'Suresh Kumar',    'spatial',        'Carpenter & craft trainer',      'suresh@goat.com'),
+                        (5, 'Deepa Nair',      'social',         'Community organiser, 8 yrs',     'deepa@goat.com'),
+                        (6, 'Arjun Singh',     'language',       'Theatre director, storyteller',  'arjun@goat.com'),
+                        (7, 'Meena Iyer',      'naturalist',     'Botanist, nature educator',      'meena@goat.com'),
+                        (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@goat.com')
                     """)
                     conn.commit()
             except Exception as e:
@@ -616,13 +616,13 @@ def init_db():
                 if cursor.fetchone()[0] == 0:
                     cursor.execute("""
                         INSERT INTO users (name, email, password_hash, role) VALUES
-                        ('Master Admin', 'master@why.org', %s, 'master_admin'),
-                        ('Admin Account', 'admin@why.org', %s, 'admin'),
-                        ('Demo Facilitator', 'facilitator@why.org', %s, 'facilitator'),
-                        ('Demo Mentor', 'mentor@why.org', %s, 'mentor'),
-                        ('Demo Student', 'student@why.org', %s, 'student'),
-                        ('Demo Parent', 'parent@why.org', %s, 'parent')
-                    """, (hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123"), hash_password("why123")))
+                        ('Master Admin', 'master@goat.com', %s, 'master_admin'),
+                        ('Admin Account', 'admin@goat.com', %s, 'admin'),
+                        ('Demo Facilitator', 'facilitator@goat.com', %s, 'facilitator'),
+                        ('Demo Mentor', 'mentor@goat.com', %s, 'mentor'),
+                        ('Demo Student', 'student@goat.com', %s, 'student'),
+                        ('Demo Parent', 'parent@goat.com', %s, 'parent')
+                    """, (hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123")))
                     conn.commit()
             except Exception as e:
                 print(f"[DATABASE WARNING] Failed to seed users on Postgres: {e} (Expected on Supabase due to UUID/FK constraints). Skipping.")
@@ -841,23 +841,23 @@ def init_db():
     if db.execute("SELECT COUNT(*) FROM mentors").fetchone()[0] == 0:
         db.executescript("""
             INSERT INTO mentors (id, name, domain, bio, contact) VALUES
-            (1, 'Anita Sharma',    'creative',       'Art teacher, 12 yrs experience', 'anita@why.org'),
-            (2, 'Rahul Gupta',     'logical',        'Math tutor, IIT graduate',       'rahul@why.org'),
-            (3, 'Priya Mehta',     'kinesthetic',    'Dance instructor, Kathak',       'priya@why.org'),
-            (4, 'Suresh Kumar',    'spatial',        'Carpenter & craft trainer',      'suresh@why.org'),
-            (5, 'Deepa Nair',      'social',         'Community organiser, 8 yrs',     'deepa@why.org'),
-            (6, 'Arjun Singh',     'language',       'Theatre director, storyteller',  'arjun@why.org'),
-            (7, 'Meena Iyer',      'naturalist',     'Botanist, nature educator',      'meena@why.org'),
-            (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@why.org');
+            (1, 'Anita Sharma',    'creative',       'Art teacher, 12 yrs experience', 'anita@goat.com'),
+            (2, 'Rahul Gupta',     'logical',        'Math tutor, IIT graduate',       'rahul@goat.com'),
+            (3, 'Priya Mehta',     'kinesthetic',    'Dance instructor, Kathak',       'priya@goat.com'),
+            (4, 'Suresh Kumar',    'spatial',        'Carpenter & craft trainer',      'suresh@goat.com'),
+            (5, 'Deepa Nair',      'social',         'Community organiser, 8 yrs',     'deepa@goat.com'),
+            (6, 'Arjun Singh',     'language',       'Theatre director, storyteller',  'arjun@goat.com'),
+            (7, 'Meena Iyer',      'naturalist',     'Botanist, nature educator',      'meena@goat.com'),
+            (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@goat.com');
         """)
         
     if db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Master Admin', 'master@why.org', ?, 'master_admin')", (hash_password("why123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Admin Account', 'admin@why.org', ?, 'admin')", (hash_password("why123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Facilitator', 'facilitator@why.org', ?, 'facilitator')", (hash_password("why123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Mentor', 'mentor@why.org', ?, 'mentor')", (hash_password("why123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Student', 'student@why.org', ?, 'student')", (hash_password("why123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Parent', 'parent@why.org', ?, 'parent')", (hash_password("why123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Master Admin', 'master@goat.com', ?, 'master_admin')", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Admin Account', 'admin@goat.com', ?, 'admin')", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Facilitator', 'facilitator@goat.com', ?, 'facilitator')", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Mentor', 'mentor@goat.com', ?, 'mentor')", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Student', 'student@goat.com', ?, 'student')", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Parent', 'parent@goat.com', ?, 'parent')", (hash_password("goat123"),))
         
     if db.execute("SELECT COUNT(*) FROM centers").fetchone()[0] == 0:
         db.execute("INSERT INTO centers (name, location) VALUES ('New Delhi Center', 'Okhla, New Delhi')")
@@ -946,14 +946,14 @@ def sync_static_tables_supabase():
         if not res_mentors.data:
             print("[SUPABASE] Seeding mentors...")
             mentors_data = [
-                {"id": 1, "name": "Anita Sharma",    "domain": "creative",       "bio": "Art teacher, 12 yrs experience", "contact": "anita@why.org"},
-                {"id": 2, "name": "Rahul Gupta",     "domain": "logical",        "bio": "Math tutor, IIT graduate",       "contact": "rahul@why.org"},
-                {"id": 3, "name": "Priya Mehta",     "domain": "kinesthetic",    "bio": "Dance instructor, Kathak",       "contact": "priya@why.org"},
-                {"id": 4, "name": "Suresh Kumar",    "domain": "spatial",        "bio": "Carpenter & craft trainer",      "contact": "suresh@why.org"},
-                {"id": 5, "name": "Deepa Nair",      "domain": "social",         "bio": "Community organiser, 8 yrs",     "contact": "deepa@why.org"},
-                {"id": 6, "name": "Arjun Singh",     "domain": "language",       "bio": "Theatre director, storyteller",  "contact": "arjun@why.org"},
-                {"id": 7, "name": "Meena Iyer",      "domain": "naturalist",     "bio": "Botanist, nature educator",      "contact": "meena@why.org"},
-                {"id": 8, "name": "Kavita Bose",     "domain": "intrapersonal",  "bio": "Counsellor, mindfulness guide",  "contact": "kavita@why.org"}
+                {"id": 1, "name": "Anita Sharma",    "domain": "creative",       "bio": "Art teacher, 12 yrs experience", "contact": "anita@goat.com"},
+                {"id": 2, "name": "Rahul Gupta",     "domain": "logical",        "bio": "Math tutor, IIT graduate",       "contact": "rahul@goat.com"},
+                {"id": 3, "name": "Priya Mehta",     "domain": "kinesthetic",    "bio": "Dance instructor, Kathak",       "contact": "priya@goat.com"},
+                {"id": 4, "name": "Suresh Kumar",    "domain": "spatial",        "bio": "Carpenter & craft trainer",      "contact": "suresh@goat.com"},
+                {"id": 5, "name": "Deepa Nair",      "domain": "social",         "bio": "Community organiser, 8 yrs",     "contact": "deepa@goat.com"},
+                {"id": 6, "name": "Arjun Singh",     "domain": "language",       "bio": "Theatre director, storyteller",  "contact": "arjun@goat.com"},
+                {"id": 7, "name": "Meena Iyer",      "domain": "naturalist",     "bio": "Botanist, nature educator",      "contact": "meena@goat.com"},
+                {"id": 8, "name": "Kavita Bose",     "domain": "intrapersonal",  "bio": "Counsellor, mindfulness guide",  "contact": "kavita@goat.com"}
             ]
             supabase_client.table("mentors").insert(mentors_data).execute()
             
