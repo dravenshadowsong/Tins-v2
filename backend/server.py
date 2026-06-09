@@ -120,32 +120,34 @@ def auth_login_gate():
                 raise ValueError("Invalid token or missing email in token")
                 
             db = get_db()
-            row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
             metadata = getattr(user, 'user_metadata', {}) or {}
             name = metadata.get("name") or email.split("@")[0]
-            role = resolve_user_role(email, metadata)
+            role, org_id, center_id = resolve_user_profile(email, metadata)
             
             if not row:
                 # Synchronize user locally if not found
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                 if is_postgres:
-                    db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, "supabase_auth"))
+                    db.execute("INSERT INTO users (id, name, email, role, organization_id, center_id, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, org_id, center_id, "supabase_auth"))
                 else:
-                    db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
+                    db.execute("INSERT INTO users (name, email, role, organization_id, center_id, password_hash) VALUES (?, ?, ?, ?, ?, ?)", (name, email, role, org_id, center_id, "supabase_auth"))
                 db.commit()
-                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
-            elif row and row["role"] != role:
+                row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
+            elif row and (row["role"] != role or row.get("organization_id") != org_id or row.get("center_id") != center_id):
                 # Synchronize local database role if it differs from Supabase Auth metadata
-                db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
+                db.execute("UPDATE users SET role = ?, organization_id = ?, center_id = ? WHERE email = ?", (role, org_id, center_id, email))
                 db.commit()
-                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
                 
             user_payload = {
                 "id": row["id"] if row else user.id,
                 "name": row["name"] if row else name,
                 "email": row["email"] if row else email,
-                "role": row["role"] if row else role
+                "role": row["role"] if row else role,
+                "organization_id": row["organization_id"] if row else org_id,
+                "center_id": row["center_id"] if row else center_id
             }
             
             return jsonify({
@@ -173,38 +175,41 @@ def auth_login_gate():
                 raise ValueError("Failed to retrieve access token from authentication response")
                 
             db = get_db()
-            row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+            row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
             metadata = getattr(user, 'user_metadata', {}) or {}
             name = metadata.get("name") or email.split("@")[0]
-            role = resolve_user_role(email, metadata)
+            role, org_id, center_id = resolve_user_profile(email, metadata)
             
             if not row:
                 # Synchronize user locally if not found
                 db_url = os.environ.get("DATABASE_URL")
                 is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                 if is_postgres:
-                    db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, "supabase_auth"))
+                    db.execute("INSERT INTO users (id, name, email, role, organization_id, center_id, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (user.id, name, email, role, org_id, center_id, "supabase_auth"))
                 else:
-                    db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
+                    db.execute("INSERT INTO users (name, email, role, organization_id, center_id, password_hash) VALUES (?, ?, ?, ?, ?, ?)", (name, email, role, org_id, center_id, "supabase_auth"))
                 db.commit()
-                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
-            elif row and row["role"] != role:
+                row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
+            elif row and (row["role"] != role or row.get("organization_id") != org_id or row.get("center_id") != center_id):
                 # Synchronize local database role if it differs from Supabase Auth metadata
-                db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
+                db.execute("UPDATE users SET role = ?, organization_id = ?, center_id = ? WHERE email = ?", (role, org_id, center_id, email))
                 db.commit()
-                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
                 
             user_payload = {
                 "id": row["id"] if row else user.id,
                 "name": row["name"] if row else name,
                 "email": row["email"] if row else email,
-                "role": row["role"] if row else role
+                "role": row["role"] if row else role,
+                "organization_id": row["organization_id"] if row else org_id,
+                "center_id": row["center_id"] if row else center_id
             }
             
             return jsonify({
                 "token": access_token,
                 "user": user_payload
             }), 200
+
             
     except Exception as e:
         import traceback
@@ -422,54 +427,79 @@ def close_db(e=None):
     if db:
         db.close()
 
-def resolve_user_role(email, metadata):
-    # Hardcoded master accounts
+def resolve_user_profile(email, metadata):
+    # Hardcoded values for default accounts
+    # Master accounts have organization_id=None, center_id=None
     if email == "dravenshadowsong@gmail.com":
-        return "master_admin"
+        return "master_admin", None, None
     if email == "master@goat.com":
-        return "master_admin"
+        return "master_admin", None, None
     if email == "admin@goat.com":
-        return "admin"
+        return "admin", 1, None
     if email == "facilitator@goat.com":
-        return "facilitator"
+        return "facilitator", 1, 1
     if email == "mentor@goat.com":
-        return "mentor"
-        
+        return "mentor", 1, None
+    if email == "student@goat.com":
+        return "student", 1, 1
+    if email == "parent@goat.com":
+        return "parent", 1, 1
+
+    role = "facilitator"
+    org_id = None
+    center_id = None
+
     # Check remote Supabase profiles table first
     if supabase_client:
         try:
-            res = supabase_client.table("profiles").select("role, is_approved").eq("email", email).execute()
+            res = supabase_client.table("profiles").select("role, is_approved, organization_id, center_id").eq("email", email).execute()
             if res.data:
                 profile = res.data[0]
-                role = profile.get("role")
+                role_str = profile.get("role")
                 is_approved = profile.get("is_approved")
-                if role:
-                    role_str = str(role).lower()
+                org_id = profile.get("organization_id")
+                center_id = profile.get("center_id")
+                if role_str:
+                    role_str = str(role_str).lower()
                     if is_approved:
-                        return role_str
+                        role = role_str
                     else:
                         if not role_str.startswith("pending_"):
-                            return "pending_" + role_str
-                        return role_str
+                            role = "pending_" + role_str
+                        else:
+                            role = role_str
+                return role, org_id, center_id
         except Exception as e:
-            print(f"[SUPABASE WARNING] Failed to fetch profile role for {email}: {e}")
-            
-    # Check if a role is explicitly passed in metadata
+            print(f"[SUPABASE WARNING] Failed to fetch profile info for {email}: {e}")
+
+    # Fallback/default logic:
     if metadata and isinstance(metadata, dict):
         meta_role = metadata.get("role")
         if meta_role:
-            return str(meta_role).lower()
-            
-    # Default to current database role if user exists
+            role = str(meta_role).lower()
+        org_id = metadata.get("organization_id") or org_id
+        center_id = metadata.get("center_id") or center_id
+
+    # Check local database
     try:
         db = get_db()
-        row = db.execute("SELECT role FROM users WHERE email = ?", (email,)).fetchone()
-        if row and row["role"]:
-            return str(row["role"]).lower()
+        row = db.execute("SELECT role, organization_id, center_id FROM users WHERE email = ?", (email,)).fetchone()
+        if row:
+            if row["role"]:
+                role = str(row["role"]).lower()
+            if row["organization_id"] is not None:
+                org_id = row["organization_id"]
+            if row["center_id"] is not None:
+                center_id = row["center_id"]
     except Exception as e:
-        print(f"[DATABASE WARNING] Failed to fetch existing role for {email}: {e}")
-        
-    return "facilitator"
+        print(f"[DATABASE WARNING] Failed to fetch existing local profile for {email}: {e}")
+
+    return role, org_id, center_id
+
+def resolve_user_role(email, metadata):
+    role, _, _ = resolve_user_profile(email, metadata)
+    return role
+
 
 def hash_password(password, salt=None):
     salt = salt or secrets.token_hex(16)
@@ -500,26 +530,26 @@ def current_user():
                 email = sb_user.email
 
                 db = get_db()
-                row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
                 metadata = getattr(sb_user, 'user_metadata', {}) or {}
                 name = metadata.get("name") or email.split("@")[0]
-                role = resolve_user_role(email, metadata)
+                role, org_id, center_id = resolve_user_profile(email, metadata)
                 
                 if row:
-                    if row["role"] != role:
-                        db.execute("UPDATE users SET role = ? WHERE email = ?", (role, email))
+                    if row["role"] != role or row.get("organization_id") != org_id or row.get("center_id") != center_id:
+                        db.execute("UPDATE users SET role = ?, organization_id = ?, center_id = ? WHERE email = ?", (role, org_id, center_id, email))
                         db.commit()
-                        row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                        row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
                     return dict(row)
                 else:
                     db_url = os.environ.get("DATABASE_URL")
                     is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
                     if is_postgres:
-                        db.execute("INSERT INTO users (id, name, email, role, password_hash) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role, "supabase_auth"))
+                        db.execute("INSERT INTO users (id, name, email, role, organization_id, center_id, password_hash) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING", (sb_user.id, name, email, role, org_id, center_id, "supabase_auth"))
                     else:
-                        db.execute("INSERT INTO users (name, email, role, password_hash) VALUES (?, ?, ?, ?)", (name, email, role, "supabase_auth"))
+                        db.execute("INSERT INTO users (name, email, role, organization_id, center_id, password_hash) VALUES (?, ?, ?, ?, ?, ?)", (name, email, role, org_id, center_id, "supabase_auth"))
                     db.commit()
-                    row = db.execute("SELECT id, name, email, role FROM users WHERE email=?", (email,)).fetchone()
+                    row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
                     if row:
                         return dict(row)
             else:
@@ -530,12 +560,13 @@ def current_user():
 
     # Fallback to local session check
     row = get_db().execute("""
-        SELECT u.id, u.name, u.email, u.role
+        SELECT u.id, u.name, u.email, u.role, u.organization_id, u.center_id
         FROM auth_sessions s
         JOIN users u ON u.id = s.user_id
         WHERE s.token = ? AND s.expires_at > datetime('now')
     """, (token,)).fetchone()
     return dict(row) if row else None
+
 
 def require_user():
     user = current_user()
@@ -590,7 +621,49 @@ def init_db():
             # Seed data for postgres
             cursor = conn.cursor()
             
-            # 1. Seed mentors
+            # 1. Seed organizations
+            try:
+                cursor.execute("SELECT COUNT(*) FROM organizations")
+                if cursor.fetchone()[0] == 0:
+                    cursor.execute("INSERT INTO organizations (id, name) VALUES (1, 'GOAT Labs')")
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed organizations on Postgres: {e}")
+                conn.rollback()
+                
+            # 2. Seed centers
+            try:
+                cursor.execute("SELECT COUNT(*) FROM centers")
+                if cursor.fetchone()[0] == 0:
+                    cursor.execute("""
+                        INSERT INTO centers (id, name, location, organization_id) VALUES
+                        (1, 'New Delhi Center', 'Okhla, New Delhi', 1),
+                        (2, 'Mumbai Center', 'Dharavi, Mumbai', 1)
+                    """)
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed centers on Postgres: {e}")
+                conn.rollback()
+                
+            # 3. Seed users
+            try:
+                cursor.execute("SELECT COUNT(*) FROM users")
+                if cursor.fetchone()[0] == 0:
+                    cursor.execute("""
+                        INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES
+                        ('Master Admin', 'master@goat.com', %s, 'master_admin', NULL, NULL),
+                        ('Admin Account', 'admin@goat.com', %s, 'admin', 1, NULL),
+                        ('Demo Facilitator', 'facilitator@goat.com', %s, 'facilitator', 1, 1),
+                        ('Demo Mentor', 'mentor@goat.com', %s, 'mentor', 1, NULL),
+                        ('Demo Student', 'student@goat.com', %s, 'student', 1, 1),
+                        ('Demo Parent', 'parent@goat.com', %s, 'parent', 1, 1)
+                    """, (hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123")))
+                    conn.commit()
+            except Exception as e:
+                print(f"[DATABASE WARNING] Failed to seed users on Postgres: {e} (Expected on Supabase due to UUID/FK constraints). Skipping.")
+                conn.rollback()
+            
+            # 4. Seed mentors
             try:
                 cursor.execute("SELECT COUNT(*) FROM mentors")
                 if cursor.fetchone()[0] == 0:
@@ -608,38 +681,6 @@ def init_db():
                     conn.commit()
             except Exception as e:
                 print(f"[DATABASE WARNING] Failed to seed mentors on Postgres: {e}")
-                conn.rollback()
-            
-            # 2. Seed users
-            try:
-                cursor.execute("SELECT COUNT(*) FROM users")
-                if cursor.fetchone()[0] == 0:
-                    cursor.execute("""
-                        INSERT INTO users (name, email, password_hash, role) VALUES
-                        ('Master Admin', 'master@goat.com', %s, 'master_admin'),
-                        ('Admin Account', 'admin@goat.com', %s, 'admin'),
-                        ('Demo Facilitator', 'facilitator@goat.com', %s, 'facilitator'),
-                        ('Demo Mentor', 'mentor@goat.com', %s, 'mentor'),
-                        ('Demo Student', 'student@goat.com', %s, 'student'),
-                        ('Demo Parent', 'parent@goat.com', %s, 'parent')
-                    """, (hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123"), hash_password("goat123")))
-                    conn.commit()
-            except Exception as e:
-                print(f"[DATABASE WARNING] Failed to seed users on Postgres: {e} (Expected on Supabase due to UUID/FK constraints). Skipping.")
-                conn.rollback()
-                
-            # 3. Seed centers
-            try:
-                cursor.execute("SELECT COUNT(*) FROM centers")
-                if cursor.fetchone()[0] == 0:
-                    cursor.execute("""
-                        INSERT INTO centers (name, location) VALUES
-                        ('New Delhi Center', 'Okhla, New Delhi'),
-                        ('Mumbai Center', 'Dharavi, Mumbai')
-                    """)
-                    conn.commit()
-            except Exception as e:
-                print(f"[DATABASE WARNING] Failed to seed centers on Postgres: {e}")
                 conn.rollback()
                 
             # 4. Seed puzzles
@@ -675,8 +716,15 @@ def init_db():
     db.executescript("""
         PRAGMA foreign_keys = ON;
 
+        CREATE TABLE IF NOT EXISTS organizations (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT NOT NULL,
+            created_at  TEXT DEFAULT (datetime('now'))
+        );
+
         CREATE TABLE IF NOT EXISTS centers (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
             name        TEXT NOT NULL,
             location    TEXT,
             created_at  TEXT DEFAULT (datetime('now'))
@@ -689,6 +737,7 @@ def init_db():
             password_hash TEXT NOT NULL,
             role          TEXT NOT NULL DEFAULT 'facilitator',
             active        INTEGER DEFAULT 1,
+            organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL,
             center_id     INTEGER REFERENCES centers(id) ON DELETE SET NULL,
             student_id    INTEGER,
             created_at    TEXT DEFAULT (datetime('now'))
@@ -717,6 +766,7 @@ def init_db():
             exp_language     INTEGER DEFAULT 0,
             exp_naturalist   INTEGER DEFAULT 0,
             exp_intrapersonal INTEGER DEFAULT 0,
+            organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
             center_id     INTEGER REFERENCES centers(id) ON DELETE SET NULL,
             created_at  TEXT    DEFAULT (datetime('now'))
         );
@@ -795,6 +845,7 @@ def init_db():
             name        TEXT NOT NULL,
             domain      TEXT NOT NULL,
             center_id   INTEGER REFERENCES centers(id) ON DELETE SET NULL,
+            organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
             description TEXT,
             created_at  TEXT DEFAULT (datetime('now'))
         );
@@ -851,17 +902,20 @@ def init_db():
             (8, 'Kavita Bose',     'intrapersonal',  'Counsellor, mindfulness guide',  'kavita@goat.com');
         """)
         
-    if db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Master Admin', 'master@goat.com', ?, 'master_admin')", (hash_password("goat123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Admin Account', 'admin@goat.com', ?, 'admin')", (hash_password("goat123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Facilitator', 'facilitator@goat.com', ?, 'facilitator')", (hash_password("goat123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Mentor', 'mentor@goat.com', ?, 'mentor')", (hash_password("goat123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Student', 'student@goat.com', ?, 'student')", (hash_password("goat123"),))
-        db.execute("INSERT INTO users (name, email, password_hash, role) VALUES ('Demo Parent', 'parent@goat.com', ?, 'parent')", (hash_password("goat123"),))
-        
+    if db.execute("SELECT COUNT(*) FROM organizations").fetchone()[0] == 0:
+        db.execute("INSERT INTO organizations (id, name) VALUES (1, 'GOAT Labs')")
+
     if db.execute("SELECT COUNT(*) FROM centers").fetchone()[0] == 0:
-        db.execute("INSERT INTO centers (name, location) VALUES ('New Delhi Center', 'Okhla, New Delhi')")
-        db.execute("INSERT INTO centers (name, location) VALUES ('Mumbai Center', 'Dharavi, Mumbai')")
+        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (1, 'New Delhi Center', 'Okhla, New Delhi', 1)")
+        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (2, 'Mumbai Center', 'Dharavi, Mumbai', 1)")
+
+    if db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
+        db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Master Admin', 'master@goat.com', ?, 'master_admin', NULL, NULL)", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Admin Account', 'admin@goat.com', ?, 'admin', 1, NULL)", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Demo Facilitator', 'facilitator@goat.com', ?, 'facilitator', 1, 1)", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Demo Mentor', 'mentor@goat.com', ?, 'mentor', 1, NULL)", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Demo Student', 'student@goat.com', ?, 'student', 1, 1)", (hash_password("goat123"),))
+        db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Demo Parent', 'parent@goat.com', ?, 'parent', 1, 1)", (hash_password("goat123"),))
         
     if db.execute("SELECT COUNT(*) FROM puzzles").fetchone()[0] == 0:
         for p in DEFAULT_AI_PUZZLES:
@@ -873,8 +927,12 @@ def init_db():
     # Dynamic SQLite migration to ensure old database versions have all required columns
     try:
         expected_columns = {
+            "centers": {
+                "organization_id": "INTEGER REFERENCES organizations(id) ON DELETE CASCADE"
+            },
             "users": {
                 "active": "INTEGER DEFAULT 1",
+                "organization_id": "INTEGER REFERENCES organizations(id) ON DELETE SET NULL",
                 "center_id": "INTEGER REFERENCES centers(id) ON DELETE SET NULL",
                 "student_id": "INTEGER"
             },
@@ -887,7 +945,11 @@ def init_db():
                 "exp_language": "INTEGER DEFAULT 0",
                 "exp_naturalist": "INTEGER DEFAULT 0",
                 "exp_intrapersonal": "INTEGER DEFAULT 0",
+                "organization_id": "INTEGER REFERENCES organizations(id) ON DELETE CASCADE",
                 "center_id": "INTEGER REFERENCES centers(id) ON DELETE SET NULL"
+            },
+            "workshops": {
+                "organization_id": "INTEGER REFERENCES organizations(id) ON DELETE CASCADE"
             },
             "sessions": {
                 "domain_flags": "TEXT",
@@ -1113,21 +1175,48 @@ def change_password_route():
 
 @app.route("/api/children", methods=["GET"])
 def list_children():
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
-    rows = db.execute("SELECT * FROM children ORDER BY created_at DESC").fetchall()
+    if role == "master_admin":
+        rows = db.execute("SELECT * FROM children ORDER BY created_at DESC").fetchall()
+    elif role == "admin": # Org Admin
+        rows = db.execute("SELECT * FROM children WHERE organization_id = ? ORDER BY created_at DESC", (org_id,)).fetchall()
+    else: # Facilitator, etc.
+        rows = db.execute("SELECT * FROM children WHERE organization_id = ? AND center_id = ? ORDER BY created_at DESC", (org_id, center_id)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/children", methods=["POST"])
 def create_child():
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    user_org_id = user.get("organization_id")
+    user_center_id = user.get("center_id")
+    
     data = request.json or {}
     print("==================================================")
     print(f"DEBUG: create_child called with data: {data}")
-    try:
-        user = current_user()
-        print(f"DEBUG: Current authenticated user: {user}")
-    except Exception as e:
-        print(f"DEBUG: Error retrieving current user: {e}")
     
+    # Determine organization_id and center_id based on user role
+    if role == "master_admin":
+        org_id = data.get("organization_id")
+        center_id = data.get("center_id")
+    elif role == "admin": # Org Admin
+        org_id = user_org_id
+        center_id = data.get("center_id") # Org Admin can assign to a center in their org
+    else: # Facilitator, etc.
+        org_id = user_org_id
+        center_id = user_center_id
+
     supabase_id = None
     if supabase_client:
         try:
@@ -1144,7 +1233,9 @@ def create_child():
                 "exp_social": int(data.get("exp_social", 0)),
                 "exp_language": int(data.get("exp_language", 0)),
                 "exp_naturalist": int(data.get("exp_naturalist", 0)),
-                "exp_intrapersonal": int(data.get("exp_intrapersonal", 0))
+                "exp_intrapersonal": int(data.get("exp_intrapersonal", 0)),
+                "organization_id": org_id,
+                "center_id": center_id
             }
             print(f"DEBUG: Attempting Supabase insert for child with data: {insert_data}")
             res = supabase_client.table("children").insert(insert_data).execute()
@@ -1163,8 +1254,9 @@ def create_child():
                 INSERT INTO children
                   (id, name, age, language, school_year, gender,
                    exp_kinesthetic, exp_creative, exp_logical, exp_spatial,
-                   exp_social, exp_language, exp_naturalist, exp_intrapersonal)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                   exp_social, exp_language, exp_naturalist, exp_intrapersonal,
+                   organization_id, center_id)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """, (
                 supabase_id,
                 data["name"], data["age"], data.get("language", "Hindi"),
@@ -1173,6 +1265,7 @@ def create_child():
                 data.get("exp_logical", 0),    data.get("exp_spatial", 0),
                 data.get("exp_social", 0),     data.get("exp_language", 0),
                 data.get("exp_naturalist", 0), data.get("exp_intrapersonal", 0),
+                org_id, center_id
             ))
             db.commit()
         else:
@@ -1183,8 +1276,9 @@ def create_child():
             INSERT INTO children
               (name, age, language, school_year, gender,
                exp_kinesthetic, exp_creative, exp_logical, exp_spatial,
-               exp_social, exp_language, exp_naturalist, exp_intrapersonal)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+               exp_social, exp_language, exp_naturalist, exp_intrapersonal,
+               organization_id, center_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             data["name"], data["age"], data.get("language", "Hindi"),
             data.get("school_year", ""), data.get("gender", ""),
@@ -1192,6 +1286,7 @@ def create_child():
             data.get("exp_logical", 0),    data.get("exp_spatial", 0),
             data.get("exp_social", 0),     data.get("exp_language", 0),
             data.get("exp_naturalist", 0), data.get("exp_intrapersonal", 0),
+            org_id, center_id
         ))
         db.commit()
         child_id = cur.lastrowid
@@ -1200,10 +1295,27 @@ def create_child():
 
 @app.route("/api/children/<int:cid>", methods=["GET"])
 def get_child(cid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
     row = db.execute("SELECT * FROM children WHERE id=?", (cid,)).fetchone()
     if not row: return jsonify({"error": "Not found"}), 404
-    return jsonify(dict(row))
+    
+    child_dict = dict(row)
+    if role != "master_admin":
+        if child_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
+    return jsonify(child_dict)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES — Sessions
@@ -1211,16 +1323,32 @@ def get_child(cid):
 
 @app.route("/api/sessions", methods=["POST"])
 def create_session():
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     data = request.json or {}
     child_id = data.get("child_id")
     print("==================================================")
     print(f"DEBUG: create_session called with data: {data}")
-    try:
-        user = current_user()
-        print(f"DEBUG: Current authenticated user: {user}")
-    except Exception as e:
-        print(f"DEBUG: Error retrieving current user: {e}")
     
+    # Check if the child exists and is within user's scope
+    db = get_db()
+    child = db.execute("SELECT * FROM children WHERE id=?", (child_id,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    child_dict = dict(child)
+    if role != "master_admin":
+        if child_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     supabase_id = None
     if supabase_client:
         try:
@@ -1239,7 +1367,6 @@ def create_session():
             import traceback
             traceback.print_exc()
             
-    db = get_db()
     if supabase_id is not None:
         if not isinstance(db, PostgresConnectionWrapper):
             db.execute(
@@ -1262,10 +1389,27 @@ def create_session():
 
 @app.route("/api/sessions/<int:sid>", methods=["GET"])
 def get_session(sid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
-    row = db.execute("SELECT * FROM sessions WHERE id=?", (sid,)).fetchone()
+    row = db.execute("SELECT s.*, c.organization_id, c.center_id FROM sessions s JOIN children c ON s.child_id = c.id WHERE s.id=?", (sid,)).fetchone()
     if not row: return jsonify({"error": "Not found"}), 404
-    return jsonify(dict(row))
+    
+    row_dict = dict(row)
+    if role != "master_admin":
+        if row_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Session belongs to another organization"}), 403
+        if role != "admin" and row_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Session belongs to another center"}), 403
+            
+    return jsonify(row_dict)
+
 
 # ── Dynamic AI Custom Puzzle Generator ────────────────────────────────────────
 
@@ -2079,16 +2223,19 @@ def generate_ai_tasks(child, discovery_answers):
 
 @app.route("/api/sessions/<int:sid>/discovery", methods=["POST"])
 def submit_discovery(sid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     data = request.json or {}
     answers = data.get("answers", {})
     child_id = data.get("child_id")
     print("==================================================")
     print(f"DEBUG: submit_discovery called for session ID: {sid} with data: {data}")
-    try:
-        user = current_user()
-        print(f"DEBUG: Current user session: {user}")
-    except Exception as e:
-        print(f"DEBUG: Error getting current user session: {e}")
     
     db = get_db()
     child = db.execute("SELECT * FROM children WHERE id=?", (child_id,)).fetchone()
@@ -2096,6 +2243,12 @@ def submit_discovery(sid):
         return jsonify({"error": "Child not found"}), 404
     child = dict(child)
     
+    if role != "master_admin":
+        if child.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     generated_tasks = generate_ai_tasks(child, answers)
     
     if supabase_client:
@@ -2145,6 +2298,14 @@ def analyze_session(sid):
     return analyze_and_save_session(sid, request.json)
 
 def analyze_and_save_session(sid, data):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+
     print("==================================================")
     print(f"DEBUG: analyze_and_save_session called for session ID: {sid}")
     try:
@@ -2152,11 +2313,6 @@ def analyze_and_save_session(sid, data):
         print(f"DEBUG: Incoming assessment data: {json.dumps(data)}")
     except Exception as e:
         print(f"DEBUG: Error printing incoming data: {e}")
-    try:
-        user = current_user()
-        print(f"DEBUG: Current user session: {user}")
-    except Exception as e:
-        print(f"DEBUG: Error getting current user session: {e}")
         
     data = data or {}
     responses = data.get("responses", {})
@@ -2167,6 +2323,12 @@ def analyze_and_save_session(sid, data):
     if not child:
         return jsonify({"error": "Child not found"}), 404
     child = dict(child)
+
+    if role != "master_admin":
+        if child.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
 
     # Load discovery answers
     session_row = db.execute("SELECT responses FROM sessions WHERE id=?", (sid,)).fetchone()
@@ -2382,7 +2544,27 @@ def analyze_and_save_session(sid, data):
 
 @app.route("/api/children/<int:cid>/sessions", methods=["GET"])
 def child_sessions(cid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
+    # Check child scope first
+    child = db.execute("SELECT * FROM children WHERE id=?", (cid,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    child_dict = dict(child)
+    if role != "master_admin":
+        if child_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     rows = db.execute(
         "SELECT * FROM sessions WHERE child_id=? ORDER BY created_at DESC", (cid,)
     ).fetchall()
@@ -2421,11 +2603,31 @@ DOMAIN_LABELS = {
 
 @app.route("/api/notes", methods=["POST"])
 def add_note():
-    data = request.json
-    user = current_user()
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
+    data = request.json or {}
+    child_id = data.get("child_id")
+    
+    db = get_db()
+    child = db.execute("SELECT * FROM children WHERE id=?", (child_id,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    child_dict = dict(child)
+    if role != "master_admin":
+        if child_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     facilitator_name = data.get("facilitator") or (user["name"] if user else "GOAT Mentor")
 
-    db = get_db()
     cur = db.execute("""
         INSERT INTO facilitator_notes
           (session_id, child_id, facilitator, confirmed, observation, override_domain, notes,
@@ -2468,7 +2670,27 @@ def add_note():
 
 @app.route("/api/notes/session/<int:sid>", methods=["GET"])
 def get_notes(sid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
+    # Check session/child scope
+    session_row = db.execute("SELECT s.*, c.organization_id, c.center_id FROM sessions s JOIN children c ON s.child_id = c.id WHERE s.id=?", (sid,)).fetchone()
+    if not session_row:
+        return jsonify({"error": "Session not found"}), 404
+        
+    session_dict = dict(session_row)
+    if role != "master_admin":
+        if session_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Session belongs to another organization"}), 403
+        if role != "admin" and session_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Session belongs to another center"}), 403
+            
     rows = db.execute("SELECT * FROM facilitator_notes WHERE session_id=?", (sid,)).fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -2488,11 +2710,31 @@ def list_mentors():
 
 @app.route("/api/matches", methods=["POST"])
 def create_match():
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     data = request.json or {}
     child_id = data.get("child_id")
     mentor_id = data.get("mentor_id")
     domain = data.get("domain", "")
     
+    db = get_db()
+    child = db.execute("SELECT * FROM children WHERE id=?", (child_id,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    child_dict = dict(child)
+    if role != "master_admin":
+        if child_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+
     # default 3-milestone plan
     plan = [
         {"month": 1, "title": "First session & orientation",    "done": False},
@@ -2572,7 +2814,27 @@ def create_match():
 
 @app.route("/api/matches/child/<int:cid>", methods=["GET"])
 def child_matches(cid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
+    # Check child scope first
+    child = db.execute("SELECT * FROM children WHERE id=?", (cid,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    child_dict = dict(child)
+    if role != "master_admin":
+        if child_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     rows = db.execute("""
         SELECT mm.*, m.name as mentor_name, m.bio, m.contact
         FROM mentor_matches mm
@@ -2588,6 +2850,32 @@ def child_matches(cid):
 
 @app.route("/api/matches/<int:mid>/milestone", methods=["PUT"])
 def update_milestone(mid):
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
+    db = get_db()
+    # Check if match exists and its child belongs to scoped org/center
+    match = db.execute("""
+        SELECT mm.*, c.organization_id, c.center_id
+        FROM mentor_matches mm
+        JOIN children c ON mm.child_id = c.id
+        WHERE mm.id = ?
+    """, (mid,)).fetchone()
+    if not match:
+        return jsonify({"error": "Match not found"}), 404
+        
+    match_dict = dict(match)
+    if role != "master_admin":
+        if match_dict.get("organization_id") != org_id:
+            return jsonify({"error": "Forbidden: Match belongs to another organization"}), 403
+        if role != "admin" and match_dict.get("center_id") != center_id:
+            return jsonify({"error": "Forbidden: Match belongs to another center"}), 403
+
     data = request.json or {}
     milestone_id = data.get("milestone_id")
     done = data.get("done")
@@ -2603,7 +2891,6 @@ def update_milestone(mid):
         except Exception as e:
             print(f"[SUPABASE WARNING] Failed to update milestone in Supabase: {e}")
             
-    db = get_db()
     db.execute(
         "UPDATE milestones SET done=?, note=? WHERE id=? AND match_id=?",
         (done, note, milestone_id, mid)
@@ -2617,15 +2904,63 @@ def update_milestone(mid):
 
 @app.route("/api/stats", methods=["GET"])
 def stats():
+    user, error = require_user()
+    if error:
+        return error
+        
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
-    total_children  = db.execute("SELECT COUNT(*) FROM children").fetchone()[0]
-    total_sessions  = db.execute("SELECT COUNT(*) FROM sessions WHERE status='complete'").fetchone()[0]
-    total_matches   = db.execute("SELECT COUNT(*) FROM mentor_matches").fetchone()[0]
-    domain_dist     = db.execute("""
-        SELECT top_domain, COUNT(*) as cnt
-        FROM sessions WHERE status='complete' AND top_domain IS NOT NULL
-        GROUP BY top_domain ORDER BY cnt DESC
-    """).fetchall()
+    if role == "master_admin":
+        total_children  = db.execute("SELECT COUNT(*) FROM children").fetchone()[0]
+        total_sessions  = db.execute("SELECT COUNT(*) FROM sessions WHERE status='complete'").fetchone()[0]
+        total_matches   = db.execute("SELECT COUNT(*) FROM mentor_matches").fetchone()[0]
+        domain_dist     = db.execute("""
+            SELECT top_domain, COUNT(*) as cnt
+            FROM sessions WHERE status='complete' AND top_domain IS NOT NULL
+            GROUP BY top_domain ORDER BY cnt DESC
+        """).fetchall()
+    elif role == "admin": # Org Admin
+        total_children  = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=?", (org_id,)).fetchone()[0]
+        total_sessions  = db.execute("""
+            SELECT COUNT(*) FROM sessions s 
+            JOIN children c ON s.child_id = c.id 
+            WHERE s.status='complete' AND c.organization_id=?
+        """, (org_id,)).fetchone()[0]
+        total_matches   = db.execute("""
+            SELECT COUNT(*) FROM mentor_matches mm 
+            JOIN children c ON mm.child_id = c.id 
+            WHERE c.organization_id=?
+        """, (org_id,)).fetchone()[0]
+        domain_dist     = db.execute("""
+            SELECT s.top_domain, COUNT(*) as cnt
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND s.top_domain IS NOT NULL AND c.organization_id=?
+            GROUP BY s.top_domain ORDER BY cnt DESC
+        """, (org_id,)).fetchall()
+    else: # Facilitator, etc.
+        total_children  = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=? AND center_id=?", (org_id, center_id)).fetchone()[0]
+        total_sessions  = db.execute("""
+            SELECT COUNT(*) FROM sessions s 
+            JOIN children c ON s.child_id = c.id 
+            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+        """, (org_id, center_id)).fetchone()[0]
+        total_matches   = db.execute("""
+            SELECT COUNT(*) FROM mentor_matches mm 
+            JOIN children c ON mm.child_id = c.id 
+            WHERE c.organization_id=? AND c.center_id=?
+        """, (org_id, center_id)).fetchone()[0]
+        domain_dist     = db.execute("""
+            SELECT s.top_domain, COUNT(*) as cnt
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND s.top_domain IS NOT NULL AND c.organization_id=? AND c.center_id=?
+            GROUP BY s.top_domain ORDER BY cnt DESC
+        """, (org_id, center_id)).fetchall()
+
     return jsonify({
         "total_children": total_children,
         "total_sessions": total_sessions,
@@ -3154,29 +3489,54 @@ def build_recommendations(scores, child):
 @app.route("/api/admin/users", methods=["GET"])
 @require_role(["master_admin", "admin"])
 def list_users():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
     db = get_db()
-    rows = db.execute("SELECT id, name, email, role, active, center_id FROM users").fetchall()
+    if role == "master_admin":
+        rows = db.execute("SELECT id, name, email, role, active, center_id, organization_id FROM users").fetchall()
+    else:
+        rows = db.execute("SELECT id, name, email, role, active, center_id, organization_id FROM users WHERE organization_id = ?", (org_id,)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/admin/users", methods=["POST"])
 @require_role(["master_admin", "admin"])
 def create_user_tms():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    user_org_id = user.get("organization_id")
+    
     data = request.json or {}
     name = data.get("name")
     email = data.get("email", "").strip().lower()
     password = data.get("password")
-    role = data.get("role", "facilitator")
+    user_role = data.get("role", "facilitator")
     center_id = data.get("center_id")
     
+    db = get_db()
+    if role == "master_admin":
+        org_id = data.get("organization_id") or 1
+    else:
+        org_id = user_org_id
+        # Also ensure that if they specify a center_id, it belongs to their organization
+        if center_id:
+            center = db.execute("SELECT organization_id FROM centers WHERE id = ?", (center_id,)).fetchone()
+            if not center or center["organization_id"] != user_org_id:
+                return jsonify({"error": "Forbidden: Center belongs to another organization"}), 403
+
     if not name or not email or not password:
         return jsonify({"error": "Missing fields"}), 400
         
-    db = get_db()
     try:
         db.execute("""
-            INSERT INTO users (name, email, password_hash, role, center_id)
-            VALUES (?, ?, ?, ?, ?)
-        """, (name, email, hash_password(password), role, center_id))
+            INSERT INTO users (name, email, password_hash, role, organization_id, center_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (name, email, hash_password(password), user_role, org_id, center_id))
         db.commit()
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -3185,7 +3545,22 @@ def create_user_tms():
 @app.route("/api/admin/users/<uid>", methods=["DELETE"])
 @require_role(["master_admin", "admin"])
 def delete_user_tms(uid):
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
     db = get_db()
+    # Check if the target user belongs to same org
+    target_user = db.execute("SELECT organization_id FROM users WHERE id=?", (uid,)).fetchone()
+    if not target_user:
+        return jsonify({"error": "User not found"}), 404
+        
+    if role != "master_admin":
+        if target_user["organization_id"] != org_id:
+            return jsonify({"error": "Forbidden: User belongs to another organization"}), 403
+            
     db.execute("DELETE FROM users WHERE id=?", (uid,))
     db.commit()
     return jsonify({"status": "success"})
@@ -3193,15 +3568,25 @@ def delete_user_tms(uid):
 @app.route("/api/admin/users/<uid>/approve", methods=["PUT"])
 @require_role(["master_admin", "admin"])
 def approve_user_tms(uid):
-    data = request.json or {}
-    approved_role = data.get("role")
-    center_id = data.get("center_id")
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
     
     db = get_db()
     user_row = db.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     if not user_row:
         return jsonify({"error": "User not found"}), 404
         
+    if role != "master_admin":
+        if user_row["organization_id"] != org_id:
+            return jsonify({"error": "Forbidden: User belongs to another organization"}), 403
+
+    data = request.json or {}
+    approved_role = data.get("role")
+    center_id = data.get("center_id")
+    
     if not approved_role:
         current_role = user_row["role"]
         if current_role.startswith("pending_"):
@@ -3214,6 +3599,10 @@ def approve_user_tms(uid):
         
     try:
         if center_id:
+            # check center org
+            center = db.execute("SELECT organization_id FROM centers WHERE id = ?", (center_id,)).fetchone()
+            if role != "master_admin" and (not center or center["organization_id"] != org_id):
+                return jsonify({"error": "Forbidden: Center belongs to another organization"}), 403
             db.execute("UPDATE users SET role=?, center_id=? WHERE id=?", (approved_role, center_id, uid))
         else:
             db.execute("UPDATE users SET role=? WHERE id=?", (approved_role, uid))
@@ -3238,33 +3627,69 @@ def approve_user_tms(uid):
 # ── CENTER MANAGEMENT ENDPOINTS ─────────────────────────────────────────────
 @app.route("/api/centers", methods=["GET"])
 def list_centers():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
     db = get_db()
-    rows = db.execute("SELECT * FROM centers").fetchall()
+    if role == "master_admin":
+        rows = db.execute("SELECT * FROM centers").fetchall()
+    else:
+        rows = db.execute("SELECT * FROM centers WHERE organization_id = ?", (org_id,)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/centers", methods=["POST"])
-@require_role(["master_admin"])
+@require_role(["master_admin", "admin"])
 def create_center():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    user_org_id = user.get("organization_id")
+    
     data = request.json or {}
     name = data.get("name")
     location = data.get("location")
     if not name:
         return jsonify({"error": "Center name required"}), 400
+        
+    if role == "master_admin":
+        org_id = data.get("organization_id") or 1
+    else:
+        org_id = user_org_id
+        
     db = get_db()
-    db.execute("INSERT INTO centers (name, location) VALUES (?, ?)", (name, location))
+    db.execute("INSERT INTO centers (name, location, organization_id) VALUES (?, ?, ?)", (name, location, org_id))
     db.commit()
     return jsonify({"status": "success"}), 201
 
 # ── WORKSHOP PLANNING & ATTENDANCE ──────────────────────────────────────────
 @app.route("/api/workshops", methods=["GET"])
 def list_workshops():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
     db = get_db()
-    rows = db.execute("SELECT w.*, c.name as center_name FROM workshops w LEFT JOIN centers c ON c.id=w.center_id").fetchall()
+    if role == "master_admin":
+        rows = db.execute("SELECT w.*, c.name as center_name FROM workshops w LEFT JOIN centers c ON c.id=w.center_id").fetchall()
+    else:
+        rows = db.execute("SELECT w.*, c.name as center_name FROM workshops w LEFT JOIN centers c ON c.id=w.center_id WHERE w.organization_id = ?", (org_id,)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/workshops", methods=["POST"])
 @require_role(["master_admin", "admin"])
 def create_workshop():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    user_org_id = user.get("organization_id")
+    
     data = request.json or {}
     name = data.get("name")
     domain = data.get("domain")
@@ -3272,20 +3697,61 @@ def create_workshop():
     description = data.get("description")
     if not name or not domain:
         return jsonify({"error": "Name and domain are required"}), 400
+        
     db = get_db()
-    db.execute("INSERT INTO workshops (name, domain, center_id, description) VALUES (?, ?, ?, ?)", (name, domain, center_id, description))
+    if role == "master_admin":
+        org_id = data.get("organization_id") or 1
+        if center_id:
+            center = db.execute("SELECT organization_id FROM centers WHERE id = ?", (center_id,)).fetchone()
+            if center:
+                org_id = center["organization_id"]
+    else:
+        org_id = user_org_id
+        if center_id:
+            center = db.execute("SELECT organization_id FROM centers WHERE id = ?", (center_id,)).fetchone()
+            if not center or center["organization_id"] != user_org_id:
+                return jsonify({"error": "Forbidden: Center belongs to another organization"}), 403
+                
+    db.execute("INSERT INTO workshops (name, domain, center_id, organization_id, description) VALUES (?, ?, ?, ?, ?)", (name, domain, center_id, org_id, description))
     db.commit()
     return jsonify({"status": "success"}), 201
 
 @app.route("/api/workshops/<int:wid>/sessions", methods=["GET"])
 def list_workshop_sessions(wid):
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
     db = get_db()
+    workshop = db.execute("SELECT organization_id FROM workshops WHERE id = ?", (wid,)).fetchone()
+    if not workshop:
+        return jsonify({"error": "Workshop not found"}), 404
+        
+    if role != "master_admin" and workshop["organization_id"] != org_id:
+        return jsonify({"error": "Forbidden: Workshop belongs to another organization"}), 403
+        
     rows = db.execute("SELECT * FROM workshop_sessions WHERE workshop_id=?", (wid,)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/workshops/<int:wid>/sessions", methods=["POST"])
 @require_role(["master_admin", "admin", "mentor"])
 def create_workshop_session(wid):
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
+    db = get_db()
+    workshop = db.execute("SELECT organization_id FROM workshops WHERE id = ?", (wid,)).fetchone()
+    if not workshop:
+        return jsonify({"error": "Workshop not found"}), 404
+        
+    if role != "master_admin" and workshop["organization_id"] != org_id:
+        return jsonify({"error": "Forbidden: Workshop belongs to another organization"}), 403
+        
     data = request.json or {}
     session_date = data.get("session_date")
     notes = data.get("notes")
@@ -3294,14 +3760,15 @@ def create_workshop_session(wid):
     if not session_date:
         return jsonify({"error": "Session date required"}), 400
         
-    db = get_db()
     cur = db.execute("INSERT INTO workshop_sessions (workshop_id, session_date, notes) VALUES (?, ?, ?)", (wid, session_date, notes))
     session_id = cur.lastrowid
     
     for cid_str, status in attendance.items():
         try:
             cid = int(cid_str)
-            db.execute("INSERT INTO workshop_attendance (workshop_session_id, child_id, status) VALUES (?, ?, ?)", (session_id, cid, status))
+            child = db.execute("SELECT organization_id FROM children WHERE id = ?", (cid,)).fetchone()
+            if child and (role == "master_admin" or child["organization_id"] == org_id):
+                db.execute("INSERT INTO workshop_attendance (workshop_session_id, child_id, status) VALUES (?, ?, ?)", (session_id, cid, status))
         except Exception:
             pass
             
@@ -3310,7 +3777,24 @@ def create_workshop_session(wid):
 
 @app.route("/api/workshops/attendance/<int:cid>", methods=["GET"])
 def list_student_attendance(cid):
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
+    child = db.execute("SELECT organization_id, center_id FROM children WHERE id=?", (cid,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    if role != "master_admin":
+        if child["organization_id"] != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child["center_id"] != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     rows = db.execute("""
         SELECT a.status, s.session_date, w.name as workshop_name, w.domain
         FROM workshop_attendance a
@@ -3324,13 +3808,37 @@ def list_student_attendance(cid):
 # ── MENTOR VALIDATION ENDPOINTS ─────────────────────────────────────────────
 @app.route("/api/mentors/validations/<int:cid>", methods=["GET"])
 def list_mentor_validations(cid):
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
+    child = db.execute("SELECT organization_id, center_id FROM children WHERE id=?", (cid,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    if role != "master_admin":
+        if child["organization_id"] != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child["center_id"] != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     rows = db.execute("SELECT * FROM mentor_validations WHERE child_id=? ORDER BY created_at DESC", (cid,)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/mentors/validations", methods=["POST"])
 @require_role(["master_admin", "admin", "mentor"])
 def submit_mentor_validation():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     data = request.json or {}
     match_id = data.get("match_id")
     child_id = data.get("child_id")
@@ -3344,6 +3852,16 @@ def submit_mentor_validation():
         return jsonify({"error": "Child ID and domain required"}), 400
         
     db = get_db()
+    child = db.execute("SELECT organization_id, center_id FROM children WHERE id=?", (child_id,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+        
+    if role != "master_admin":
+        if child["organization_id"] != org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if role != "admin" and child["center_id"] != center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     db.execute("""
         INSERT INTO mentor_validations (match_id, child_id, domain, rating, strengths, growth_areas, notes)
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -3395,15 +3913,73 @@ def schedule_reassessment():
 # ── GLOBAL ANALYTICS DASHBOARD ──────────────────────────────────────────────
 @app.route("/api/analytics", methods=["GET"])
 def get_analytics():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    center_id = user.get("center_id")
+    
     db = get_db()
     
-    sessions = db.execute("SELECT top_domain, COUNT(*) as cnt FROM sessions WHERE status='complete' GROUP BY top_domain").fetchall()
+    # 1. Talent Distribution query
+    if role == "master_admin":
+        sessions = db.execute("SELECT top_domain, COUNT(*) as cnt FROM sessions WHERE status='complete' GROUP BY top_domain").fetchall()
+    elif role == "admin":
+        sessions = db.execute("""
+            SELECT s.top_domain, COUNT(*) as cnt 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=?
+            GROUP BY s.top_domain
+        """, (org_id,)).fetchall()
+    else:
+        sessions = db.execute("""
+            SELECT s.top_domain, COUNT(*) as cnt 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+            GROUP BY s.top_domain
+        """, (org_id, center_id)).fetchall()
     talent_dist = {r["top_domain"]: r["cnt"] for r in sessions if r["top_domain"]}
     
-    workshops = db.execute("SELECT domain, COUNT(*) as cnt FROM workshops GROUP BY domain").fetchall()
+    # 2. Workshop demand query
+    if role == "master_admin":
+        workshops = db.execute("SELECT domain, COUNT(*) as cnt FROM workshops GROUP BY domain").fetchall()
+    elif role == "admin":
+        workshops = db.execute("""
+            SELECT domain, COUNT(*) as cnt 
+            FROM workshops 
+            WHERE organization_id=? 
+            GROUP BY domain
+        """, (org_id,)).fetchall()
+    else:
+        workshops = db.execute("""
+            SELECT domain, COUNT(*) as cnt 
+            FROM workshops 
+            WHERE organization_id=? AND center_id=? 
+            GROUP BY domain
+        """, (org_id, center_id)).fetchall()
     workshop_demand = {r["domain"]: r["cnt"] for r in workshops if r["domain"]}
     
-    sessions_all = db.execute("SELECT child_id, personality_data FROM sessions WHERE status='complete'").fetchall()
+    # 3. Untapped potential query
+    if role == "master_admin":
+        sessions_all = db.execute("SELECT child_id, personality_data FROM sessions WHERE status='complete'").fetchall()
+    elif role == "admin":
+        sessions_all = db.execute("""
+            SELECT s.child_id, s.personality_data 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=?
+        """, (org_id,)).fetchall()
+    else:
+        sessions_all = db.execute("""
+            SELECT s.child_id, s.personality_data 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+        """, (org_id, center_id)).fetchall()
+        
     untapped_counts = {}
     for s in sessions_all:
         try:
@@ -3414,7 +3990,26 @@ def get_analytics():
         except Exception:
             pass
             
-    growth_rows = db.execute("SELECT top_domain, tq_scores, completed_at FROM sessions WHERE status='complete' ORDER BY completed_at").fetchall()
+    # 4. Growth data query
+    if role == "master_admin":
+        growth_rows = db.execute("SELECT top_domain, tq_scores, completed_at FROM sessions WHERE status='complete' ORDER BY completed_at").fetchall()
+    elif role == "admin":
+        growth_rows = db.execute("""
+            SELECT s.top_domain, s.tq_scores, s.completed_at 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=?
+            ORDER BY s.completed_at
+        """, (org_id,)).fetchall()
+    else:
+        growth_rows = db.execute("""
+            SELECT s.top_domain, s.tq_scores, s.completed_at 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+            ORDER BY s.completed_at
+        """, (org_id, center_id)).fetchall()
+        
     growth_data = {}
     for r in growth_rows:
         dom = r["top_domain"]
@@ -3427,11 +4022,53 @@ def get_analytics():
         except Exception:
             pass
             
-    total_registered = db.execute("SELECT COUNT(*) FROM children").fetchone()[0]
-    total_assessed = db.execute("SELECT COUNT(DISTINCT child_id) FROM sessions WHERE status='complete'").fetchone()[0]
-    total_matched = db.execute("SELECT COUNT(*) FROM mentor_matches WHERE status='active'").fetchone()[0]
-    total_enrolled = db.execute("SELECT COUNT(DISTINCT child_id) FROM workshop_attendance WHERE status='Present'").fetchone()[0]
-    
+    # 5. Funnel query totals
+    if role == "master_admin":
+        total_registered = db.execute("SELECT COUNT(*) FROM children").fetchone()[0]
+        total_assessed = db.execute("SELECT COUNT(DISTINCT child_id) FROM sessions WHERE status='complete'").fetchone()[0]
+        total_matched = db.execute("SELECT COUNT(*) FROM mentor_matches WHERE status='active'").fetchone()[0]
+        total_enrolled = db.execute("SELECT COUNT(DISTINCT child_id) FROM workshop_attendance WHERE status='Present'").fetchone()[0]
+    elif role == "admin":
+        total_registered = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=?", (org_id,)).fetchone()[0]
+        total_assessed = db.execute("""
+            SELECT COUNT(DISTINCT s.child_id) 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=?
+        """, (org_id,)).fetchone()[0]
+        total_matched = db.execute("""
+            SELECT COUNT(*) 
+            FROM mentor_matches mm
+            JOIN children c ON mm.child_id = c.id
+            WHERE mm.status='active' AND c.organization_id=?
+        """, (org_id,)).fetchone()[0]
+        total_enrolled = db.execute("""
+            SELECT COUNT(DISTINCT a.child_id) 
+            FROM workshop_attendance a
+            JOIN children c ON a.child_id = c.id
+            WHERE a.status='Present' AND c.organization_id=?
+        """, (org_id,)).fetchone()[0]
+    else:
+        total_registered = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=? AND center_id=?", (org_id, center_id)).fetchone()[0]
+        total_assessed = db.execute("""
+            SELECT COUNT(DISTINCT s.child_id) 
+            FROM sessions s
+            JOIN children c ON s.child_id = c.id
+            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+        """, (org_id, center_id)).fetchone()[0]
+        total_matched = db.execute("""
+            SELECT COUNT(*) 
+            FROM mentor_matches mm
+            JOIN children c ON mm.child_id = c.id
+            WHERE mm.status='active' AND c.organization_id=? AND c.center_id=?
+        """, (org_id, center_id)).fetchone()[0]
+        total_enrolled = db.execute("""
+            SELECT COUNT(DISTINCT a.child_id) 
+            FROM workshop_attendance a
+            JOIN children c ON a.child_id = c.id
+            WHERE a.status='Present' AND c.organization_id=? AND c.center_id=?
+        """, (org_id, center_id)).fetchone()[0]
+        
     return jsonify({
         "talent_distribution": talent_dist,
         "workshop_demand": workshop_demand,
@@ -3453,10 +4090,19 @@ from flask import Response
 @app.route("/api/export/csv", methods=["GET"])
 @require_role(["master_admin", "admin"])
 def export_data_csv():
+    user, error = require_user()
+    if error:
+        return error
+    role = user.get("role")
+    org_id = user.get("organization_id")
+    
     db = get_db()
     
-    children = db.execute("SELECT * FROM children").fetchall()
-    
+    if role == "master_admin":
+        children = db.execute("SELECT * FROM children").fetchall()
+    else:
+        children = db.execute("SELECT * FROM children WHERE organization_id=?", (org_id,)).fetchall()
+        
     output = io.StringIO()
     output.write('\ufeff')
     writer = csv.writer(output)
@@ -3485,7 +4131,20 @@ def export_session_pdf(sid):
         try:
             sb_user_resp = supabase.auth.get_user(token)
             if sb_user_resp and sb_user_resp.user:
-                user = sb_user_resp.user
+                email = sb_user_resp.user.email
+                db = get_db()
+                row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
+                if row:
+                    user = dict(row)
+                else:
+                    role, org, center = resolve_user_profile(email, getattr(sb_user_resp.user, 'user_metadata', {}) or {})
+                    user = {
+                        "id": sb_user_resp.user.id,
+                        "email": email,
+                        "role": role,
+                        "organization_id": org,
+                        "center_id": center
+                    }
         except Exception as e:
             print(f"[AUTH WARNING] Failed to verify Supabase token for PDF: {e}")
             
@@ -3496,7 +4155,20 @@ def export_session_pdf(sid):
             try:
                 sb_user_resp = supabase.auth.get_user(token_h)
                 if sb_user_resp and sb_user_resp.user:
-                    user = sb_user_resp.user
+                    email = sb_user_resp.user.email
+                    db = get_db()
+                    row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
+                    if row:
+                        user = dict(row)
+                    else:
+                        role, org, center = resolve_user_profile(email, getattr(sb_user_resp.user, 'user_metadata', {}) or {})
+                        user = {
+                            "id": sb_user_resp.user.id,
+                            "email": email,
+                            "role": role,
+                            "organization_id": org,
+                            "center_id": center
+                        }
             except Exception as e:
                 pass
                 
@@ -3504,7 +4176,7 @@ def export_session_pdf(sid):
         # Check fallback local session check
         if token:
             row = get_db().execute("""
-                SELECT u.id, u.name, u.email, u.role
+                SELECT u.id, u.name, u.email, u.role, u.organization_id, u.center_id
                 FROM auth_sessions s
                 JOIN users u ON u.id = s.user_id
                 WHERE s.token = ? AND s.expires_at > datetime('now')
@@ -3524,6 +4196,17 @@ def export_session_pdf(sid):
     if not child:
         return jsonify({"error": "Child not found"}), 404
         
+    # Scope check
+    user_role = user.get("role")
+    user_org_id = user.get("organization_id")
+    user_center_id = user.get("center_id")
+    
+    if user_role != "master_admin":
+        if child.get("organization_id") != user_org_id:
+            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+        if user_role != "admin" and child.get("center_id") != user_center_id:
+            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
     notes = db.execute("SELECT * FROM facilitator_notes WHERE session_id=? ORDER BY created_at DESC", (sid,)).fetchall()
     
     # 2. Setup ReportLab PDF document in memory

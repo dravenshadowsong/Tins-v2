@@ -1,8 +1,14 @@
 -- PostgreSQL Schema for GOAT Talent Management System
 
+CREATE TABLE IF NOT EXISTS organizations (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS centers (
     id SERIAL PRIMARY KEY,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     location VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -15,6 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'facilitator',
     active INTEGER DEFAULT 1,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE SET NULL,
     center_id INTEGER REFERENCES centers(id) ON DELETE SET NULL,
     student_id INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -43,6 +50,7 @@ CREATE TABLE IF NOT EXISTS children (
     exp_language INTEGER DEFAULT 0,
     exp_naturalist INTEGER DEFAULT 0,
     exp_intrapersonal INTEGER DEFAULT 0,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     center_id INTEGER REFERENCES centers(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -121,6 +129,7 @@ CREATE TABLE IF NOT EXISTS workshops (
     name VARCHAR(255) NOT NULL,
     domain VARCHAR(100) NOT NULL,
     center_id INTEGER REFERENCES centers(id) ON DELETE SET NULL,
+    organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -47,7 +47,9 @@ try:
         "age": 12,
         "language": "English",
         "school_year": "Grade 7",
-        "gender": "Male"
+        "gender": "Male",
+        "organization_id": 1,
+        "center_id": 1
     }
     res_child = supabase.table("children").insert(child_data).execute()
     assert res_child.data and len(res_child.data) > 0, "Failed to insert child"
