@@ -1194,28 +1194,30 @@ def list_children():
 
 @app.route("/api/children", methods=["POST"])
 def create_child():
-    user, error = require_user()
-    if error:
-        return error
-        
-    role = user.get("role")
-    user_org_id = user.get("organization_id")
-    user_center_id = user.get("center_id")
-    
+    user = current_user()
     data = request.json or {}
     print("==================================================")
     print(f"DEBUG: create_child called with data: {data}")
     
-    # Determine organization_id and center_id based on user role
-    if role == "master_admin":
-        org_id = data.get("organization_id")
-        center_id = data.get("center_id")
-    elif role == "admin": # Org Admin
-        org_id = user_org_id
-        center_id = data.get("center_id") # Org Admin can assign to a center in their org
-    else: # Facilitator, etc.
-        org_id = user_org_id
-        center_id = user_center_id
+    if user:
+        role = user.get("role")
+        user_org_id = user.get("organization_id")
+        user_center_id = user.get("center_id")
+        
+        # Determine organization_id and center_id based on user role
+        if role == "master_admin":
+            org_id = data.get("organization_id")
+            center_id = data.get("center_id")
+        elif role == "admin": # Org Admin
+            org_id = user_org_id
+            center_id = data.get("center_id") # Org Admin can assign to a center in their org
+        else: # Facilitator, etc.
+            org_id = user_org_id
+            center_id = user_center_id
+    else:
+        # Anonymous registration defaults to Organization 1 and no center assignment
+        org_id = 1
+        center_id = None
 
     supabase_id = None
     if supabase_client:
@@ -1311,8 +1313,20 @@ def get_child(cid):
     if role != "master_admin":
         if child_dict.get("organization_id") != org_id:
             return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
-        if role != "admin" and child_dict.get("center_id") != center_id:
+        if role != "admin" and child_dict.get("center_id") is not None and child_dict.get("center_id") != center_id:
             return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
+        # Auto-assign center if currently unassigned and accessed by a facilitator
+        if role != "admin" and child_dict.get("center_id") is None and center_id is not None:
+            print(f"DEBUG: Auto-assigning unassigned child {cid} to center {center_id} on child profile fetch")
+            db.execute("UPDATE children SET center_id = ? WHERE id = ?", (center_id, cid))
+            db.commit()
+            if supabase_client:
+                try:
+                    supabase_client.table("children").update({"center_id": center_id}).eq("id", cid).execute()
+                except Exception as e:
+                    print(f"DEBUG: Exception auto-assigning child center on profile fetch: {e}")
+            child_dict["center_id"] = center_id
             
     return jsonify(child_dict)
 
@@ -1323,14 +1337,7 @@ def get_child(cid):
 
 @app.route("/api/sessions", methods=["POST"])
 def create_session():
-    user, error = require_user()
-    if error:
-        return error
-        
-    role = user.get("role")
-    org_id = user.get("organization_id")
-    center_id = user.get("center_id")
-    
+    user = current_user()
     data = request.json or {}
     child_id = data.get("child_id")
     print("==================================================")
@@ -1343,11 +1350,28 @@ def create_session():
         return jsonify({"error": "Child not found"}), 404
         
     child_dict = dict(child)
-    if role != "master_admin":
-        if child_dict.get("organization_id") != org_id:
-            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
-        if role != "admin" and child_dict.get("center_id") != center_id:
-            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+    if user:
+        role = user.get("role")
+        org_id = user.get("organization_id")
+        center_id = user.get("center_id")
+        
+        if role != "master_admin":
+            if child_dict.get("organization_id") != org_id:
+                return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+            if role != "admin" and child_dict.get("center_id") is not None and child_dict.get("center_id") != center_id:
+                return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+            
+            # Auto-assign center if currently unassigned and accessed by a facilitator
+            if role != "admin" and child_dict.get("center_id") is None and center_id is not None:
+                print(f"DEBUG: Auto-assigning unassigned child {child_id} to center {center_id}")
+                db.execute("UPDATE children SET center_id = ? WHERE id = ?", (center_id, child_id))
+                db.commit()
+                if supabase_client:
+                    try:
+                        supabase_client.table("children").update({"center_id": center_id}).eq("id", child_id).execute()
+                    except Exception as e:
+                        print(f"DEBUG: Exception auto-assigning child center on session creation: {e}")
+                child_dict["center_id"] = center_id
             
     supabase_id = None
     if supabase_client:
@@ -1389,24 +1413,36 @@ def create_session():
 
 @app.route("/api/sessions/<int:sid>", methods=["GET"])
 def get_session(sid):
-    user, error = require_user()
-    if error:
-        return error
-        
-    role = user.get("role")
-    org_id = user.get("organization_id")
-    center_id = user.get("center_id")
+    user = current_user()
     
     db = get_db()
     row = db.execute("SELECT s.*, c.organization_id, c.center_id FROM sessions s JOIN children c ON s.child_id = c.id WHERE s.id=?", (sid,)).fetchone()
     if not row: return jsonify({"error": "Not found"}), 404
     
     row_dict = dict(row)
-    if role != "master_admin":
-        if row_dict.get("organization_id") != org_id:
-            return jsonify({"error": "Forbidden: Session belongs to another organization"}), 403
-        if role != "admin" and row_dict.get("center_id") != center_id:
-            return jsonify({"error": "Forbidden: Session belongs to another center"}), 403
+    if user:
+        role = user.get("role")
+        org_id = user.get("organization_id")
+        center_id = user.get("center_id")
+        
+        if role != "master_admin":
+            if row_dict.get("organization_id") != org_id:
+                return jsonify({"error": "Forbidden: Session belongs to another organization"}), 403
+            if role != "admin" and row_dict.get("center_id") is not None and row_dict.get("center_id") != center_id:
+                return jsonify({"error": "Forbidden: Session belongs to another center"}), 403
+                
+            # Auto-assign/claim center if currently unassigned and accessed by a facilitator
+            if role != "admin" and row_dict.get("center_id") is None and center_id is not None:
+                child_id = row_dict.get("child_id")
+                print(f"DEBUG: Auto-assigning unassigned child {child_id} to center {center_id} on session load")
+                db.execute("UPDATE children SET center_id = ? WHERE id = ?", (center_id, child_id))
+                db.commit()
+                if supabase_client:
+                    try:
+                        supabase_client.table("children").update({"center_id": center_id}).eq("id", child_id).execute()
+                    except Exception as e:
+                        print(f"DEBUG: Exception auto-assigning child center on session fetch: {e}")
+                row_dict["center_id"] = center_id
             
     return jsonify(row_dict)
 
@@ -2223,13 +2259,7 @@ def generate_ai_tasks(child, discovery_answers):
 
 @app.route("/api/sessions/<int:sid>/discovery", methods=["POST"])
 def submit_discovery(sid):
-    user, error = require_user()
-    if error:
-        return error
-        
-    role = user.get("role")
-    org_id = user.get("organization_id")
-    center_id = user.get("center_id")
+    user = current_user()
     
     data = request.json or {}
     answers = data.get("answers", {})
@@ -2243,11 +2273,28 @@ def submit_discovery(sid):
         return jsonify({"error": "Child not found"}), 404
     child = dict(child)
     
-    if role != "master_admin":
-        if child.get("organization_id") != org_id:
-            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
-        if role != "admin" and child.get("center_id") != center_id:
-            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+    if user:
+        role = user.get("role")
+        org_id = user.get("organization_id")
+        center_id = user.get("center_id")
+        
+        if role != "master_admin":
+            if child.get("organization_id") != org_id:
+                return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+            if role != "admin" and child.get("center_id") is not None and child.get("center_id") != center_id:
+                return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+                
+            # Auto-assign center if currently unassigned and accessed by a facilitator
+            if role != "admin" and child.get("center_id") is None and center_id is not None:
+                print(f"DEBUG: Auto-assigning unassigned child {child_id} to center {center_id} on discovery submission")
+                db.execute("UPDATE children SET center_id = ? WHERE id = ?", (center_id, child_id))
+                db.commit()
+                if supabase_client:
+                    try:
+                        supabase_client.table("children").update({"center_id": center_id}).eq("id", child_id).execute()
+                    except Exception as e:
+                        print(f"DEBUG: Exception auto-assigning child center on discovery: {e}")
+                child["center_id"] = center_id
             
     generated_tasks = generate_ai_tasks(child, answers)
     
@@ -2280,7 +2327,6 @@ def submit_discovery(sid):
 
 @app.route("/api/sessions/<int:sid>/submit", methods=["POST"])
 @app.route("/api/sessions/<int:sid>/submit/", methods=["POST"])
-@require_auth
 def submit_session(sid):
     """
     Receives all responses, runs the scoring engine, saves results.
@@ -2289,7 +2335,6 @@ def submit_session(sid):
 
 @app.route("/api/sessions/<int:sid>/analyze", methods=["POST"])
 @app.route("/api/sessions/<int:sid>/analyze/", methods=["POST"])
-@require_auth
 def analyze_session(sid):
     """
     Receives structured questionnaire and puzzle responses, analyses metrics,
@@ -2298,14 +2343,8 @@ def analyze_session(sid):
     return analyze_and_save_session(sid, request.json)
 
 def analyze_and_save_session(sid, data):
-    user, error = require_user()
-    if error:
-        return error
-        
-    role = user.get("role")
-    org_id = user.get("organization_id")
-    center_id = user.get("center_id")
-
+    user = current_user()
+    
     print("==================================================")
     print(f"DEBUG: analyze_and_save_session called for session ID: {sid}")
     try:
@@ -2324,11 +2363,28 @@ def analyze_and_save_session(sid, data):
         return jsonify({"error": "Child not found"}), 404
     child = dict(child)
 
-    if role != "master_admin":
-        if child.get("organization_id") != org_id:
-            return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
-        if role != "admin" and child.get("center_id") != center_id:
-            return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+    if user:
+        role = user.get("role")
+        org_id = user.get("organization_id")
+        center_id = user.get("center_id")
+        
+        if role != "master_admin":
+            if child.get("organization_id") != org_id:
+                return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
+            if role != "admin" and child.get("center_id") is not None and child.get("center_id") != center_id:
+                return jsonify({"error": "Forbidden: Child belongs to another center"}), 403
+                
+            # Auto-assign center if currently unassigned and accessed by a facilitator
+            if role != "admin" and child.get("center_id") is None and center_id is not None:
+                print(f"DEBUG: Auto-assigning unassigned child {child_id} to center {center_id} on analysis/submission")
+                db.execute("UPDATE children SET center_id = ? WHERE id = ?", (center_id, child_id))
+                db.commit()
+                if supabase_client:
+                    try:
+                        supabase_client.table("children").update({"center_id": center_id}).eq("id", child_id).execute()
+                    except Exception as e:
+                        print(f"DEBUG: Exception auto-assigning child center on analysis: {e}")
+                child["center_id"] = center_id
 
     # Load discovery answers
     session_row = db.execute("SELECT responses FROM sessions WHERE id=?", (sid,)).fetchone()
@@ -4528,4 +4584,4 @@ init_db()
 
 if __name__ == "__main__":
     print("\n[SUCCESS] GOAT backend running at http://localhost:5050\n")
-    app.run(port=5050, debug=True)
+    app.run(port=5050, debug=True, use_reloader=False)
