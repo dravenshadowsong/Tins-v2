@@ -253,8 +253,12 @@ function TaskRenderer({ task, answer, startedAt, setAnswer, selectedLanguage }) 
   if (task.type === "choice") {
     return <JudgementChoice task={task} answer={answer} startedAt={startedAt} setAnswer={setAnswer} selectedLanguage={selectedLanguage} />;
   }
+  if (task.type === "open_ended") {
+    return <OpenEndedTask task={task} answer={answer} startedAt={startedAt} setAnswer={setAnswer} selectedLanguage={selectedLanguage} />;
+  }
   return <ScaleTask task={task} answer={answer} setAnswer={setAnswer} selectedLanguage={selectedLanguage} />;
 }
+
 
 function PatternChoice({ task, answer, startedAt, setAnswer, selectedLanguage }) {
   return (
@@ -600,6 +604,55 @@ function ReactionTask({ task, answer, setAnswer, selectedLanguage }) {
           : answer
           ? `${answer.reaction_ms} ms`
           : strings.wait}
+      </button>
+    </div>
+  );
+}
+
+function OpenEndedTask({ task, answer, startedAt, setAnswer, selectedLanguage }) {
+  const [text, setText] = useState(answer?.text || "");
+
+  const submit = () => {
+    setAnswer(baseAnswer(task, text, {
+      text,
+      response_ms: Date.now() - startedAt,
+    }));
+  };
+
+  const strings = {
+    English: {
+      placeholder: "Type your thoughts here... Write as much as you like!",
+      lock: "Save response"
+    },
+    Hindi: {
+      placeholder: "अपने विचार यहाँ लिखें... आप जितना चाहें उतना लिख सकते हैं!",
+      lock: "जवाब सहेजें"
+    }
+  }[selectedLanguage];
+
+  return (
+    <div className="task-stack">
+      <textarea
+        rows={6}
+        value={text}
+        onChange={e => setText(e.target.value)}
+        placeholder={strings.placeholder}
+        style={{
+          width: "100%",
+          padding: "16px",
+          borderRadius: "12px",
+          border: "1px solid #E2E8F0",
+          fontSize: "15px",
+          lineHeight: "1.6",
+          fontFamily: "inherit",
+          resize: "vertical",
+          outline: "none",
+          transition: "border-color 0.2s",
+          marginBottom: "16px"
+        }}
+      />
+      <button className="btn btn-primary" onClick={submit} disabled={!text.trim()}>
+        {strings.lock}
       </button>
     </div>
   );

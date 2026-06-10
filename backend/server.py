@@ -2002,19 +2002,22 @@ DEFAULT_AI_PUZZLES = [
         "metric": "judgement"
     },
     {
-        "key": "naturalist_decomposer",
+        "key": "naturalist_weather_pattern",
         "type": "choice",
         "domain": "naturalist",
-        "component": "living_systems",
-        "title": {"English": "The Forest Soil Miracle", },
-        "prompt": {"English": "In a thick, green forest, giant dead leaves fall on the ground every day, but the forest floor stays clean and rich. Who are the hidden heroes cleaning the forest floor?", },
+        "component": "pattern_in_nature",
+        "title": {"English": "The Rain Clouds", "Hindi": "बारिश के बादल"},
+        "prompt": {
+            "English": "You are playing outdoors and notice the wind suddenly blowing cold, swallows flying low, and the sky turning dark grey. What is nature telling you?",
+            "Hindi": "आप बाहर खेल रहे हैं और अचानक ठंडी हवा चलने लगती है, चिड़ियाँ नीचे उड़ने लगती हैं, और आसमान गहरा भूरा हो जाता है। प्रकृति आपको क्या बता रही है?"
+        },
         "options": [
-            {"label": {"English": "Tiny earthworms, mushrooms, and beetles (decomposers) turning leaves into soil", }, "value": 4},
-            {"label": {"English": "The forest wind blowing everything away", }, "value": 0},
-            {"label": {"English": "The rain washing everything into rivers", }, "value": 0},
-            {"label": {"English": "Wild forest animals eating all the dry leaves", }, "value": 1}
+            {"label": {"English": "A heavy rain shower is coming very soon", "Hindi": "बहुत जल्द तेज़ बारिश होने वाली है"}, "value": 4},
+            {"label": {"English": "The sun is going to shine brighter", "Hindi": "सूरज और तेज़ चमकने वाला है"}, "value": 0},
+            {"label": {"English": "An earthquake is happening", "Hindi": "भूकंप आ रहा है"}, "value": 0},
+            {"label": {"English": "A cold winter night has started", "Hindi": "ठंड की रात शुरू हो गई है"}, "value": 1}
         ],
-        "metric": "classification"
+        "metric": "judgement"
     },
     {
         "key": "naturalist_wind_disperse",
@@ -2286,6 +2289,60 @@ def generate_ai_tasks(child, discovery_answers):
                 
             selected_tasks.append(p)
             
+    # Append the 4 open-ended deep discovery tasks at the end
+    deep_discovery_tasks = [
+        {
+            "key": "deep_discovery_flow",
+            "type": "open_ended",
+            "domain": "intrapersonal",
+            "component": "self_awareness",
+            "title": {"English": "Flow State Tracker", "Hindi": "ध्यान केंद्रित करने वाली गतिविधियाँ"},
+            "prompt": {
+                "English": "Tell us about an activity (like building, drawing, reading, or playing) that makes you completely lose track of time. What are you doing, and what makes it so exciting?",
+                "Hindi": "हमें किसी ऐसी गतिविधि (जैसे कुछ बनाना, चित्र बनाना, पढ़ना, या खेलना) के बारे में बताएं जिसमें आप समय का ध्यान बिल्कुल भूल जाते हैं। आप क्या कर रहे होते हैं, और वह बात आपको इतनी रोमांचक क्यों लगती है?"
+            }
+        },
+        {
+            "key": "deep_discovery_pride",
+            "type": "open_ended",
+            "domain": "intrapersonal",
+            "component": "self_awareness",
+            "title": {"English": "Your Proudest Moment", "Hindi": "आपका सबसे गौरवपूर्ण क्षण"},
+            "prompt": {
+                "English": "What is one project, creation, or achievement that you are most proud of? Describe what you did and why it felt so special to you.",
+                "Hindi": "कोई एक प्रोजेक्ट, रचना, या उपलब्धि क्या है जिस पर आपको सबसे ज्यादा गर्व है? वर्णन करें कि आपने क्या किया और वह आपके लिए इतना विशेष क्यों था।"
+            }
+        },
+        {
+            "key": "deep_discovery_curiosity",
+            "type": "open_ended",
+            "domain": "intrapersonal",
+            "component": "reflective_thinking",
+            "title": {"English": "The One-Year Learning Quest", "Hindi": "एक साल का सीखने का सफर"},
+            "prompt": {
+                "English": "If you could spend one whole year learning about anything you want without any exams or grades, what topic or skill would you choose, and why?",
+                "Hindi": "यदि आप बिना किसी परीक्षा या ग्रेड के अपनी पसंद की किसी भी चीज़ को सीखने में एक पूरा वर्ष बिता सकते हैं, तो आप किस विषय या कौशल को चुनेंगे, और क्यों?"
+            }
+        },
+        {
+            "key": "deep_discovery_vision",
+            "type": "open_ended",
+            "domain": "social",
+            "component": "peer_influence",
+            "title": {"English": "The Big Problem Solver", "Hindi": "बड़ी समस्या का समाधान"},
+            "prompt": {
+                "English": "If you were given resources to solve one big problem in your school, community, or the world, what problem would you choose, and how would you start solving it?",
+                "Hindi": "यदि आपको अपने स्कूल, समुदाय या दुनिया में एक बड़ी समस्या को हल करने के लिए संसाधन दिए जाएं, तो आप कौन सी समस्या चुनेंगे, और आप इसे कैसे हल करना शुरू करेंगे?"
+            }
+        }
+    ]
+    
+    for opt_task in deep_discovery_tasks:
+        p = dict(opt_task)
+        p["title"] = opt_task["title"].get(pref_lang, opt_task["title"]["English"])
+        p["prompt"] = opt_task["prompt"].get(pref_lang, opt_task["prompt"]["English"])
+        selected_tasks.append(p)
+
     return selected_tasks
 
 @app.route("/api/sessions/<int:sid>/discovery", methods=["POST"])
@@ -2472,6 +2529,12 @@ def analyze_and_save_session(sid, data):
     talent_narrative = ""
     pattern_analysis = ""
     
+    # Extract open-ended answers from responses payload
+    open_ended_answers = {}
+    for k, v in responses.items():
+        if isinstance(v, dict) and v.get("task_type") == "open_ended":
+            open_ended_answers[k] = v.get("value", "")
+
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if api_key:
         prompt = f"""
@@ -2485,10 +2548,16 @@ def analyze_and_save_session(sid, data):
         Top Domain: {DOMAIN_LABELS.get(top_domain, top_domain)}
         Untapped Potential Flagged: {[ DOMAIN_LABELS.get(u, u) for u in scores["untapped_potential"] ]}
         
+        Qualitative Deep Discovery Responses (simple text inputs from child):
+        - Flow State (what makes them lose track of time): "{open_ended_answers.get("deep_discovery_flow", "None provided")}"
+        - Proudest Achievement: "{open_ended_answers.get("deep_discovery_pride", "None provided")}"
+        - One-Year Quest (what they would choose to learn): "{open_ended_answers.get("deep_discovery_curiosity", "None provided")}"
+        - Big Problem Solver (their future vision/problem solving): "{open_ended_answers.get("deep_discovery_vision", "None provided")}"
+        
         Please analyze this data and generate a JSON object with two fields (do not write any markdown outside the JSON block):
-        - "talent_narrative": A warm, encouraging, human, and educator-friendly narrative (2-3 sentences) explaining the child's natural abilities and learning style.
+        - "talent_narrative": A warm, encouraging, human, and educator-friendly narrative (2-3 sentences) explaining the child's natural abilities and learning style, synthesizing the quantitative scores with their qualitative deep discovery answers.
           Always communicate probability and potential rather than certainty (e.g. "suggests strong indicators in X activities" rather than "X is your greatest strength").
-          Avoid all corporate buzzwords or definitive labels (e.g. do NOT use "exceptional", "highly impressive", "accelerated nurturing"). Focus on spontaneous behaviors.
+          Avoid all corporate buzzwords or definitive labels. Focus on spontaneous behaviors.
         - "pattern_analysis": A deep cognitive pattern analysis explaining their speed, memory, focus, and logic based on the metrics.
         """
         gemini_res = call_gemini_api(prompt, api_key)
@@ -2514,8 +2583,11 @@ def analyze_and_save_session(sid, data):
         top_tasks = [FORMAL_MAPPING.get(t, t.replace("_", " ").title()) for t, val in responses.items() if isinstance(val, dict) and val.get("domain") == top_domain and answer_to_scale(val) >= 3.0]
         task_str = " and ".join(top_tasks[:2]) if top_tasks else "scenario-based problem-solving"
 
+        flow_text = open_ended_answers.get("deep_discovery_flow", "")
+        interest_ref = f" especially related to their interest in '{flow_text[:50]}...'" if flow_text else ""
+
         talent_narrative = (
-            f"{child.get('name', 'This child')} showed the strongest indicators in {primary_label} activities, "
+            f"{child.get('name', 'This child')} showed the strongest indicators in {primary_label} activities{interest_ref}, "
             f"particularly in {task_str} tasks. {sec_str} also emerged as a promising area for potential development. "
             f"Because prior exposure in this domain appears {exposure_label}, additional workshops and continued "
             f"participation may provide a clearer picture of their long-term strengths.{potential_str}"

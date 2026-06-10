@@ -448,25 +448,25 @@ export const ASSESSMENT_TASKS = [
     metric: "judgement",
   },
   {
-    key: "naturalist_decomposer",
+    key: "naturalist_weather_pattern",
     type: "choice",
     domain: "naturalist",
-    component: "living_systems",
+    component: "pattern_in_nature",
     title: {
-      English: "The Forest Soil Miracle",
-      Hindi: "जंगल की मिट्टी का चमत्कार"
+      English: "The Rain Clouds",
+      Hindi: "बारिश के बादल"
     },
     prompt: {
-      English: "In a thick, green forest, giant dead leaves fall on the ground every day, but the forest floor stays clean and rich. Who are the hidden heroes cleaning the forest floor?",
-      Hindi: "एक घने, हरे जंगल में, हर दिन विशाल सूखी पत्तियाँ ज़मीन पर गिरती हैं, लेकिन जंगल की ज़मीन साफ़ और उपजाऊ बनी रहती है। जंगल की ज़मीन को साफ़ करने वाले ये छिपे हुए हीरो कौन हैं?"
+      English: "You are playing outdoors and notice the wind suddenly blowing cold, swallows flying low, and the sky turning dark grey. What is nature telling you?",
+      Hindi: "आप बाहर खेल रहे हैं और अचानक ठंडी हवा चलने लगती है, चिड़ियाँ नीचे उड़ने लगती हैं, और आसमान गहरा भूरा हो जाता है। प्रकृति आपको क्या बता रही है?"
     },
     options: [
-      { label: { English: "Tiny earthworms, mushrooms, and beetles (decomposers) turning leaves into soil", Hindi: "छोटे केंचुए, मशरूम, और भृंग (beetles) जो पत्तियों को उपजाऊ मिट्टी में बदलते हैं" }, value: 4 },
-      { label: { English: "The forest wind blowing everything away", Hindi: "जंगल की हवा जो सब कुछ उड़ा ले जाती है" }, value: 0 },
-      { label: { English: "The rain washing everything into rivers", Hindi: "बारिश जो सब कुछ नदियों में बहा ले जाती है" }, value: 0 },
-      { label: { English: "Wild forest animals eating all the dry leaves", Hindi: "जंगली जानवर जो सूखी पत्तियाँ खा जाते हैं" }, value: 1 }
+      { label: { English: "A heavy rain shower is coming very soon", Hindi: "बहुत जल्द तेज़ बारिश होने वाली है" }, value: 4 },
+      { label: { English: "The sun is going to shine brighter", Hindi: "सूरज और तेज़ चमकने वाला है" }, value: 0 },
+      { label: { English: "An earthquake is happening", Hindi: "भूकंप आ रहा है" }, value: 0 },
+      { label: { English: "A cold winter night has started", Hindi: "ठंड की रात शुरू हो गई है" }, value: 1 }
     ],
-    metric: "classification",
+    metric: "judgement",
   },
   {
     key: "naturalist_wind_disperse",
@@ -550,5 +550,65 @@ export const ASSESSMENT_TASKS = [
       }
     ],
     metric: "judgement",
+  },
+  {
+    key: "deep_discovery_flow",
+    type: "open_ended",
+    domain: "intrapersonal",
+    component: "self_awareness",
+    title: {
+      English: "Flow State Tracker",
+      Hindi: "ध्यान केंद्रित करने वाली गतिविधियाँ"
+    },
+    prompt: {
+      English: "Tell us about an activity (like building, drawing, reading, or playing) that makes you completely lose track of time. What are you doing, and what makes it so exciting?",
+      Hindi: "हमें किसी ऐसी गतिविधि (जैसे कुछ बनाना, चित्र बनाना, पढ़ना, या खेलना) के बारे में बताएं जिसमें आप समय का ध्यान बिल्कुल भूल जाते हैं। आप क्या कर रहे होते हैं, और वह बात आपको इतनी रोमांचक क्यों लगती है?"
+    },
+    metric: "narrative_expression"
+  },
+  {
+    key: "deep_discovery_pride",
+    type: "open_ended",
+    domain: "intrapersonal",
+    component: "self_awareness",
+    title: {
+      English: "Your Proudest Moment",
+      Hindi: "आपका सबसे गौरवपूर्ण क्षण"
+    },
+    prompt: {
+      English: "What is one project, creation, or achievement that you are most proud of? Describe what you did and why it felt so special to you.",
+      Hindi: "कोई एक प्रोजेक्ट, रचना, या उपलब्धि क्या है जिस पर आपको सबसे ज्यादा गर्व है? वर्णन करें कि आपने क्या किया और वह आपके लिए इतना विशेष क्यों था।"
+    },
+    metric: "narrative_expression"
+  },
+  {
+    key: "deep_discovery_curiosity",
+    type: "open_ended",
+    domain: "intrapersonal",
+    component: "reflective_thinking",
+    title: {
+      English: "The One-Year Learning Quest",
+      Hindi: "एक साल का सीखने का सफर"
+    },
+    prompt: {
+      English: "If you could spend one whole year learning about anything you want without any exams or grades, what topic or skill would you choose, and why?",
+      Hindi: "यदि आप बिना किसी परीक्षा या ग्रेड के अपनी पसंद की किसी भी चीज़ को सीखने में एक पूरा वर्ष बिता सकते हैं, तो आप किस विषय या कौशल को चुनेंगे, और क्यों?"
+    },
+    metric: "narrative_expression"
+  },
+  {
+    key: "deep_discovery_vision",
+    type: "open_ended",
+    domain: "social",
+    component: "peer_influence",
+    title: {
+      English: "The Big Problem Solver",
+      Hindi: "बड़ी समस्या का समाधान"
+    },
+    prompt: {
+      English: "If you were given resources to solve one big problem in your school, community, or the world, what problem would you choose, and how would you start solving it?",
+      Hindi: "यदि आपको अपने स्कूल, समुदाय या दुनिया में एक बड़ी समस्या को हल करने के लिए संसाधन दिए जाएं, तो आप कौन सी समस्या चुनेंगे, और आप इसे कैसे हल करना शुरू करेंगे?"
+    },
+    metric: "narrative_expression"
   }
 ];
