@@ -69,8 +69,8 @@ try:
     # 1. Fetch from Render environment variable OR use your project URL fallback
     supabase_url = os.environ.get("SUPABASE_URL") or "https://ubsjcfaokemckctswnzi.supabase.co"
     
-    # 2. Fetch from Render environment variable OR use your long service role key fallback
-    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVic2pjZmFva2VtY2tjdHN3bnppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQxMzk4NCwiZXhwIjoyMDk1OTg5OTg0fQ.qzh7UKIFmvmKP-mQ5Ev7OoKAWRGXP9hfADbP64RxBNE"
+    # 2. Fetch from Render environment variable
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     
     if supabase_url and supabase_key:
         supabase = create_client(supabase_url, supabase_key)
@@ -637,8 +637,10 @@ def init_db():
                 if cursor.fetchone()[0] == 0:
                     cursor.execute("""
                         INSERT INTO centers (id, name, location, organization_id) VALUES
-                        (1, 'New Delhi Center', 'Okhla, New Delhi', 1),
-                        (2, 'Mumbai Center', 'Dharavi, Mumbai', 1)
+                        (1, 'Khadar Centre', 'Khadar', 1),
+                        (2, 'Okhla Centre', 'Okhla', 1),
+                        (3, 'Govindpuri Centre', 'Govindpuri', 1),
+                        (4, 'Yamuna Centre', 'Yamuna', 1)
                     """)
                     conn.commit()
             except Exception as e:
@@ -906,8 +908,10 @@ def init_db():
         db.execute("INSERT INTO organizations (id, name) VALUES (1, 'GOAT Labs')")
 
     if db.execute("SELECT COUNT(*) FROM centers").fetchone()[0] == 0:
-        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (1, 'New Delhi Center', 'Okhla, New Delhi', 1)")
-        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (2, 'Mumbai Center', 'Dharavi, Mumbai', 1)")
+        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (1, 'Khadar Centre', 'Khadar', 1)")
+        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (2, 'Okhla Centre', 'Okhla', 1)")
+        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (3, 'Govindpuri Centre', 'Govindpuri', 1)")
+        db.execute("INSERT INTO centers (id, name, location, organization_id) VALUES (4, 'Yamuna Centre', 'Yamuna', 1)")
 
     if db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
         db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Master Admin', 'master@goat.com', ?, 'master_admin', NULL, NULL)", (hash_password("goat123"),))
@@ -1185,11 +1189,28 @@ def list_children():
     
     db = get_db()
     if role == "master_admin":
-        rows = db.execute("SELECT * FROM children ORDER BY created_at DESC").fetchall()
+        rows = db.execute("""
+            SELECT c.*, cnt.name AS center_name
+            FROM children c
+            LEFT JOIN centers cnt ON cnt.id = c.center_id
+            ORDER BY c.created_at DESC
+        """).fetchall()
     elif role == "admin": # Org Admin
-        rows = db.execute("SELECT * FROM children WHERE organization_id = ? ORDER BY created_at DESC", (org_id,)).fetchall()
+        rows = db.execute("""
+            SELECT c.*, cnt.name AS center_name
+            FROM children c
+            LEFT JOIN centers cnt ON cnt.id = c.center_id
+            WHERE c.organization_id = ?
+            ORDER BY c.created_at DESC
+        """, (org_id,)).fetchall()
     else: # Facilitator, etc.
-        rows = db.execute("SELECT * FROM children WHERE organization_id = ? AND center_id = ? ORDER BY created_at DESC", (org_id, center_id)).fetchall()
+        rows = db.execute("""
+            SELECT c.*, cnt.name AS center_name
+            FROM children c
+            LEFT JOIN centers cnt ON cnt.id = c.center_id
+            WHERE c.organization_id = ? AND c.center_id = ?
+            ORDER BY c.created_at DESC
+        """, (org_id, center_id)).fetchall()
     return jsonify([dict(r) for r in rows])
 
 @app.route("/api/children", methods=["POST"])
@@ -1215,9 +1236,14 @@ def create_child():
             org_id = user_org_id
             center_id = user_center_id
     else:
-        # Anonymous registration defaults to Organization 1 and no center assignment
+        # Anonymous registration defaults to Organization 1 and optional center assignment
         org_id = 1
-        center_id = None
+        center_id = data.get("center_id")
+        if center_id:
+            try:
+                center_id = int(center_id)
+            except ValueError:
+                center_id = None
 
     supabase_id = None
     if supabase_client:
@@ -1306,7 +1332,12 @@ def get_child(cid):
     center_id = user.get("center_id")
     
     db = get_db()
-    row = db.execute("SELECT * FROM children WHERE id=?", (cid,)).fetchone()
+    row = db.execute("""
+        SELECT c.*, cnt.name AS center_name
+        FROM children c
+        LEFT JOIN centers cnt ON cnt.id = c.center_id
+        WHERE c.id = ?
+    """, (cid,)).fetchone()
     if not row: return jsonify({"error": "Not found"}), 404
     
     child_dict = dict(row)
@@ -3679,6 +3710,13 @@ def approve_user_tms(uid):
         return jsonify({"error": str(e)}), 400
         
     return jsonify({"status": "success", "role": approved_role})
+
+# ── PUBLIC ENDPOINTS (NO AUTH REQUIRED) ──────────────────────────────────────
+@app.route("/api/public/centers", methods=["GET"])
+def list_public_centers():
+    db = get_db()
+    rows = db.execute("SELECT id, name FROM centers ORDER BY id ASC").fetchall()
+    return jsonify([dict(r) for r in rows])
 
 # ── CENTER MANAGEMENT ENDPOINTS ─────────────────────────────────────────────
 @app.route("/api/centers", methods=["GET"])

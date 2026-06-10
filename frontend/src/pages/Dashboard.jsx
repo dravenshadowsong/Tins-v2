@@ -13,6 +13,7 @@ export default function Dashboard() {
   // Core Data States
   const [analytics, setAnalytics] = useState(null);
   const [children, setChildren] = useState([]);
+  const [selectedCenterFilter, setSelectedCenterFilter] = useState("");
   const [users, setUsers] = useState([]);
   const [centers, setCenters] = useState([]);
   const [workshops, setWorkshops] = useState([]);
@@ -865,64 +866,131 @@ export default function Dashboard() {
           </div>
 
           {/* Validation Logs */}
-          <div className="card" style={{ padding: "20px", borderRadius: "12px" }}>
-            <h3 style={{ margin: "0 0 16px 0", fontWeight: 800 }}>Children Records & Development Timeline</h3>
-            <div className="table-wrap">
-              <table className="goat-table">
-                <thead>
-                  <tr>
-                    <th>Student</th>
-                    <th>Age</th>
-                    <th>Assigned Center</th>
-                    <th>Validation Progress</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {children.map(c => (
-                    <tr key={c.id}>
-                      <td style={{ fontWeight: 600 }}>{c.name}</td>
-                      <td>{c.age}</td>
-                      <td>New Delhi Center</td>
-                      <td>
-                        <button className="btn btn-ghost btn-sm" onClick={async () => {
-                          const v = await api.getMentorValidations(c.id).catch(() => []);
-                          alert(`Validation Logs for ${c.name}:\n\n` + (v.length === 0 ? "No evaluations logged." : v.map(x => `Domain: ${x.domain.toUpperCase()} | Rating: ${x.rating}/5 stars\nStrengths: ${x.strengths || "N/A"}\nNotes: ${x.notes || "N/A"}`).join("\n\n")));
-                        }}>View Developmental Log</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {(() => {
+            const filteredChildren = children.filter(c => {
+              if (!selectedCenterFilter) return true;
+              if (selectedCenterFilter === "Unassigned") return !c.center_name;
+              return c.center_name === selectedCenterFilter;
+            });
+
+            return (
+              <div className="card" style={{ padding: "20px", borderRadius: "12px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+                  <h3 style={{ margin: 0, fontWeight: 800 }}>Children Records & Development Timeline</h3>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "14px", fontWeight: 600, color: "#4b5563" }}>Filter by Centre:</span>
+                    <select
+                      value={selectedCenterFilter}
+                      onChange={e => setSelectedCenterFilter(e.target.value)}
+                      style={{ height: "36px", border: "1.5px solid #d1d5db", borderRadius: "8px", padding: "0 8px", fontSize: "14px", background: "#fff" }}
+                    >
+                      <option value="">All Centres</option>
+                      <option value="Khadar Centre">Khadar Centre</option>
+                      <option value="Okhla Centre">Okhla Centre</option>
+                      <option value="Govindpuri Centre">Govindpuri Centre</option>
+                      <option value="Yamuna Centre">Yamuna Centre</option>
+                      <option value="Unassigned">Unassigned</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="table-wrap">
+                  <table className="goat-table">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Age</th>
+                        <th>Assigned Center</th>
+                        <th>Validation Progress</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredChildren.map(c => (
+                        <tr key={c.id}>
+                          <td style={{ fontWeight: 600 }}>{c.name}</td>
+                          <td>{c.age}</td>
+                          <td>{c.center_name || "Unassigned"}</td>
+                          <td>
+                            <button className="btn btn-ghost btn-sm" onClick={async () => {
+                              const v = await api.getMentorValidations(c.id).catch(() => []);
+                              alert(`Validation Logs for ${c.name}:\n\n` + (v.length === 0 ? "No evaluations logged." : v.map(x => `Domain: ${x.domain.toUpperCase()} | Rating: ${x.rating}/5 stars\nStrengths: ${x.strengths || "N/A"}\nNotes: ${x.notes || "N/A"}`).join("\n\n")));
+                            }}>View Developmental Log</button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredChildren.length === 0 && (
+                        <tr>
+                          <td colSpan={4} style={{ textAlign: "center", color: "#9ca3af", padding: "20px 0" }}>
+                            No children registered in this centre yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
       {/* CHILDREN RECORDS TAB */}
-      {activeTab === "children" && (
-        <div className="card" style={{ padding: "20px", borderRadius: "12px" }}>
-          <h3 style={{ margin: "0 0 16px 0", fontWeight: 800 }}>Assessments & Registry List</h3>
-          <div className="table-wrap">
-            <table className="goat-table">
-              <thead>
-                <tr>
-                  <th>Student Name</th>
-                  <th>Age</th>
-                  <th>Gender</th>
-                  <th>Assessed Top Talent</th>
-                  <th>Registry Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {children.map(c => (
-                  <ChildRecordRow key={c.id} child={c} navigate={navigate} role={role} />
-                ))}
-              </tbody>
-            </table>
+      {activeTab === "children" && (() => {
+        const filteredChildren = children.filter(c => {
+          if (!selectedCenterFilter) return true;
+          if (selectedCenterFilter === "Unassigned") return !c.center_name;
+          return c.center_name === selectedCenterFilter;
+        });
+
+        return (
+          <div className="card" style={{ padding: "20px", borderRadius: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+              <h3 style={{ margin: 0, fontWeight: 800 }}>Assessments & Registry List</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "14px", fontWeight: 600, color: "#4b5563" }}>Filter by Centre:</span>
+                <select
+                  value={selectedCenterFilter}
+                  onChange={e => setSelectedCenterFilter(e.target.value)}
+                  style={{ height: "36px", border: "1.5px solid #d1d5db", borderRadius: "8px", padding: "0 8px", fontSize: "14px", background: "#fff" }}
+                >
+                  <option value="">All Centres</option>
+                  <option value="Khadar Centre">Khadar Centre</option>
+                  <option value="Okhla Centre">Okhla Centre</option>
+                  <option value="Govindpuri Centre">Govindpuri Centre</option>
+                  <option value="Yamuna Centre">Yamuna Centre</option>
+                  <option value="Unassigned">Unassigned</option>
+                </select>
+              </div>
+            </div>
+            <div className="table-wrap">
+              <table className="goat-table">
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Centre</th>
+                    <th>Assessed Top Talent</th>
+                    <th>Registry Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredChildren.map(c => (
+                    <ChildRecordRow key={c.id} child={c} navigate={navigate} role={role} />
+                  ))}
+                  {filteredChildren.length === 0 && (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", color: "#9ca3af", padding: "20px 0" }}>
+                        No children registered in this centre yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* SCIENTIFIC FOUNDATIONS TAB */}
       {activeTab === "science" && role === "master_admin" && (
@@ -1158,6 +1226,7 @@ function ChildRecordRow({ child, navigate, role }) {
       <td style={{ fontWeight: 600 }}>{child.name}</td>
       <td>{child.age}</td>
       <td>{child.gender || "Not specified"}</td>
+      <td>{child.center_name || "Unassigned"}</td>
       <td>
         {d ? (
           <span className="domain-badge" style={{ background: d.light, color: d.color }}>

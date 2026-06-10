@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
@@ -14,19 +14,40 @@ const EXP_LABELS = ["Never tried it", "Tried a few times", "Do it sometimes", "D
 export default function Intake() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const [centers, setCenters] = useState([]);
   const [form, setForm] = useState({
-    name: "", age: "", language: "Hindi", school_year: "", gender: "",
+    name: "", age: "", language: "Hindi", school_year: "", gender: "", center_id: "",
     exp_kinesthetic:0, exp_creative:0, exp_logical:0, exp_spatial:0,
     exp_social:0, exp_language:0, exp_naturalist:0, exp_intrapersonal:0,
   });
 
+  useEffect(() => {
+    api.getPublicCenters()
+      .then(setCenters)
+      .catch(() => {
+        // Fallback to hardcoded centers if API is offline or not found
+        setCenters([
+          { id: 1, name: "Khadar Centre" },
+          { id: 2, name: "Okhla Centre" },
+          { id: 3, name: "Govindpuri Centre" },
+          { id: 4, name: "Yamuna Centre" }
+        ]);
+      });
+  }, []);
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const submit = async () => {
-    if (!form.name.trim() || !form.age) return alert("Please fill in name and age.");
+    if (!form.name.trim() || !form.age || !form.center_id) {
+      return alert("Please fill in name, age, and select a center.");
+    }
     setSaving(true);
     try {
-      const child = await api.createChild({ ...form, age: parseInt(form.age) });
+      const child = await api.createChild({ 
+        ...form, 
+        age: parseInt(form.age),
+        center_id: parseInt(form.center_id)
+      });
       const session = await api.createSession(child.id);
       navigate(`/discovery/${session.id}?cid=${child.id}`);
     } catch (e) {
@@ -73,14 +94,25 @@ export default function Intake() {
           </div>
         </div>
 
-        <div className="form-group">
-          <label>School class</label>
-          <select value={form.school_year} onChange={e => set("school_year", e.target.value)}>
-            <option value="">Select class</option>
-            {["Class 4","Class 5","Class 6","Class 7","Class 8","Class 9","Class 10","Not in school"].map(c =>
-              <option key={c}>{c}</option>
-            )}
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <label>School class</label>
+            <select value={form.school_year} onChange={e => set("school_year", e.target.value)}>
+              <option value="">Select class</option>
+              {["Class 4","Class 5","Class 6","Class 7","Class 8","Class 9","Class 10","Not in school"].map(c =>
+                <option key={c}>{c}</option>
+              )}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Centre Name</label>
+            <select value={form.center_id} onChange={e => set("center_id", e.target.value)} required>
+              <option value="">Select centre</option>
+              {centers.map(c =>
+                <option key={c.id} value={c.id}>{c.name}</option>
+              )}
+            </select>
+          </div>
         </div>
       </div>
 

@@ -58,6 +58,7 @@ export const api = {
   deleteUser:      (id)        => req("DELETE", `/admin/users/${id}`),
   approveUser:     (id, data)  => req("PUT",    `/admin/users/${id}/approve`, data),
   getCenters:      ()          => req("GET",  "/centers"),
+  getPublicCenters:()          => req("GET",  "/public/centers"),
   createCenter:    (data)      => req("POST", "/centers", data),
   getWorkshops:    ()          => req("GET",  "/workshops"),
   createWorkshop:  (data)      => req("POST", "/workshops", data),
