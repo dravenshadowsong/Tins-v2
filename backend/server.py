@@ -412,7 +412,7 @@ def get_db():
             try:
                 if db_url.startswith("postgres://"):
                     db_url = db_url.replace("postgres://", "postgresql://", 1)
-                conn = psycopg2.connect(db_url)
+                conn = psycopg2.connect(db_url, connect_timeout=10)
                 g.db = PostgresConnectionWrapper(conn)
             except Exception as e:
                 print(f"[DATABASE WARNING] Failed to connect to Postgres: {e}. Falling back to SQLite.")
@@ -607,7 +607,7 @@ def init_db():
         try:
             if db_url.startswith("postgres://"):
                 db_url = db_url.replace("postgres://", "postgresql://", 1)
-            conn = psycopg2.connect(db_url)
+            conn = psycopg2.connect(db_url, connect_timeout=10)
             cursor = conn.cursor()
             
             schema_path = os.path.join(os.path.dirname(__file__), "db", "postgres_schema.sql")
@@ -685,18 +685,18 @@ def init_db():
                 print(f"[DATABASE WARNING] Failed to seed mentors on Postgres: {e}")
                 conn.rollback()
                 
-            # 4. Seed puzzles
+            # 4. Seed/Sync puzzles
             try:
-                cursor.execute("SELECT COUNT(*) FROM puzzles")
-                if cursor.fetchone()[0] == 0:
-                    for p in DEFAULT_AI_PUZZLES:
-                        cursor.execute("""
-                            INSERT INTO puzzles (key, type, domain, component, data)
-                            VALUES (%s, %s, %s, %s, %s)
-                        """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
-                    conn.commit()
+                for p in DEFAULT_AI_PUZZLES:
+                    cursor.execute("""
+                        INSERT INTO puzzles (key, type, domain, component, data)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (key) DO UPDATE 
+                        SET type = EXCLUDED.type, domain = EXCLUDED.domain, component = EXCLUDED.component, data = EXCLUDED.data
+                    """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
+                conn.commit()
             except Exception as e:
-                print(f"[DATABASE WARNING] Failed to seed puzzles on Postgres: {e}")
+                print(f"[DATABASE WARNING] Failed to sync puzzles on Postgres: {e}")
                 conn.rollback()
             
             # Ensure dravenshadowsong@gmail.com is master_admin in remote Postgres
@@ -709,7 +709,6 @@ def init_db():
                 
             conn.close()
             print("[SUCCESS] PostgreSQL/Supabase initialized successfully!")
-            return
         except Exception as e:
             print(f"[DATABASE ERROR] Failed to initialize Postgres: {e}. Falling back to SQLite.")
             
@@ -921,12 +920,12 @@ def init_db():
         db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Demo Student', 'student@goat.com', ?, 'student', 1, 1)", (hash_password("goat123"),))
         db.execute("INSERT INTO users (name, email, password_hash, role, organization_id, center_id) VALUES ('Demo Parent', 'parent@goat.com', ?, 'parent', 1, 1)", (hash_password("goat123"),))
         
-    if db.execute("SELECT COUNT(*) FROM puzzles").fetchone()[0] == 0:
-        for p in DEFAULT_AI_PUZZLES:
-            db.execute("""
-                INSERT INTO puzzles (key, type, domain, component, data)
-                VALUES (?, ?, ?, ?, ?)
-            """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
+    # Seed/Sync puzzles
+    for p in DEFAULT_AI_PUZZLES:
+        db.execute("""
+            INSERT OR REPLACE INTO puzzles (key, type, domain, component, data)
+            VALUES (?, ?, ?, ?, ?)
+        """, (p["key"], p["type"], p["domain"], p.get("component", ""), json.dumps(p)))
             
     # Dynamic SQLite migration to ensure old database versions have all required columns
     try:
@@ -1917,13 +1916,16 @@ DEFAULT_AI_PUZZLES = [
         "type": "choice",
         "domain": "social",
         "component": "empathy_recognition",
-        "title": {"English": "The Lost Puppy Dilemma", },
-        "prompt": {"English": "Your group of friends finds a cute lost puppy with a collar in the park. Two friends want to keep the puppy secretly in their house, but you know its owners must be worried. How do you lead your friends to do the right thing without making them angry?", },
+        "title": {"English": "The Project Deadline", "Hindi": "The Project Deadline"},
+        "prompt": {
+            "English": "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?",
+            "Hindi": "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?"
+        },
         "options": [
-            {"label": {"English": "Suggest calling the number on the collar together so you can all be heroes who saved and returned a lost pet", }, "value": 4},
-            {"label": {"English": "Fight with them and threaten to report them to the police", }, "value": 0},
-            {"label": {"English": "Walk away in silence and let them do whatever they want", }, "value": 1},
-            {"label": {"English": "Take the puppy away from them by force and run", }, "value": 0}
+            {"label": {"English": "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation.", "Hindi": "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation."}, "value": 4},
+            {"label": {"English": "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important.", "Hindi": "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important."}, "value": 4},
+            {"label": {"English": "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time.", "Hindi": "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time."}, "value": 4},
+            {"label": {"English": "Do nothing and let the other teammates decide.", "Hindi": "Do nothing and let the other teammates decide."}, "value": 1}
         ],
         "metric": "judgement"
     },
@@ -2112,13 +2114,16 @@ DEFAULT_AI_PUZZLES = [
         "type": "choice",
         "domain": "intrapersonal",
         "component": "resilience_signal",
-        "title": {"English": "The Lost Kite Adventure", },
-        "prompt": {"English": "You spent two days making a beautiful paper kite. On its very first flight, it gets stuck high in a thorny tree. You feel upset and want to cry. What is the most helpful thing to tell yourself?", },
+        "title": {"English": "The Stuck Kite", "Hindi": "The Stuck Kite"},
+        "prompt": {
+            "English": "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?",
+            "Hindi": "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?"
+        },
         "options": [
-            {"label": {"English": "It is normal to feel sad, but crying won't get it down. Let me take a deep breath and plan to reach it with a long stick.", }, "value": 4},
-            {"label": {"English": "I am terrible at flying kites. I will never make or fly one again.", }, "value": 0},
-            {"label": {"English": "I will kick the tree as hard as I can until it shakes.", }, "value": 0},
-            {"label": {"English": "It was a bad kite anyway, I don't care.", }, "value": 1}
+            {"label": {"English": "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned.", "Hindi": "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned."}, "value": 4},
+            {"label": {"English": "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper.", "Hindi": "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper."}, "value": 4},
+            {"label": {"English": "Ask friends for ideas on how to build a simple pulley or tool to hook the string.", "Hindi": "Ask friends for ideas on how to build a simple pulley or tool to hook the string."}, "value": 4},
+            {"label": {"English": "Leave the park feeling angry and give up on flying kites altogether.", "Hindi": "Leave the park feeling angry and give up on flying kites altogether."}, "value": 1}
         ],
         "metric": "judgement"
     },
@@ -2197,7 +2202,12 @@ def call_gemini_api(prompt, api_key):
         print(f"[SUCCESS OR RETRY] Gemini API request failed: {e}")
         return None
 
+_cached_puzzles = None
+
 def load_puzzles_from_db():
+    global _cached_puzzles
+    if _cached_puzzles is not None:
+        return _cached_puzzles
     try:
         db = get_db()
         rows = db.execute("SELECT data FROM puzzles").fetchall()
@@ -2207,7 +2217,10 @@ def load_puzzles_from_db():
                 puzzles.append(json.loads(r["data"]))
             except Exception:
                 pass
-        return puzzles if puzzles else DEFAULT_AI_PUZZLES
+        if puzzles:
+            _cached_puzzles = puzzles
+            return puzzles
+        return DEFAULT_AI_PUZZLES
     except Exception:
         return DEFAULT_AI_PUZZLES
 
@@ -2261,7 +2274,7 @@ def generate_ai_tasks(child, discovery_answers):
         else:
             q_count = 2
             
-        domain_puzzles = [p for p in DEFAULT_AI_PUZZLES if p["domain"] == domain]
+        domain_puzzles = [p for p in db_puzzles if p["domain"] == domain]
         # Standardized selection of first q_count questions from the bank
         selected = domain_puzzles[:q_count]
         
@@ -2394,13 +2407,11 @@ def submit_discovery(sid):
                 "phase": "assess"
             }
             print(f"DEBUG: Attempting Supabase update for session ID: {sid} in discovery")
-            print(f"DEBUG: Supabase update payload: {json.dumps(update_data)}")
+            # print(f"DEBUG: Supabase update payload: {json.dumps(update_data)}")
             res = supabase_client.table("sessions").update(update_data).eq("id", sid).execute()
-            print(f"DEBUG: Supabase update response data: {res.data}")
+            # print(f"DEBUG: Supabase update response data: {res.data}")
         except Exception as e:
-            print(f"DEBUG: EXCEPTION caught during Supabase update in discovery: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"DEBUG: EXCEPTION caught during Supabase update in discovery: {str(e)[:200]}")
             
     db.execute("""
         UPDATE sessions SET
@@ -2437,7 +2448,7 @@ def analyze_and_save_session(sid, data):
     print(f"DEBUG: analyze_and_save_session called for session ID: {sid}")
     try:
         print(f"DEBUG: Incoming assessment data responses count: {len(data.get('responses', {})) if data else 0}")
-        print(f"DEBUG: Incoming assessment data: {json.dumps(data)}")
+        # print(f"DEBUG: Incoming assessment data: {json.dumps(data)}")
     except Exception as e:
         print(f"DEBUG: Error printing incoming data: {e}")
         
@@ -2637,13 +2648,11 @@ def analyze_and_save_session(sid, data):
                 "completed_at": completed_now
             }
             print(f"DEBUG: Attempting Supabase update for session ID: {sid}")
-            print(f"DEBUG: Supabase update payload: {json.dumps(update_data)}")
+            # print(f"DEBUG: Supabase update payload: {json.dumps(update_data)}")
             res = supabase_client.table("sessions").update(update_data).eq("id", sid).execute()
-            print(f"DEBUG: Supabase update response data: {res.data}")
+            # print(f"DEBUG: Supabase update response data: {res.data}")
         except Exception as e:
-            print(f"DEBUG: EXCEPTION caught during Supabase update: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"DEBUG: EXCEPTION caught during Supabase update: {str(e)[:200]}")
 
     # Permanently write the results to database
     db.execute("""
@@ -5403,7 +5412,7 @@ def export_session_pdf(sid):
                 h_date_str = str(h_date_val)[:10]
                 
             h_top = DOMAINS_MAP.get(hist_row["top_domain"], hist_row["top_domain"] or "N/A")
-            h_sid = f"TINS-SESS-{hist_row['id']}"
+            h_sid = f"GOAT-SESS-{hist_row['id']}"
             
             if idx == 0:
                 m_desc = "Baseline preferences mapped."
@@ -5467,7 +5476,7 @@ def export_session_pdf(sid):
     story.append(Paragraph("ASSESSMENT METHODOLOGY", h1_style))
     
     methodology_text = (
-        "The GOAT-TINS Talent Mapping framework integrates multiple data points to evaluate "
+        "The GOAT Talent Mapping framework integrates multiple data points to evaluate "
         "a student's developmental indicators. The framework consists of four primary stages:<br/>"
         "1. <b>Cognitive Puzzles</b>: Abstract, language-neutral puzzles to measure pattern recognition and reasoning.<br/>"
         "2. <b>Prior Exposure Logs</b>: Mappings of historical familiarity to distinguish natural preference from taught capability.<br/>"
@@ -5521,29 +5530,37 @@ def export_session_pdf(sid):
         canvas.circle(0, 396, 180, fill=0, stroke=1)
         
         # Project WHY Logo
-        canvas.setFillColor(colors.HexColor("#00B8A9"))
-        canvas.circle(200, 700, 15, fill=1, stroke=0)
-        canvas.setStrokeColor(colors.white)
-        canvas.setLineWidth(2.5)
-        canvas.line(200, 700, 200, 690)
-        canvas.line(200, 700, 192, 708)
-        canvas.line(200, 700, 208, 708)
+        why_logo_path = os.path.join(os.path.dirname(__file__), "why_logo.jpg")
+        if os.path.exists(why_logo_path):
+            canvas.drawImage(why_logo_path, 185, 685, width=30, height=30, mask='auto')
+        else:
+            canvas.setFillColor(colors.HexColor("#00B8A9"))
+            canvas.circle(200, 700, 15, fill=1, stroke=0)
+            canvas.setStrokeColor(colors.white)
+            canvas.setLineWidth(2.5)
+            canvas.line(200, 700, 200, 690)
+            canvas.line(200, 700, 192, 708)
+            canvas.line(200, 700, 208, 708)
         
         canvas.setFillColor(colors.HexColor("#2D3436"))
         canvas.setFont("Helvetica-Bold", 11)
         canvas.drawString(225, 696, "PROJECT WHY")
         
-        # TINS Logo next to it
-        canvas.setFillColor(colors.HexColor("#5B4CF0"))
-        canvas.rect(360, 685, 30, 30, fill=1, stroke=0)
-        canvas.setStrokeColor(colors.white)
-        canvas.setLineWidth(3.0)
-        canvas.line(375, 690, 375, 710)
-        canvas.line(367, 710, 383, 710)
+        # GOAT Logo next to it
+        goat_logo_path = os.path.join(os.path.dirname(__file__), "goat_logo.png")
+        if os.path.exists(goat_logo_path):
+            canvas.drawImage(goat_logo_path, 360, 685, width=30, height=30, mask='auto')
+        else:
+            canvas.setFillColor(colors.HexColor("#5B4CF0"))
+            canvas.rect(360, 685, 30, 30, fill=1, stroke=0)
+            canvas.setStrokeColor(colors.white)
+            canvas.setLineWidth(3.0)
+            canvas.line(375, 690, 375, 710)
+            canvas.line(367, 710, 383, 710)
         
         canvas.setFillColor(colors.HexColor("#2D3436"))
         canvas.setFont("Helvetica-Bold", 11)
-        canvas.drawString(400, 696, "TINS TALENT LAB")
+        canvas.drawString(400, 696, "GOAT TALENT LAB")
         
         # Report Title
         canvas.setFillColor(colors.HexColor("#5B4CF0"))
@@ -5567,7 +5584,7 @@ def export_session_pdf(sid):
             ("AGE", f"{child.get('age', 'N/A')} YEARS"),
             ("CLASS / LEVEL", (child.get("school_year") or "N/A").upper()),
             ("ASSESSMENT DATE", formatted_date.upper()),
-            ("ASSESSMENT ID", f"TINS-SESS-{sid}"),
+            ("ASSESSMENT ID", f"GOAT-SESS-{sid}"),
             ("FACILITATOR", facilitator_name.upper())
         ]
         
@@ -5595,7 +5612,7 @@ def export_session_pdf(sid):
         
         if doc.page > 1:
             canvas.drawString(54, 750, "GOAT TALENT IDENTIFICATION SYSTEM REPORT")
-            canvas.drawRightString(letter[0]-54, 750, "PROJECT WHY / TINS")
+            canvas.drawRightString(letter[0]-54, 750, "PROJECT WHY / GOAT")
             canvas.setStrokeColor(colors.HexColor("#CBD5E1"))
             canvas.setLineWidth(0.5)
             canvas.line(54, 742, letter[0]-54, 742)

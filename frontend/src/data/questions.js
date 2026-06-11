@@ -387,29 +387,29 @@ export const ASSESSMENT_TASKS = [
     domain: "social",
     component: "empathy_recognition",
     title: {
-      English: "The Lost Puppy Dilemma",
-      Hindi: "खोए हुए पिल्ले का फैसला"
+      English: "The Project Deadline",
+      Hindi: "The Project Deadline"
     },
     prompt: {
-      English: "Your group of friends finds a cute lost puppy with a collar in the park. Two friends want to keep the puppy secretly in their house, but you know its owners must be worried. How do you lead your friends to do the right thing without making them angry?",
-      Hindi: "आपके दोस्तों के समूह को पार्क में पट्टे वाला एक प्यारा खोया हुआ पिल्ला मिलता है। दो दोस्त पिल्ले को चुपके से अपने घर में रखना चाहते हैं, लेकिन आप जानते हैं कि उसके मालिक परेशान होंगे। आप अपने दोस्तों को बिना गुस्सा दिलाए सही काम करने के लिए कैसे मनाएंगे?"
+      English: "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?",
+      Hindi: "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?"
     },
     options: [
       {
-        label: { English: "Suggest calling the number on the collar together so you can all be heroes who saved and returned a lost pet", Hindi: "सुझाव दें कि सभी मिलकर पट्टे पर लिखे नंबर पर फोन करें ताकि आप सब उस खोए हुए पालतू जानवर को बचाने वाले हीरो बन सकें" },
+        label: { English: "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation.", Hindi: "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation." },
         value: 4
       },
       {
-        label: { English: "Fight with them and threaten to report them to the police", Hindi: "उनसे लड़ें और पुलिस में शिकायत करने की धमकी दें" },
-        value: 0
+        label: { English: "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important.", Hindi: "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important." },
+        value: 4
       },
       {
-        label: { English: "Walk away in silence and let them do whatever they want", Hindi: "चुपचाप चले जाएं और उन्हें जो करना है करने दें" },
+        label: { English: "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time.", Hindi: "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time." },
+        value: 4
+      },
+      {
+        label: { English: "Do nothing and let the other teammates decide.", Hindi: "Do nothing and let the other teammates decide." },
         value: 1
-      },
-      {
-        label: { English: "Take the puppy away from them by force and run", Hindi: "उनसे जबरदस्ती पिल्ला छीन लें और भाग जाएं" },
-        value: 0
       }
     ],
     metric: "judgement",
@@ -524,28 +524,28 @@ export const ASSESSMENT_TASKS = [
     domain: "intrapersonal",
     component: "resilience_signal",
     title: {
-      English: "The Lost Kite Adventure",
-      Hindi: "खोई हुई पतंग का हौसला"
+      English: "The Stuck Kite",
+      Hindi: "The Stuck Kite"
     },
     prompt: {
-      English: "You spent two days making a beautiful paper kite. On its very first flight, it gets stuck high in a thorny tree. You feel upset and want to cry. What is the most helpful thing to tell yourself?",
-      Hindi: "आपने दो दिन लगाकर कागज की एक सुंदर पतंग बनाई। पहली ही उड़ान में, वह एक कांटेदार पेड़ पर ऊँचाई पर फंस जाती है। आप बहुत परेशान महसूस करते हैं और आपका रोने का मन करता है। ऐसे में खुद को समझाने के लिए सबसे मददगार बात क्या होगी?"
+      English: "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?",
+      Hindi: "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?"
     },
     options: [
       {
-        label: { English: "It is normal to feel sad, but crying won't get it down. Let me take a deep breath and plan to reach it with a long stick.", Hindi: "उदास महसूस होना सामान्य है, लेकिन रोने से पतंग नीचे नहीं आएगी। मैं एक गहरी सांस लेता हूं और एक लंबी छड़ी से उसे सुरक्षित निकालने की योजना बनाता हूं।" },
+        label: { English: "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned.", Hindi: "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned." },
         value: 4
       },
       {
-        label: { English: "I am terrible at flying kites. I will never make or fly one again.", Hindi: "मैं पतंग उड़ाने में बहुत बेकार हूं। मैं अब कभी पतंग नहीं बनाऊंगा और न ही उड़ाऊंगा।" },
-        value: 0
+        label: { English: "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper.", Hindi: "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper." },
+        value: 4
       },
       {
-        label: { English: "I will kick the tree as hard as I can until it shakes.", Hindi: "मैं पेड़ को इतनी जोर से लात मारूंगा जब तक कि वह हिलने न लगे।" },
-        value: 0
+        label: { English: "Ask friends for ideas on how to build a simple pulley or tool to hook the string.", Hindi: "Ask friends for ideas on how to build a simple pulley or tool to hook the string." },
+        value: 4
       },
       {
-        label: { English: "It was a bad kite anyway, I don't care.", Hindi: "वह पतंग वैसे भी खराब थी, मुझे कोई परवाह नहीं है।" },
+        label: { English: "Leave the park feeling angry and give up on flying kites altogether.", Hindi: "Leave the park feeling angry and give up on flying kites altogether." },
         value: 1
       }
     ],
