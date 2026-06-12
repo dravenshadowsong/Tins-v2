@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { DISCOVERY_QUESTIONS, DOMAINS } from "../data/questions";
+import { DISCOVERY_QUESTIONS, DOMAINS, getAdaptedDiscoveryQuestions } from "../data/questions";
 import { api } from "../api";
 
 export default function Discovery() {
@@ -13,9 +13,30 @@ export default function Discovery() {
   const [answers, setAnswers] = useState({});
   const [generating, setGenerating] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [child, setChild] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const q = DISCOVERY_QUESTIONS[step];
-  const total = DISCOVERY_QUESTIONS.length;
+  useEffect(() => {
+    async function loadChild() {
+      try {
+        const c = await api.getChild(cid);
+        setChild(c);
+      } catch (e) {
+        console.error("Error loading child profile:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadChild();
+  }, [cid]);
+
+  const questions = useMemo(() => {
+    if (!child) return DISCOVERY_QUESTIONS;
+    return getAdaptedDiscoveryQuestions(child.school_year, child.age, child.language);
+  }, [child]);
+
+  const q = questions[step];
+  const total = questions.length;
 
   const select = (idx) => {
     setAnswers(a => ({ ...a, [q.id]: idx }));
@@ -48,7 +69,7 @@ export default function Discovery() {
 
   const getTopDomains = () => {
     const domainCounts = {};
-    DISCOVERY_QUESTIONS.forEach((quest) => {
+    questions.forEach((quest) => {
       const chosenOptIdx = answers[quest.id];
       if (chosenOptIdx !== undefined) {
         const opt = quest.options[chosenOptIdx];
@@ -68,6 +89,10 @@ export default function Discovery() {
         ...DOMAINS[key]
       }));
   };
+
+  if (loading) {
+    return <div style={{ textAlign: "center", marginTop: 80, color: "#777" }}>Loading discovery...</div>;
+  }
 
   if (showSummary) {
     const topDomains = getTopDomains();

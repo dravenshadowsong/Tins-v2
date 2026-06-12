@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ASSESSMENT_TASKS, DOMAINS } from "../data/questions";
+import { ASSESSMENT_TASKS, DOMAINS, getAdaptedDeepTasks } from "../data/questions";
 import { api } from "../api";
 
 const SCALE_LABELS = {
@@ -70,15 +70,19 @@ export default function DeepAssessment() {
 
   // Dynamically resolve AI generated tasks or default fallback
   const taskList = useMemo(() => {
+    let tasks = ASSESSMENT_TASKS;
     if (session?.generated_tasks) {
       try {
-        return JSON.parse(session.generated_tasks);
+        tasks = JSON.parse(session.generated_tasks);
       } catch (e) {
         console.error("Error parsing AI generated tasks:", e);
       }
     }
-    return ASSESSMENT_TASKS;
-  }, [session]);
+    if (child) {
+      tasks = getAdaptedDeepTasks(tasks, child.school_year, child.age, child.language);
+    }
+    return tasks;
+  }, [session, child]);
 
   const task = taskList[step];
   const total = taskList.length;

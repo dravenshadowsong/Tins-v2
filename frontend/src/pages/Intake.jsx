@@ -72,7 +72,7 @@ export default function Intake() {
           </div>
           <div className="form-group">
             <label>Age</label>
-            <input type="number" min={9} max={15} placeholder="9-15" value={form.age} onChange={e => set("age", e.target.value)} />
+            <input type="number" min={8} max={18} placeholder="8-18" value={form.age} onChange={e => set("age", e.target.value)} />
           </div>
         </div>
 
@@ -99,7 +99,7 @@ export default function Intake() {
             <label>School class</label>
             <select value={form.school_year} onChange={e => set("school_year", e.target.value)}>
               <option value="">Select class</option>
-              {["Class 4","Class 5","Class 6","Class 7","Class 8","Class 9","Class 10","Not in school"].map(c =>
+              {["Class 4","Class 5","Class 6","Class 7","Class 8","Class 9","Class 10","Class 11","Class 12","Not in school"].map(c =>
                 <option key={c}>{c}</option>
               )}
             </select>

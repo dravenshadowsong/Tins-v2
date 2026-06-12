@@ -2224,8 +2224,514 @@ def load_puzzles_from_db():
     except Exception:
         return DEFAULT_AI_PUZZLES
 
+LOCAL_PRIMARY_OVERRIDES = {
+    "logical_pattern_matrix": {
+        "title": {"English": "The Magic Lock", "Hindi": "जादू की संख्या"},
+        "prompt": {
+            "English": "Add numbers to open the lock. The bottom row has 3 and 5 (= 8). Next are 5 and 9 (= 14). What belongs at the top? (3+5=8, 5+9=14, 8+14=?)",
+            "Hindi": "ताला खोलने के लिए संख्याओं को जोड़ें। सबसे नीचे 3 और 5 हैं, जो 8 बनते हैं। उनके बगल में 5 और 9 हैं, जो 14 बनते हैं। सबसे ऊपर क्या आएगा? (3+5=8, 5+9=14, 8+14=?)"
+        }
+    },
+    "logical_riddle": {
+        "title": {"English": "The Leg Code", "Hindi": "पैरों का खेल"},
+        "prompt": {
+            "English": "A cat is 4, a spider is 8, and an ant is 6. What number represents a snake? 🐍",
+            "Hindi": "बिल्ली 4 है, मकड़ी 8 है, चींटी 6 है। सांप का नंबर क्या होगा? 🐍"
+        }
+    },
+    "spatial_rotation": {
+        "prompt": {
+            "English": "A star pointer turns: first UP ↑, then RIGHT →, then DOWN ↓. Where will it point next?",
+            "Hindi": "तारे की सुई घूमती है: पहले ऊपर इशारा करती है ↑, फिर दाएं →, फिर नीचे ↓। आगे कहाँ इशारा करेगी?"
+        }
+    },
+    "spatial_perspective": {
+        "title": {"English": "Shadow Match", "Hindi": "परछाई का खेल"},
+        "prompt": {
+            "English": "A T-shaped toy has light shining from the LEFT. What shape of shadow does it make on the wall?",
+            "Hindi": "एक 'T' आकार के खिलौने पर बाईं (LEFT) ओर से टॉर्च की रोशनी पड़ने पर दीवार पर कैसी छाया बनेगी?"
+        }
+    },
+    "creative_uses": {
+        "prompt": {
+            "English": "Imagine gravity pulls you SIDEWAYS at school instead of down! 😮 Write 3 funny things that would happen!",
+            "Hindi": "सोचें कि आपके स्कूल में गुरुत्वाकर्षण नीचे के बजाय बगल में काम करने लगे! 😮 3 मजेदार चीजें लिखें जो आपके साथ होंगी!"
+        }
+    },
+    "language_story_order": {
+        "title": {"English": "Story Order", "Hindi": "कहानी जमाएं"},
+        "prompt": {
+            "English": "Put these secret agent message pieces in the correct order to tell the exciting escape story!",
+            "Hindi": "इन वाक्यों को सही क्रम में लगाएं ताकि एक मजेदार भागने की कहानी बन सके!"
+        }
+    },
+    "language_analogy": {
+        "title": {"English": "Word Connection", "Hindi": "शब्दों का मेल"},
+        "prompt": {
+            "English": "Complete this word connection: A FEATHER is to a BIRD as a SCALE is to...?",
+            "Hindi": "शब्दों का संबंध पूरा करें: एक पंख (FEATHER) चिड़िया (BIRD) के लिए है, तो एक शल्क (SCALE) किसके लिए है...?"
+        }
+    },
+    "kinesthetic_motor_planning": {
+        "title": {"English": "The Rope Bridge", "Hindi": "रस्सी का पुल"},
+        "prompt": {
+            "English": "You are on a wobbling rope bridge. Strong wind blows from the right! What is the best way to balance?",
+            "Hindi": "आप एक हिलते हुए रस्सी के पुल पर हैं। दाईं ओर से तेज हवा चलती है! सुरक्षित रहने के लिए आप क्या करेंगे?"
+        },
+        "options": [
+            {"label": {"English": "Bend knees, spread arms, and lean slightly right", "Hindi": "घुटनों को मोड़ें, हाथ फैलाएं और थोड़ा दाईं ओर झुकें"}, "value": 4},
+            {"label": {"English": "Stand straight and close eyes", "Hindi": "बिल्कुल सीधे खड़े रहें और आंखें बंद करें"}, "value": 0},
+            {"label": {"English": "Run fast to the other side", "Hindi": "जितनी तेजी से हो सके दूसरी तरफ दौड़ें"}, "value": 1},
+            {"label": {"English": "Sit down and shout for help", "Hindi": "रस्सी के पुल पर बैठ जाएं और मदद के लिए चिल्लाएं"}, "value": 2}
+        ]
+    },
+    "social_response": {
+        "title": {"English": "Helping a Teammate", "Hindi": "साथी की मदद"},
+        "prompt": {
+            "English": "10 minutes left for a group project. A friend is upset because their drawing was left out. What do you do?",
+            "Hindi": "प्रोजेक्ट जमा करने में 10 मिनट बचे हैं। एक दोस्त रो रहा है क्योंकि उसका चित्र भूल गए। बाकी जमा करना चाहते हैं। आप क्या करेंगे?"
+        },
+        "options": [
+            {"label": {"English": "Submit now and highlight their drawing later", "Hindi": "प्रोजेक्ट जमा कर दें, फिर प्रेजेंटेशन में दोस्त के चित्र की बात करें"}, "value": 4},
+            {"label": {"English": "Delay to add the drawing because friendship matters most", "Hindi": "देर हो जाए तो भी चित्र चिपकाएं क्योंकि दोस्त की खुशी जरूरी है"}, "value": 4},
+            {"label": {"English": "Tape the drawing to the back quickly to save time", "Hindi": "चित्र को पोस्टर के पीछे चिपका दें ताकि समय बच सके"}, "value": 4},
+            {"label": {"English": "Do nothing and let others decide", "Hindi": "चुप रहें और दूसरों को फैसला करने दें"}, "value": 1}
+        ]
+    },
+    "social_conflict_resolution": {
+        "title": {"English": "Playground Argument", "Hindi": "मैदान का झगड़ा"},
+        "prompt": {
+            "English": "Two friends argue about a football goal. The game stops. How do you help them play again?",
+            "Hindi": "फुटबॉल मैच में दो दोस्त गोल को लेकर झगड़ रहे हैं। खेल रुक गया है। आप झगड़ा कैसे सुलझाएंगे?"
+        },
+        "options": [
+            {"label": {"English": "Flip a coin to decide and continue having fun", "Hindi": "सिक्का उछालकर फैसला करें और खेल जारी रखें"}, "value": 4},
+            {"label": {"English": "Shout louder than them to make them stop", "Hindi": "उन दोनों से भी ज़्यादा ज़ोर से चिल्लाएँ ताकि वे चुप हो जाएँ"}, "value": 0},
+            {"label": {"English": "Take the ball and walk home", "Hindi": "फुटबॉल लेकर अपने घर चले जाएं"}, "value": 1},
+            {"label": {"English": "Blame one friend to end it quickly", "Hindi": "बहस को जल्दी खत्म करने के लिए तुरंत एक सहपाठी को दोषी ठहराएं"}, "value": 0}
+        ]
+    },
+    "naturalist_weather_pattern": {
+        "prompt": {
+            "English": "Cold wind blows, birds fly low, and the sky turns dark grey. What is nature telling you?",
+            "Hindi": "अचानक ठंडी हवा चलने लगती है, पक्षी नीचे उड़ते हैं और आसमान काला हो जाता है। प्रकृति क्या बता रही है?"
+        },
+        "options": [
+            {"label": {"English": "Heavy rain is coming soon", "Hindi": "बहुत जल्द तेज बारिश होने वाली है"}, "value": 4},
+            {"label": {"English": "The sun will shine brighter", "Hindi": "सूरज और तेज चमकेगा"}, "value": 0},
+            {"label": {"English": "An earthquake is coming", "Hindi": "भूकंप आने वाला है"}, "value": 0},
+            {"label": {"English": "A cold winter night has started", "Hindi": "ठंड की रात शुरू हो गई है"}, "value": 1}
+        ]
+    },
+    "naturalist_wind_disperse": {
+        "title": {"English": "Butterfly Garden", "Hindi": "तितलियों का बगीचा"},
+        "prompt": {
+            "English": "You want to attract butterflies to your garden. What is the best thing to do?",
+            "Hindi": "आप अपने बगीचे में सुंदर तितलियों को बुलाना चाहते हैं। कौन सा काम सबसे अच्छा होगा?"
+        },
+        "options": [
+            {"label": {"English": "Plant sweet flowers and keep water nearby", "Hindi": "मीठे फूलों के पौधे लगाएं और उथले बर्तन में पानी रखें"}, "value": 4},
+            {"label": {"English": "Spray insect spray", "Hindi": "पौधों से दूसरे कीड़ों को दूर रखने के लिए तेज़ कीटनाशक का छिड़काव करें"}, "value": 0},
+            {"label": {"English": "Cover flowers with plastic bags", "Hindi": "सभी फूलों को प्लास्टिक की शीट से ढक दें"}, "value": 0},
+            {"label": {"English": "Catch butterflies elsewhere and release them", "Hindi": "दूसरे पार्कों से तितलियों को पकड़ें और उन्हें अपने बगीचे में छोड़ दें"}, "value": 1}
+        ]
+    },
+    "intrapersonal_reflection": {
+        "title": {"English": "Hard Work", "Hindi": "कठिन काम"},
+        "prompt": {
+            "English": "When something is hard, do you tell yourself you can do it with practice?",
+            "Hindi": "जब आप किसी बहुत कठिन चुनौती का सामना करते हैं, तो क्या आप खुद से कहते हैं कि अभ्यास करने से आप इसमें बेहतर हो सकते हैं?"
+        },
+        "low": {"English": "No, I get discouraged", "Hindi": "नहीं, मैं हिम्मत हार जाता हूँ"},
+        "high": {"English": "Yes, I love to learn!", "Hindi": "हाँ, मुझे सीखना पसंद है!"}
+    },
+    "intrapersonal_frustration": {
+        "title": {"English": "The Stuck Kite", "Hindi": "फंसी पतंग"},
+        "prompt": {
+            "English": "Your handmade kite gets stuck in a tree. You cannot reach it. What do you do?",
+            "Hindi": "आपकी बनाई पतंग पेड़ पर फंस गई है। आप वहां तक नहीं पहुंच सकते। आप क्या करेंगे?"
+        },
+        "options": [
+            {"label": {"English": "Accept it and design a new, better kite", "Hindi": "मान लें कि वह गई, और नई पतंग बनाने की सोचें"}, "value": 4},
+            {"label": {"English": "Find a long stick to try to get it down", "Hindi": "एक लंबा डंडा ढूंढकर उसे निकालने की कोशिश करें"}, "value": 4},
+            {"label": {"English": "Ask friends for ideas to build a hook tool", "Hindi": "दोस्तों से कहें कि धागा खींचने की मशीन बनाएं"}, "value": 4},
+            {"label": {"English": "Go home angry and give up entirely", "Hindi": "गुस्सा होकर घर चले जाएं और पतंग उड़ाना छोड़ दें"}, "value": 1}
+        ]
+    },
+    "deep_discovery_flow": {
+        "prompt": {
+            "English": "Tell us about a game or drawing that makes you forget about lunchtime! 🎨 What are you doing and why is it so much fun?",
+            "Hindi": "हमें किसी ऐसे खेल या चित्रकारी के बारे में बताएं जिसमें आप दोपहर के खाने का समय भी भूल जाते हैं! 🎨 आप क्या कर रहे होते हैं और यह इतना मजेदार क्यों है?"
+        }
+    },
+    "deep_discovery_pride": {
+        "prompt": {
+            "English": "What is one thing you built or made that you love showing to everyone? 🌟 Describe what you did.",
+            "Hindi": "आपने कौन सी एक ऐसी चीज़ बनाई है जो आप सबको दिखाना चाहते हैं? 🌟 बताएं कि आपने उसे कैसे बनाया।"
+        }
+    },
+    "deep_discovery_curiosity": {
+        "prompt": {
+            "English": "If you could spend a whole day learning anything you want (like magic, space, or building robots), what would it be?",
+            "Hindi": "यदि आप अपनी पसंद की कोई भी चीज़ सीखने (जैसे जादू, अंतरिक्ष, या रोबोट बनाना) में एक पूरा दिन बिता सकते हैं, तो आप क्या चुनेंगे?"
+        }
+    },
+    "deep_discovery_vision": {
+        "prompt": {
+            "English": "If you had a magic wand to fix one big problem in your school or village, what would you fix first?",
+            "Hindi": "यदि आपके पास अपने स्कूल या गाँव की किसी एक बड़ी समस्या को ठीक करने के लिए एक जादुई छड़ी हो, तो आप पहले क्या ठीक करेंगे?"
+        }
+    }
+}
+
+LOCAL_ADVANCED_OVERRIDES = {
+    "logical_pattern_matrix": {
+        "title": {"English": "The Numerical Matrix Crypt", "Hindi": "संख्यात्मक मैट्रिक्स"},
+        "prompt": {
+            "English": "Analyze the sequence hierarchy in a numerical matrix where base inputs of 3 and 5 sum to 8, adjacent inputs 5 and 9 sum to 14, and mid-tier outputs sum to the apex. Calculate the missing value at the apex of the structure. (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)",
+            "Hindi": "संख्यात्मक मैट्रिक्स में अनुक्रम पदानुक्रम का विश्लेषण करें जहां 3 और 5 का योग 8 है, 5 और 9 का योग 14 है, और मध्य-स्तरीय योग शीर्ष की ओर बढ़ते हैं। शीर्ष पर अज्ञात मान की गणना करें। (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)"
+        }
+    },
+    "logical_riddle": {
+        "title": {"English": "The Taxonomic Leg-Count Cipher", "Hindi": "वर्गीकरण कोड"},
+        "prompt": {
+            "English": "An abstract cipher maps biological entities to indices based on their appendages: Feline represents 4, Arachnid represents 8, Formicidae represents 6. Determine the numerical value mapping to Serpentes.",
+            "Hindi": "एक अमूर्त सिफर जीवों को उनके अंगों के आधार पर अनुक्रमित करता है: बिल्ली (Feline) 4 को दर्शाती है, मकड़ी (Arachnid) 8 को, और चींटी (Formicidae) 6 को। सर्प (Serpentes) के लिए सही संख्या निर्धारित करें।"
+        }
+    },
+    "spatial_rotation": {
+        "prompt": {
+            "English": "A vector indicator on a coordinate system rotates sequentially: pointing 90 degrees (North), 0 degrees (East), then 270 degrees (South). Compute the next heading in the cycle.",
+            "Hindi": "एक समन्वय प्रणाली (coordinate system) में एक वेक्टर संकेतक क्रमिक रूप से घूमता है: पहले 90 डिग्री (उत्तर), फिर 0 डिग्री (पूर्व), और फिर 270 डिग्री (दक्षिण)। चक्र में अगले हेडिंग की गणना करें।"
+        }
+    },
+    "spatial_perspective": {
+        "title": {"English": "Orthographic Projection Shadow", "Hindi": "ऑर्थोग्राफिक प्रोजेक्शन शैडो"},
+        "prompt": {
+            "English": "A three-dimensional planar T-shaped structure is cast under a light source from the direct lateral left axis. What two-dimensional orthographic silhouette is projected onto the wall?",
+            "Hindi": "एक त्रि-आयामी (3D) समतलीय T-आकार की संरचना को बाईं ओर (lateral left) से प्रकाश स्रोत के नीचे रखा गया है। दीवार पर कौन सी द्वि-आयामी (2D) ऑर्थोग्राफिक परछाई दिखाई देगी?"
+        }
+    },
+    "creative_uses": {
+        "prompt": {
+            "English": "Hypothesize a scenario where gravity shifts to operate along the horizontal lateral axis rather than the vertical pull. Propose 3 distinct, highly divergent consequences of this physical anomaly on daily routines.",
+            "Hindi": "एक ऐसी स्थिति की परिकल्पना करें जहां गुरुत्वाकर्षण ऊर्ज्वाधर (vertical) खिंचाव के बजाय क्षैतिज (horizontal lateral) अक्ष पर काम करना शुरू कर देता है। दैनिक जीवन पर इस भौतिक विसंगति के 3 बिल्कुल अलग परिणामों का प्रस्ताव दें।"
+        }
+    },
+    "language_story_order": {
+        "title": {"English": "Narrative Reconstruction Sequence", "Hindi": "कथा पुनर्निर्माण क्रम"},
+        "prompt": {
+            "English": "Reconstruct the chronological order of these compound narrative segments to establish a coherent, logically flowing adventure sequence.",
+            "Hindi": "एक सुसंगत और तार्किक कहानी स्थापित करने के लिए इन मिश्रित कथा खंडों के कालानुक्रमिक (chronological) क्रम को पुनर्गठित करें।"
+        }
+    },
+    "language_analogy": {
+        "title": {"English": "Semantic Analogy Bridge", "Hindi": "सिमेंटिक सादृश्य पुल"},
+        "prompt": {
+            "English": "Determine the semantic correlation to complete the analogical bridge: FEATHER is to BIRD as SCALE is to...?",
+            "Hindi": "सादृश्य संबंध को पूरा करने के लिए सही अर्थपूर्ण शब्द का चयन करें: पंख (FEATHER) का जो संबंध पक्षी (BIRD) से है, वही शल्क (SCALE) का किससे है...?"
+        }
+    },
+    "kinesthetic_motor_planning": {
+        "title": {"English": "Biomechanical Stabilization", "Hindi": "बायोमैकेनिकल स्थिरता"},
+        "prompt": {
+            "English": "While traversing an unstable, high rope bridge, you encounter a sudden, high-velocity wind force from the right lateral axis. What physical stabilization strategy best maintains equilibrium?",
+            "Hindi": "एक अस्थिर, ऊंचे रस्सी के पुल को पार करते समय, आपको दाईं ओर से अचानक तेज गति से हवा के झोंके का सामना करना पड़ता है। संतुलन बनाए रखने के लिए सबसे प्रभावी शारीरिक स्थिरीकरण (stabilization) रणनीति क्या है?"
+        },
+        "options": [
+            {"label": {"English": "Lower your center of gravity by flexing knees, extend arms for counterbalance, and lean slightly into the wind", "Hindi": "घुटनों को मोड़कर अपने गुरुत्वाकर्षण केंद्र को कम करें, संतुलन के लिए हाथ फैलाएं, और थोड़ा दाईं ओर (हवा की तरफ) झुकें"}, "value": 4},
+            {"label": {"English": "Align body posture fully vertical, close eyes, and stiffen muscle groups", "Hindi": "शरीर की मुद्रा को पूरी तरह से सीधा संरेखित करें, आंखें बंद करें और अपनी मांसपेशियों को कड़ा करें"}, "value": 0},
+            {"label": {"English": "Increase linear velocity to minimize exposure time on the bridge", "Hindi": "पुल पर समय कम करने के लिए जितनी जल्दी हो सके दौड़ें"}, "value": 1},
+            {"label": {"English": "Decline posture to seated, minimizing wind profile, and signal for external assistance", "Hindi": "हवा के प्रभाव को कम करने के लिए पुल पर बैठ जाएं और बाहरी सहायता का संकेत दें"}, "value": 2}
+        ]
+    },
+    "social_response": {
+        "title": {"English": "Collaborative Milestone Conflict", "Hindi": "सहयोगात्मक कार्य संघर्ष"},
+        "prompt": {
+            "English": "Your team faces an imminent 10-minute project submission deadline. The display is functional, but a teammate is distressed because their contributions were omitted. Other members insist on immediate submission. How do you resolve this?",
+            "Hindi": "आपकी टीम के पास प्रोजेक्ट जमा करने के लिए केवल 10 मिनट बचे हैं। प्रोजेक्ट तैयार है, लेकिन एक टीम का सदस्य परेशान है क्योंकि उसका काम शामिल नहीं किया गया है। अन्य सदस्य तुरंत जमा करने पर जोर दे रहे हैं। आप इसे कैसे हल करेंगे?"
+        },
+        "options": [
+            {"label": {"English": "Submit immediately to secure victory, promising to emphasize their role during the oral presentation", "Hindi": "जीत सुनिश्चित करने के लिए तुरंत जमा करें, और मौखिक प्रस्तुति के दौरान उनकी भूमिका पर प्रकाश डालने का वादा करें"}, "value": 4},
+            {"label": {"English": "Delay submission to integrate their contribution, prioritizing group cohesion over strict adherence to deadlines", "Hindi": "उनके योगदान को शामिल करने के लिए जमा करने में देरी करें, समय सीमा के बजाय समूह एकता को प्राथमिकता दें"}, "value": 4},
+            {"label": {"English": "Execute a rapid compromise, attaching the drawing to the reverse side as a visual appendix to satisfy both interests", "Hindi": "एक त्वरित समझौता खोजें, चित्र को पोस्टर के पीछे 'परिशिष्ट' (Appendix) के रूप में चिपका दें ताकि समय बच सके"}, "value": 4},
+            {"label": {"English": "Maintain neutrality and defer the final decision to the collective group vote", "Hindi": "तटस्थ रहें और अंतिम निर्णय को सामूहिक समूह वोट पर छोड़ दें"}, "value": 1}
+        ]
+    },
+    "social_conflict_resolution": {
+        "title": {"English": "Peer Dispute Resolution", "Hindi": "सहकर्मी विवाद समाधान"},
+        "prompt": {
+            "English": "During a competitive activity, an intense dispute arises between two peers regarding whether a scoring event occurred. Tensions escalate and progress halts. How do you intervene?",
+            "Hindi": "एक प्रतिस्पर्धी गतिविधि के दौरान, दो सहपाठियों के बीच स्कोरिंग को लेकर तीव्र विवाद उत्पन्न हो जाता है। तनाव बढ़ता है और खेल रुक जाता है। आप कैसे हस्तक्षेप करेंगे?"
+        },
+        "options": [
+            {"label": {"English": "Implement a randomized determination (e.g. coin flip) to restore activity, emphasizing that mutual enjoyment supersedes the score", "Hindi": "गतिविधि को फिर से शुरू करने के लिए एक यादृच्छिक तरीका (जैसे सिक्का उछालना) अपनाएं, और यादिलाएं कि आपसी मज़ा जीत से बड़ा है"}, "value": 4},
+            {"label": {"English": "Raise your vocal volume to command attention and demand compliance", "Hindi": "उनका ध्यान आकर्षित करने के लिए अपनी आवाज़ उठाएं और शांत होने की मांग करें"}, "value": 0},
+            {"label": {"English": "Withdraw from the group and remove the central equipment to end the activity", "Hindi": "गतिविधि को समाप्त करने के लिए समूह से हट जाएं और खेल का मुख्य सामान अपने साथ ले जाएं"}, "value": 1},
+            {"label": {"English": "Assign fault immediately to one individual to expedite resolution", "Hindi": "विवाद को जल्दी सुलझाने के लिए तुरंत एक व्यक्ति को दोषी ठहराएं"}, "value": 0}
+        ]
+    },
+    "naturalist_weather_pattern": {
+        "prompt": {
+            "English": "You observe a sudden decrease in air temperature, low-altitude avian flight paths, and dense cumulonimbus cloud formations. What meteorological transition is indicated?",
+            "Hindi": "आप हवा के तापमान में अचानक गिरावट, पक्षियों की कम ऊंचाई पर उड़ान, और आसमान में घने बादलों के निर्माण को देखते हैं। यह कौन सा मौसमी परिवर्तन दर्शाता है?"
+        },
+        "options": [
+            {"label": {"English": "An imminent heavy precipitation event", "Hindi": "बहुत जल्द होने वाली भारी वर्षा (precipitation)"}, "value": 4},
+            {"label": {"English": "Increased solar radiation and clearing conditions", "Hindi": "सूरज का अधिक चमकना और आसमान साफ होना"}, "value": 0},
+            {"label": {"English": "Seismic instability", "Hindi": "भूकंपीय अस्थिरता"}, "value": 0},
+            {"label": {"English": "Onset of a cold anticyclonic front", "Hindi": "शीत हवा के फ्रंट (cold anticyclonic front) की शुरुआत"}, "value": 1}
+        ]
+    },
+    "naturalist_wind_disperse": {
+        "title": {"English": "Ecological Restoration", "Hindi": "पारिस्थितिकी बहाली"},
+        "prompt": {
+            "English": "You intend to optimize the local insect population in a micro-habitat. Which ecological intervention will support native lepidoptera (butterflies) the most?",
+            "Hindi": "आप एक छोटे बगीचे में स्थानीय कीड़ों की आबादी बढ़ाना चाहते हैं। कौन सा उपाय स्थानीय तितलियों (lepidoptera) की सबसे अधिक मदद करेगा?"
+        },
+        "options": [
+            {"label": {"English": "Cultivate native nectar-producing angiosperms and provide accessible hydration stations", "Hindi": "मीठे मकरंद वाले चमकदार स्थानीय फूलों के पौधे लगाएं और पास में उथले बर्तनों में ताजा पानी रखें"}, "value": 4},
+            {"label": {"English": "Apply synthetic chemical insecticides to eliminate competing arthropods", "Hindi": "प्रतिस्पर्धी कीड़ों को समाप्त करने के लिए रासायनिक कीटनाशकों का छिड़काव करें"}, "value": 0},
+            {"label": {"English": "Enclose the flora fully in protective polyethylene sheets to prevent contamination", "Hindi": "प्रदूषण से बचाने के लिए पौधों को पूरी तरह से पॉलीथीन शीट से ढक दें"}, "value": 0},
+            {"label": {"English": "Introduce non-native species captured from distant ecosystems", "Hindi": "दूर के पारिस्थितिकी तंत्र (ecosystems) से पकड़ी गई गैर-स्थानीय प्रजातियों को शामिल करें"}, "value": 1}
+        ]
+    },
+    "intrapersonal_reflection": {
+        "title": {"English": "Cognitive Agility & Growth", "Hindi": "संज्ञानात्मक विकास"},
+        "prompt": {
+            "English": "When confronted with highly challenging cognitive tasks, do you maintain that your abilities in this domain are malleable and improve with systematic effort?",
+            "Hindi": "जब आपका सामना किसी कठिन चुनौती से होता है, तो क्या आप मानते हैं कि अभ्यास और योजनाबद्ध प्रयास के माध्यम से आपकी क्षमताएं विकसित हो सकती हैं?"
+        },
+        "low": {"English": "No, I believe my capacity is fixed and feel discouraged", "Hindi": "नहीं, मेरा मानना है कि मेरी क्षमताएं निश्चित हैं और मैं हतोत्साहित महसूस करता हूँ"},
+        "high": {"English": "Yes, I view challenges as opportunities for skill acquisition", "Hindi": "हाँ, मैं चुनौतियों को नए कौशल सीखने के अवसर के रूप में देखता हूँ"}
+    },
+    "intrapersonal_frustration": {
+        "title": {"English": "Resilience Strategy", "Hindi": "लचीलापन रणनीति"},
+        "prompt": {
+            "English": "You spent significant effort constructing a complex device, but on its initial test it becomes trapped in an inaccessible location. How do you respond?",
+            "Hindi": "आपने एक जटिल उपकरण के निर्माण में काफी समय बिताया, लेकिन परीक्षण के दौरान वह एक दुर्गम स्थान पर फंस गया। आपकी प्रतिक्रिया क्या होगी?"
+        },
+        "options": [
+            {"label": {"English": "Acknowledge the loss, analyze the design failures, and initiate construction of an optimized version", "Hindi": "नुकसान को स्वीकार करें, डिजाइन की विफलताओं का विश्लेषण करें और एक बेहतर संस्करण का निर्माण शुरू करें"}, "value": 4},
+            {"label": {"English": "Acquire specialized tools to attempt recovery, accepting the risk of physical damage to the device", "Hindi": "उपकरण को निकालने के लिए विशेष उपकरणों की व्यवस्था करें, भले ही इसमें समय लगे और उपकरण क्षतिग्रस्त हो"}, "value": 4},
+            {"label": {"English": "Collaborate with peers to engineer a mechanical extraction or pulley apparatus", "Hindi": "उपकरण को निकालने के लिए एक सरल यांत्रिक चरखी (pulley) बनाने के लिए दोस्तों से चर्चा करें"}, "value": 4},
+            {"label": {"English": "Abandon the project, experiencing frustration, and cease activities in this domain", "Hindi": "क्रोधित होकर परियोजना को छोड़ दें और इस क्षेत्र में काम करना पूरी तरह बंद कर दें"}, "value": 1}
+        ]
+    },
+    "deep_discovery_flow": {
+        "prompt": {
+            "English": "Tell us about a complex project, design, or research activity that engages you so deeply that you completely lose track of time. Describe your operational focus.",
+            "Hindi": "हमें किसी ऐसे जटिल प्रोजेक्ट, डिजाइन, या शोध गतिविधि के बारे में बताएं जिसमें आप समय का ध्यान भूल जाते हैं। अपनी परिचालन एकाग्रता (operational focus) का वर्णन करें।"
+        }
+    },
+    "deep_discovery_pride": {
+        "prompt": {
+            "English": "Describe a complex creation, engineered solution, or milestone achievement that you are proud of. What specific problems did you solve?",
+            "Hindi": "अपनी किसी ऐसी जटिल रचना, इंजीनियरिंग समाधान या महत्वपूर्ण उपलब्धि का वर्णन करें जिस पर आपको गर्व है। आपने किन विशिष्ट समस्याओं का समाधान किया?"
+        }
+    },
+    "deep_discovery_curiosity": {
+        "prompt": {
+            "English": "If you could spend one year investigating a single scientific field, technology, or creative domain without academic constraints, what would it be and why?",
+            "Hindi": "यदि आप बिना किसी शैक्षणिक प्रतिबंध के एक पूरा वर्ष किसी एकल वैज्ञानिक क्षेत्र, तकनीक या रचनात्मक डोमेन की जांच करने में बिता सकते हैं, तो वह क्या होगा और क्यों?"
+        }
+    },
+    "deep_discovery_vision": {
+        "prompt": {
+            "English": "Identify a systemic challenge in your community, school, or industry. If you were granted resources, how would you design and implement a solution?",
+            "Hindi": "अपने स्कूल, समुदाय या उद्योग में एक प्रणालीगत चुनौती (systemic challenge) की पहचान करें। यदि आपको संसाधन दिए जाएं, तो आप समाधान कैसे तैयार और लागू करेंगे?"
+        }
+    }
+}
+
+def get_complexity_level(school_year, age):
+    sy = str(school_year or "").lower().strip()
+    if any(c in sy for c in ["class 4", "class 5", "class 6", "grade 4", "grade 5", "grade 6"]):
+        return "PRIMARY"
+    elif any(c in sy for c in ["class 7", "class 8", "grade 7", "grade 8"]):
+        return "MIDDLE"
+    elif any(c in sy for c in ["class 9", "class 10", "grade 9", "grade 10"]):
+        return "SECONDARY"
+    elif any(c in sy for c in ["class 11", "class 12", "grade 11", "grade 12"]):
+        return "SENIOR"
+        
+    try:
+        a = int(age)
+        if a <= 11:
+            return "PRIMARY"
+        elif a <= 13:
+            return "MIDDLE"
+        elif a <= 15:
+            return "SECONDARY"
+        else:
+            return "SENIOR"
+    except Exception:
+        pass
+        
+    return "MIDDLE"
+
+def adapt_task_locally(task, complexity, language):
+    import re
+    is_hindi = str(language or "").lower() == "hindi"
+    pref_lang = "Hindi" if is_hindi else "English"
+    
+    adapted = dict(task)
+    
+    title_val = task.get("title", "")
+    if isinstance(title_val, dict):
+        title_val = title_val.get(pref_lang) or title_val.get("English", "")
+    
+    prompt_val = task.get("prompt", "")
+    if isinstance(prompt_val, dict):
+        prompt_val = prompt_val.get(pref_lang) or prompt_val.get("English", "")
+        
+    key = task.get("key")
+    if complexity == "PRIMARY" and key in LOCAL_PRIMARY_OVERRIDES:
+        override = LOCAL_PRIMARY_OVERRIDES[key]
+        if "title" in override:
+            title_val = override["title"].get(pref_lang) or override["title"].get("English", "")
+        if "prompt" in override:
+            prompt_val = override["prompt"].get(pref_lang) or override["prompt"].get("English", "")
+        if "options" in override and "options" in task:
+            new_opts = []
+            for i, opt in enumerate(task.get("options", [])):
+                if i < len(override["options"]):
+                    over_opt = override["options"][i]
+                    lbl = over_opt["label"].get(pref_lang) or over_opt["label"].get("English", "")
+                    val = opt.get("value", 0) if isinstance(opt, dict) else 0
+                    new_opts.append({"label": lbl, "value": val})
+                else:
+                    new_opts.append(opt)
+            adapted["options"] = new_opts
+    elif complexity in ["SECONDARY", "SENIOR"] and key in LOCAL_ADVANCED_OVERRIDES:
+        override = LOCAL_ADVANCED_OVERRIDES[key]
+        if "title" in override:
+            title_val = override["title"].get(pref_lang) or override["title"].get("English", "")
+        if "prompt" in override:
+            prompt_val = override["prompt"].get(pref_lang) or override["prompt"].get("English", "")
+        if "options" in override and "options" in task:
+            new_opts = []
+            for i, opt in enumerate(task.get("options", [])):
+                if i < len(override["options"]):
+                    over_opt = override["options"][i]
+                    lbl = over_opt["label"].get(pref_lang) or over_opt["label"].get("English", "")
+                    val = opt.get("value", 0) if isinstance(opt, dict) else 0
+                    new_opts.append({"label": lbl, "value": val})
+                else:
+                    new_opts.append(opt)
+            adapted["options"] = new_opts
+    else:
+        if complexity == "PRIMARY":
+            replacements = {
+                r"\bmotivation\b": "drive/fun",
+                r"\bresilience\b": "strength",
+                r"\bmpathy\b": "caring",
+                r"\bleadership\b": "group planning",
+                r"\breflection\b": "thinking",
+                r"\binitiative\b": "first steps",
+                r"\bstrategic\b": "careful",
+                r"\bperspective\b": "view",
+                r"\banalyze\b": "study",
+                r"\banalytical\b": "pattern matching"
+            }
+            for pattern, rep in replacements.items():
+                prompt_val = re.sub(pattern, rep, prompt_val, flags=re.IGNORECASE)
+                
+            if not any(emoji in prompt_val for emoji in ["🎨", "🧩", "🌟", "🏃", "🤝", "🐞", "🧱"]):
+                prompt_val += " 🌟"
+                
+            if "options" in adapted and isinstance(adapted["options"], list):
+                new_opts = []
+                for opt in adapted["options"]:
+                    if isinstance(opt, dict):
+                        lbl = opt.get("label", "")
+                        if isinstance(lbl, dict):
+                            lbl = lbl.get(pref_lang) or lbl.get("English", "")
+                        lbl = re.sub(r"\bresilience\b", "strength", lbl, flags=re.IGNORECASE)
+                        lbl = re.sub(r"\bleadership\b", "helping friends", lbl, flags=re.IGNORECASE)
+                        new_opts.append({"label": lbl, "value": opt.get("value", 0)})
+                    else:
+                        lbl = str(opt)
+                        lbl = re.sub(r"\bresilience\b", "strength", lbl, flags=re.IGNORECASE)
+                        lbl = re.sub(r"\bleadership\b", "helping friends", lbl, flags=re.IGNORECASE)
+                        new_opts.append(lbl)
+                adapted["options"] = new_opts
+                
+        elif complexity in ["SECONDARY", "SENIOR"]:
+            if "career" not in prompt_val.lower() and "project" not in prompt_val.lower() and "business" not in prompt_val.lower():
+                prompt_val = f"Future Planning / Scenario Analysis: {prompt_val}"
+                
+            if "options" in adapted and isinstance(adapted["options"], list):
+                new_opts = []
+                for opt in adapted["options"]:
+                    if isinstance(opt, dict):
+                        lbl = opt.get("label", "")
+                        if isinstance(lbl, dict):
+                            lbl = lbl.get(pref_lang) or lbl.get("English", "")
+                        new_opts.append({"label": lbl, "value": opt.get("value", 0)})
+                    else:
+                        new_opts.append(opt)
+                adapted["options"] = new_opts
+
+    adapted["title"] = title_val
+    adapted["prompt"] = prompt_val
+    return adapted
+
+def adapt_tasks_with_gemini(tasks, complexity, language, api_key):
+    class_range = {
+        "PRIMARY": "Classes 4-6",
+        "MIDDLE": "Classes 7-8",
+        "SECONDARY": "Classes 9-10",
+        "SENIOR": "Classes 11-12"
+    }[complexity]
+    age_range = {
+        "PRIMARY": "8-11 years",
+        "MIDDLE": "12-14 years",
+        "SECONDARY": "14-16 years",
+        "SENIOR": "16-18 years"
+    }[complexity]
+    
+    prompt = f"""
+    You are a supportive child psychologist and expert psychometrician.
+    Your task is to adapt the following list of assessment tasks to be age-appropriate for a student at the {complexity} level (Class range: {class_range}, Age: {age_range}).
+    The preferred language is {language}.
+    
+    CRITICAL RULES FOR ADAPTATION:
+    1. Maintain the EXACT same keys (like `key`, `type`, `domain`, `component`, `metric`) and data structures (options array length and order, sequence array length, etc.) for each task.
+    2. Keep measuring the SAME underlying trait/component (e.g., leadership, mental rotation, etc.).
+    3. Do NOT measure reading comprehension. Adapt the vocabulary and reading load to the specified level.
+    4. Wording guidelines based on level:
+       - PRIMARY (Class 4-6):
+         * Readable within 5-8 seconds, max 20-25 words.
+         * Emojis where helpful. Simple everyday vocabulary. No abstract psychological words (e.g., Motivation, Resilience, Empathy, Leadership, Reflection, Initiative, Strategic, Perspective, Analytical).
+         * Game-like stories (adventures, missions, puzzles, detective challenges, treasure hunts, building challenges, team games).
+         * Prefer concrete "What would you do?" situations.
+       - MIDDLE (Class 7-8):
+         * Medium reading complexity, 1-2 sentence scenarios.
+         * Realistic school situations, sports teams, clubs, competitions, community activities.
+         * Basic career concepts, slightly deeper reflection. Maintain gamification.
+       - SECONDARY (Class 9-10):
+         * Complex scenarios. Future planning, career exploration, sophisticated problem-solving. Deeper reflection.
+         * Career choices, business ideas, technology, social challenges.
+       - SENIOR (Class 11-12):
+         * Full psychometric complexity, advanced reasoning.
+         * Career/university situations, advanced self-reflection, ethical dilemmas, strategic planning, complex team leadership.
+    5. Translate/localize both prompt, title, and options/labels to {language} (if it is Hindi, provide Hindi translations).
+    
+    Original Tasks to Adapt:
+    {json.dumps(tasks, ensure_ascii=False)}
+    
+    Return ONLY a JSON array containing the adapted tasks. Each task in the array must contain all fields of the original task, with the `title`, `prompt`, `options`, `steps`, `shuffled`, `low`, `high` adapted according to the rules. Do not wrap in markdown other than the JSON block.
+    """
+    
+    res = call_gemini_api(prompt, api_key)
+    if res and isinstance(res, list) and len(res) == len(tasks):
+        print(f"[SUCCESS] Successfully adapted {len(tasks)} tasks via Gemini API for {complexity} level.")
+        return res
+    print("[WARNING] Gemini adaptation failed or returned invalid JSON structure. Falling back to local rules.")
+    return None
+
 def generate_ai_tasks(child, discovery_answers):
-    # Perfect balanced discovery mapping
     discovery_mapping = {
         "q_discovery_1": {0: "logical", 1: "creative", 2: "language", 3: "social"},
         "q_discovery_2": {0: "spatial", 1: "creative", 2: "logical", 3: "kinesthetic"},
@@ -2257,16 +2763,14 @@ def generate_ai_tasks(child, discovery_answers):
     if pref_lang not in ["Hindi", "English"]:
         pref_lang = "English"
 
-    selected_tasks = []
+    raw_tasks = []
     db_puzzles = load_puzzles_from_db()
     
-    # Adaptive Selection based on likelihood
     for domain in ["logical", "spatial", "creative", "language", "kinesthetic", "social", "naturalist", "intrapersonal"]:
         exp_val = child.get(f"exp_{domain}", 0)
         disc_count = discovery_counts.get(domain, 0)
         likelihood = exp_val + disc_count
         
-        # High (>= 6) -> 6 questions, Medium (3-5) -> 4 questions, Low (< 3) -> 2 questions
         if likelihood >= 6:
             q_count = 6
         elif likelihood >= 3:
@@ -2275,34 +2779,11 @@ def generate_ai_tasks(child, discovery_answers):
             q_count = 2
             
         domain_puzzles = [p for p in db_puzzles if p["domain"] == domain]
-        # Standardized selection of first q_count questions from the bank
         selected = domain_puzzles[:q_count]
         
         for original_puzzle in selected:
-            p = dict(original_puzzle)
-            p["title"] = original_puzzle["title"].get(pref_lang, original_puzzle["title"]["English"])
-            p["prompt"] = original_puzzle["prompt"].get(pref_lang, original_puzzle["prompt"]["English"])
+            raw_tasks.append(original_puzzle)
             
-            if "low" in original_puzzle and isinstance(original_puzzle["low"], dict):
-                p["low"] = original_puzzle["low"].get(pref_lang, original_puzzle["low"]["English"])
-            if "high" in original_puzzle and isinstance(original_puzzle["high"], dict):
-                p["high"] = original_puzzle["high"].get(pref_lang, original_puzzle["high"]["English"])
-                
-            if "options" in original_puzzle and original_puzzle["type"] == "choice":
-                p["options"] = []
-                for opt in original_puzzle["options"]:
-                    new_opt = dict(opt)
-                    if isinstance(opt["label"], dict):
-                        new_opt["label"] = opt["label"].get(pref_lang, opt["label"]["English"])
-                    p["options"].append(new_opt)
-                    
-            if "steps" in original_puzzle and original_puzzle["type"] == "order_steps":
-                p["steps"] = original_puzzle["steps"].get(pref_lang, original_puzzle["steps"]["English"])
-                p["shuffled"] = original_puzzle["shuffled"].get(pref_lang, original_puzzle["shuffled"]["English"])
-                
-            selected_tasks.append(p)
-            
-    # Append the 4 open-ended deep discovery tasks at the end
     deep_discovery_tasks = [
         {
             "key": "deep_discovery_flow",
@@ -2351,12 +2832,32 @@ def generate_ai_tasks(child, discovery_answers):
     ]
     
     for opt_task in deep_discovery_tasks:
-        p = dict(opt_task)
-        p["title"] = opt_task["title"].get(pref_lang, opt_task["title"]["English"])
-        p["prompt"] = opt_task["prompt"].get(pref_lang, opt_task["prompt"]["English"])
-        selected_tasks.append(p)
+        raw_tasks.append(opt_task)
 
-    return selected_tasks
+    complexity = get_complexity_level(child.get("school_year"), child.get("age"))
+    
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    adapted_tasks = None
+    
+    if api_key:
+        try:
+            adapted_tasks = adapt_tasks_with_gemini(raw_tasks, complexity, pref_lang, api_key)
+        except Exception as e:
+            print(f"[ERROR] Gemini adaptation failed: {e}. Falling back to local rules.")
+            
+    if not adapted_tasks:
+        adapted_tasks = []
+        for task in raw_tasks:
+            try:
+                adapted_tasks.append(adapt_task_locally(task, complexity, pref_lang))
+            except Exception as e:
+                print(f"[ERROR] Local adaptation failed for task {task.get('key')}: {e}")
+                p = dict(task)
+                p["title"] = task["title"].get(pref_lang, task["title"]["English"]) if isinstance(task.get("title"), dict) else task.get("title", "")
+                p["prompt"] = task["prompt"].get(pref_lang, task["prompt"]["English"]) if isinstance(task.get("prompt"), dict) else task.get("prompt", "")
+                adapted_tasks.append(p)
+                
+    return adapted_tasks
 
 @app.route("/api/sessions/<int:sid>/discovery", methods=["POST"])
 def submit_discovery(sid):
