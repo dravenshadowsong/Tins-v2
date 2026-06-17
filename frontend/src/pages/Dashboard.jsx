@@ -36,8 +36,8 @@ export default function Dashboard() {
   const [passSuccess, setPassSuccess] = useState("");
 
   useEffect(() => {
-    const cachedUser = localStorage.getItem("goat_user");
-    if (!cachedUser || !localStorage.getItem("goat_token")) {
+    const cachedUser = sessionStorage.getItem("goat_user");
+    if (!cachedUser || !sessionStorage.getItem("goat_token")) {
       navigate("/login");
       return;
     }
@@ -52,7 +52,7 @@ export default function Dashboard() {
         if (profileResponse && profileResponse.user) {
           activeUser = profileResponse.user;
           setUser(profileResponse.user);
-          localStorage.setItem("goat_user", JSON.stringify(profileResponse.user));
+          sessionStorage.setItem("goat_user", JSON.stringify(profileResponse.user));
         }
 
         const activeRole = (activeUser.role || "").toLowerCase();
@@ -112,7 +112,7 @@ export default function Dashboard() {
             Registered Email: {user?.email}
           </div>
           <button className="btn btn-outline btn-full" onClick={() => {
-            localStorage.clear();
+            sessionStorage.clear();
             navigate("/login");
           }} style={{ fontWeight: 700 }}>
             Sign Out & Back to Login
@@ -146,7 +146,7 @@ export default function Dashboard() {
               🔑 Change Password
             </button>
             <button className="btn btn-outline" onClick={() => {
-              localStorage.clear();
+              sessionStorage.clear();
               navigate("/login");
             }}>
               Sign Out

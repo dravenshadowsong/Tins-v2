@@ -28,8 +28,8 @@ export default function Login() {
 
       // 2. Exchange Supabase session token for local session
       const result = await api.loginSupabase({ token: data.session.access_token });
-      localStorage.setItem("goat_token", result.token);
-      localStorage.setItem("goat_user", JSON.stringify(result.user));
+      sessionStorage.setItem("goat_token", result.token);
+      sessionStorage.setItem("goat_user", JSON.stringify(result.user));
       if (redirect) {
         navigate(redirect);
       } else {
@@ -40,8 +40,8 @@ export default function Login() {
       // Fallback for offline testing or legacy seeded accounts
       try {
         const result = await api.login({ email, password });
-        localStorage.setItem("goat_token", result.token);
-        localStorage.setItem("goat_user", JSON.stringify(result.user));
+        sessionStorage.setItem("goat_token", result.token);
+        sessionStorage.setItem("goat_user", JSON.stringify(result.user));
         if (redirect) {
           navigate(redirect);
         } else {

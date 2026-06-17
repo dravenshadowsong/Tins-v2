@@ -24,7 +24,7 @@ export default function Facilitator() {
 
   useEffect(() => {
     async function load() {
-      if (!localStorage.getItem("goat_token")) {
+      if (!sessionStorage.getItem("goat_token")) {
         navigate("/login");
         return;
       }

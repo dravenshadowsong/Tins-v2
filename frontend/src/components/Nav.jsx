@@ -5,8 +5,8 @@ export default function Nav() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isAssessment = pathname.includes("/discovery") || pathname.includes("/assess");
-  const loggedIn = Boolean(localStorage.getItem("goat_token"));
-  const userJson = localStorage.getItem("goat_user");
+  const loggedIn = Boolean(sessionStorage.getItem("goat_token"));
+  const userJson = sessionStorage.getItem("goat_user");
   const user = userJson ? JSON.parse(userJson) : null;
 
   const handleLogout = async () => {
@@ -15,8 +15,8 @@ export default function Nav() {
     } catch (e) {
       console.error("Logout request failed:", e);
     }
-    localStorage.removeItem("goat_token");
-    localStorage.removeItem("goat_user");
+    sessionStorage.removeItem("goat_token");
+    sessionStorage.removeItem("goat_user");
     navigate("/");
   };
 

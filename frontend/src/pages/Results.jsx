@@ -477,7 +477,7 @@ export default function Results() {
 
   const safeName = (child?.name || "Student").trim().replace(/\s+/g, "_");
   const personalizedSnapshot = `${child?.name || "The student"} appears to demonstrate strong developmental indicators in ${primaryLabel} activities, particularly in open-ended exploration and problem-solving styles. These findings suggest a natural comfort with ${primaryLabel} concepts. Secondary indicators also suggest potential in ${secondaryDomains.map(d => DOMAINS[d]?.label || d).join(" and ")} areas. Nurturing these talents in structured settings will provide a clearer picture of their long-term growth.`;
-  const pdfUrl = `${api.downloadPDF(sid)}?token=${localStorage.getItem("goat_token")}&cid=${cid}`;
+  const pdfUrl = `${api.downloadPDF(sid)}?token=${sessionStorage.getItem("goat_token")}&cid=${cid}`;
 
   return (
     <div style={{ maxWidth: 1040, margin: "0 auto", padding: "20px 10px" }}>

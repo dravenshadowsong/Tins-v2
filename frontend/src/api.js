@@ -4,7 +4,7 @@ export const BASE = import.meta.env.DEV
   : (import.meta.env.VITE_API_URL || "https://tins-v2-1.onrender.com/api");
 
 async function req(method, path, body) {
-  const token = localStorage.getItem("goat_token");
+  const token = sessionStorage.getItem("goat_token");
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: {

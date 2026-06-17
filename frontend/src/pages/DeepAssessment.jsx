@@ -34,7 +34,7 @@ export default function DeepAssessment() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("goat_token");
+    const token = sessionStorage.getItem("goat_token");
     if (!token) {
       navigate(`/login?redirect=${encodeURIComponent(`/assess/${sid}?cid=${cid}`)}`);
     }
