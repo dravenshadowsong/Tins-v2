@@ -573,9 +573,44 @@ export default function Results() {
 
   const getFallbackTegData = () => {
     const data = {};
+    let expData = null;
+    if (child?.exposure_data) {
+      try {
+        expData = typeof child.exposure_data === "string" ? JSON.parse(child.exposure_data) : child.exposure_data;
+      } catch (e) {
+        expData = null;
+      }
+    }
+
+    let exposure_scores = {};
+    if (expData && typeof expData === "object") {
+      const q = {};
+      for (let i = 1; i <= 12; i++) {
+        q[`q${i}`] = parseFloat(expData[`q${i}`] !== undefined ? expData[`q${i}`] : 0);
+      }
+      const domain_exposures = {
+        logical: (q.q1 + q.q2) / 2.0,
+        spatial: (q.q3 + q.q1) / 2.0,
+        creative: (q.q4 + q.q5) / 2.0,
+        kinesthetic: (q.q8 + q.q5) / 2.0,
+        language: (q.q11 + q.q6) / 2.0,
+        social: (q.q7 + q.q6) / 2.0,
+        naturalist: q.q9,
+        intrapersonal: (q.q11 + q.q12) / 2.0
+      };
+      Object.entries(domain_exposures).forEach(([dom, val]) => {
+        exposure_scores[dom] = Math.round((val / 4.0) * 100);
+      });
+    }
+
     Object.entries(integ).forEach(([domain, talent_score]) => {
-      const exp_val = child?.[`exp_${domain}`] !== undefined ? child[`exp_${domain}`] : 1;
-      const exposure_score = Math.round((exp_val / 3) * 100);
+      let exposure_score = 0;
+      if (exposure_scores[domain] !== undefined) {
+        exposure_score = exposure_scores[domain];
+      } else {
+        const exp_val = child?.[`exp_${domain}`] !== undefined ? child[`exp_${domain}`] : 1;
+        exposure_score = Math.round((exp_val / 3) * 100);
+      }
       const opportunity_score = Math.min(100, Math.round((talent_score + (100 - exposure_score)) * 0.56));
       let teg_status = "Exploratory";
       if (talent_score >= 75 && exposure_score <= 33) teg_status = "High Potential, Low Exposure";
@@ -1339,17 +1374,28 @@ export default function Results() {
             
             {untapped_potential.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {untapped_potential.map(u => (
-                  <div key={u} className="summary-card-v4" style={{ border: "1px dashed #F7B731", background: "rgba(247, 183, 49, 0.05)", padding: "16px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                      <span style={{ fontWeight: 800, fontSize: "15px", color: "#B7791F" }}>🔥 Untapped potential in {DOMAINS[u]?.label}</span>
-                      <span className="domain-badge" style={{ background: "#F7B731", color: "#fff", fontSize: "11px", fontWeight: 800 }}>High Potential + Low Exposure</span>
+                {untapped_potential.map(u => {
+                  let exposureText = "";
+                  if (activeTegData && activeTegData[u]) {
+                    exposureText = `Exposure Score: ${activeTegData[u].exposure_score}%`;
+                  } else {
+                    const legacyVal = child && child[`exp_${u}`] !== undefined ? child[`exp_${u}`] : 0;
+                    const legacyLabel = ["Never tried it", "Tried a few times"][legacyVal] || "Never tried it";
+                    exposureText = `Exposure Level: ${legacyLabel}`;
+                  }
+
+                  return (
+                    <div key={u} className="summary-card-v4" style={{ border: "1px dashed #F7B731", background: "rgba(247, 183, 49, 0.05)", padding: "16px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                        <span style={{ fontWeight: 800, fontSize: "15px", color: "#B7791F" }}>🔥 Untapped potential in {DOMAINS[u]?.label}</span>
+                        <span className="domain-badge" style={{ background: "#F7B731", color: "#fff", fontSize: "11px", fontWeight: 800 }}>High Potential + Low Exposure</span>
+                      </div>
+                      <p style={{ fontSize: "13px", lineHeight: "1.5", color: "#4A4A4A", margin: 0, fontWeight: 500 }}>
+                        {child?.name} scored an impressive <strong>{integ[u]}%</strong> in deep assessment tasks for <strong>{DOMAINS[u]?.label}</strong> despite having very limited practice or access opportunities in the past ({exposureText}). Introductory exposure is highly recommended.
+                      </p>
                     </div>
-                    <p style={{ fontSize: "13px", lineHeight: "1.5", color: "#4A4A4A", margin: 0, fontWeight: 500 }}>
-                      {child?.name} scored an impressive <strong>{integ[u]}%</strong> in deep assessment tasks for <strong>{DOMAINS[u]?.label}</strong> despite having very limited practice or access opportunities in the past (Exposure Level: {["Never tried it", "Tried a few times"][child[`exp_${u}`] || 0]}). Introductory exposure is highly recommended.
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div style={{ padding: "16px", background: "rgba(0, 184, 169, 0.04)", border: "1px dashed #00B8A9", borderRadius: "12px", textAlign: "center", fontSize: "13.5px", color: "#00B8A9", fontWeight: 700 }}>

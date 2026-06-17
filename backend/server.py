@@ -616,6 +616,15 @@ def init_db():
             
             cursor.execute(schema_sql)
             conn.commit()
+            
+            # Migration check: Add exposure_data if not exists
+            try:
+                cursor.execute("ALTER TABLE children ADD COLUMN IF NOT EXISTS exposure_data TEXT")
+                conn.commit()
+            except Exception as e_alter:
+                print(f"[DATABASE WARNING] Failed to dynamically alter children on Postgres: {e_alter}")
+                conn.rollback()
+                
             cursor.close()
             
             # Seed data for postgres
@@ -949,7 +958,8 @@ def init_db():
                 "exp_naturalist": "INTEGER DEFAULT 0",
                 "exp_intrapersonal": "INTEGER DEFAULT 0",
                 "organization_id": "INTEGER REFERENCES organizations(id) ON DELETE CASCADE",
-                "center_id": "INTEGER REFERENCES centers(id) ON DELETE SET NULL"
+                "center_id": "INTEGER REFERENCES centers(id) ON DELETE SET NULL",
+                "exposure_data": "TEXT"
             },
             "workshops": {
                 "organization_id": "INTEGER REFERENCES organizations(id) ON DELETE CASCADE"
@@ -1266,6 +1276,11 @@ def list_children():
                 d["tq_scores"] = json.loads(d["tq_scores"])
             except Exception:
                 pass
+        if d.get("exposure_data"):
+            try:
+                d["exposure_data"] = json.loads(d["exposure_data"])
+            except Exception:
+                pass
         res.append(d)
     return jsonify(res)
 
@@ -1301,6 +1316,8 @@ def create_child():
             except ValueError:
                 center_id = None
 
+    exposure_val = json.dumps(data.get("exposure_data")) if data.get("exposure_data") else None
+
     supabase_id = None
     if supabase_client:
         try:
@@ -1319,7 +1336,8 @@ def create_child():
                 "exp_naturalist": int(data.get("exp_naturalist", 0)),
                 "exp_intrapersonal": int(data.get("exp_intrapersonal", 0)),
                 "organization_id": org_id,
-                "center_id": center_id
+                "center_id": center_id,
+                "exposure_data": exposure_val
             }
             print(f"DEBUG: Attempting Supabase insert for child with data: {insert_data}")
             res = supabase_client.table("children").insert(insert_data).execute()
@@ -1339,8 +1357,8 @@ def create_child():
                   (id, name, age, language, school_year, gender,
                    exp_kinesthetic, exp_creative, exp_logical, exp_spatial,
                    exp_social, exp_language, exp_naturalist, exp_intrapersonal,
-                   organization_id, center_id)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                   organization_id, center_id, exposure_data)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """, (
                 supabase_id,
                 data["name"], data["age"], data.get("language", "Hindi"),
@@ -1349,7 +1367,8 @@ def create_child():
                 data.get("exp_logical", 0),    data.get("exp_spatial", 0),
                 data.get("exp_social", 0),     data.get("exp_language", 0),
                 data.get("exp_naturalist", 0), data.get("exp_intrapersonal", 0),
-                org_id, center_id
+                org_id, center_id,
+                exposure_val
             ))
             db.commit()
         else:
@@ -1361,8 +1380,8 @@ def create_child():
               (name, age, language, school_year, gender,
                exp_kinesthetic, exp_creative, exp_logical, exp_spatial,
                exp_social, exp_language, exp_naturalist, exp_intrapersonal,
-               organization_id, center_id)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+               organization_id, center_id, exposure_data)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             data["name"], data["age"], data.get("language", "Hindi"),
             data.get("school_year", ""), data.get("gender", ""),
@@ -1370,7 +1389,8 @@ def create_child():
             data.get("exp_logical", 0),    data.get("exp_spatial", 0),
             data.get("exp_social", 0),     data.get("exp_language", 0),
             data.get("exp_naturalist", 0), data.get("exp_intrapersonal", 0),
-            org_id, center_id
+            org_id, center_id,
+            exposure_val
         ))
         db.commit()
         child_id = cur.lastrowid
@@ -1397,6 +1417,12 @@ def get_child(cid):
     if not row: return jsonify({"error": "Not found"}), 404
     
     child_dict = dict(row)
+    if child_dict.get("exposure_data"):
+        try:
+            child_dict["exposure_data"] = json.loads(child_dict["exposure_data"])
+        except Exception:
+            pass
+
     if role != "master_admin":
         if child_dict.get("organization_id") != org_id:
             return jsonify({"error": "Forbidden: Child belongs to another organization"}), 403
@@ -4294,11 +4320,38 @@ def calculate_gti(sorted_domains):
     return gti_score, gti_label
 
 def calculate_teg(final_scores, child):
+    exposure_data = child.get("exposure_data")
+    if isinstance(exposure_data, str) and exposure_data:
+        try:
+            exposure_data = json.loads(exposure_data)
+        except Exception:
+            exposure_data = None
+            
+    if exposure_data and isinstance(exposure_data, dict):
+        q = {}
+        for i in range(1, 13):
+            q[f"q{i}"] = float(exposure_data.get(f"q{i}", 0))
+            
+        domain_exposures = {
+            "logical": (q["q1"] + q["q2"]) / 2.0,
+            "spatial": (q["q3"] + q["q1"]) / 2.0,
+            "creative": (q["q4"] + q["q5"]) / 2.0,
+            "kinesthetic": (q["q8"] + q["q5"]) / 2.0,
+            "language": (q["q11"] + q["q6"]) / 2.0,
+            "social": (q["q7"] + q["q6"]) / 2.0,
+            "naturalist": q["q9"],
+            "intrapersonal": (q["q11"] + q["q12"]) / 2.0
+        }
+        exposure_scores = {dom: int(round((val / 4.0) * 100)) for dom, val in domain_exposures.items()}
+    else:
+        exposure_scores = {}
+        for domain in final_scores.keys():
+            exp_val = child.get(f"exp_{domain}", 0)
+            exposure_scores[domain] = int(round((exp_val / 3.0) * 100))
+
     teg_data = {}
     for domain, talent_score in final_scores.items():
-        exp_val = child.get(f"exp_{domain}", 0)
-        exposure_score = int(round((exp_val / 3.0) * 100))
-        
+        exposure_score = exposure_scores.get(domain, 0)
         opportunity_score = min(100, int(round((talent_score + (100 - exposure_score)) * 0.56)))
         
         if talent_score >= 75 and exposure_score <= 33:

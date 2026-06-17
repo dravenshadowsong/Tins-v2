@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS children (
     exp_language INTEGER DEFAULT 0,
     exp_naturalist INTEGER DEFAULT 0,
     exp_intrapersonal INTEGER DEFAULT 0,
+    exposure_data TEXT,
     organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
     center_id INTEGER REFERENCES centers(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
