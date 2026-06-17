@@ -1189,28 +1189,85 @@ def list_children():
     db = get_db()
     if role == "master_admin":
         rows = db.execute("""
-            SELECT c.*, cnt.name AS center_name
+            SELECT c.*, cnt.name AS center_name,
+                   s.id AS latest_session_id,
+                   s.top_domain,
+                   s.personality_data,
+                   s.tq_scores
             FROM children c
             LEFT JOIN centers cnt ON cnt.id = c.center_id
+            LEFT JOIN (
+                SELECT s1.id, s1.child_id, s1.top_domain, s1.personality_data, s1.tq_scores
+                FROM sessions s1
+                INNER JOIN (
+                    SELECT child_id, MAX(id) as max_id
+                    FROM sessions
+                    WHERE status = 'complete'
+                    GROUP BY child_id
+                ) s2 ON s1.id = s2.max_id
+            ) s ON s.child_id = c.id
             ORDER BY c.created_at DESC
         """).fetchall()
     elif role == "admin": # Org Admin
         rows = db.execute("""
-            SELECT c.*, cnt.name AS center_name
+            SELECT c.*, cnt.name AS center_name,
+                   s.id AS latest_session_id,
+                   s.top_domain,
+                   s.personality_data,
+                   s.tq_scores
             FROM children c
             LEFT JOIN centers cnt ON cnt.id = c.center_id
+            LEFT JOIN (
+                SELECT s1.id, s1.child_id, s1.top_domain, s1.personality_data, s1.tq_scores
+                FROM sessions s1
+                INNER JOIN (
+                    SELECT child_id, MAX(id) as max_id
+                    FROM sessions
+                    WHERE status = 'complete'
+                    GROUP BY child_id
+                ) s2 ON s1.id = s2.max_id
+            ) s ON s.child_id = c.id
             WHERE c.organization_id = ?
             ORDER BY c.created_at DESC
         """, (org_id,)).fetchall()
     else: # Facilitator, etc.
         rows = db.execute("""
-            SELECT c.*, cnt.name AS center_name
+            SELECT c.*, cnt.name AS center_name,
+                   s.id AS latest_session_id,
+                   s.top_domain,
+                   s.personality_data,
+                   s.tq_scores
             FROM children c
             LEFT JOIN centers cnt ON cnt.id = c.center_id
+            LEFT JOIN (
+                SELECT s1.id, s1.child_id, s1.top_domain, s1.personality_data, s1.tq_scores
+                FROM sessions s1
+                INNER JOIN (
+                    SELECT child_id, MAX(id) as max_id
+                    FROM sessions
+                    WHERE status = 'complete'
+                    GROUP BY child_id
+                ) s2 ON s1.id = s2.max_id
+            ) s ON s.child_id = c.id
             WHERE c.organization_id = ? AND c.center_id = ?
             ORDER BY c.created_at DESC
         """, (org_id, center_id)).fetchall()
-    return jsonify([dict(r) for r in rows])
+        
+    res = []
+    for r in rows:
+        d = dict(r)
+        if d.get("personality_data"):
+            try:
+                d["personality_data"] = json.loads(d["personality_data"])
+            except Exception:
+                pass
+        if d.get("tq_scores"):
+            try:
+                d["tq_scores"] = json.loads(d["tq_scores"])
+            except Exception:
+                pass
+        res.append(d)
+    return jsonify(res)
 
 @app.route("/api/children", methods=["POST"])
 def create_child():
@@ -3005,8 +3062,20 @@ def analyze_and_save_session(sid, data):
     if latest_note:
         latest_note = dict(latest_note)
 
+    # Calculate past completed sessions count
+    past_sessions_count = 0
+    try:
+        past_sessions = db.execute(
+            "SELECT COUNT(*) as count FROM sessions WHERE child_id = ? AND status = 'complete' AND id != ?",
+            (child["id"], sid)
+        ).fetchone()
+        if past_sessions:
+            past_sessions_count = past_sessions["count"]
+    except Exception as e:
+        print(f"DEBUG: Exception calculating past sessions count: {e}")
+
     # Run scoring engine with full context
-    scores = score_responses(responses, child, discovery_answers, latest_note)
+    scores = score_responses(responses, child, discovery_answers, latest_note, past_sessions_count=past_sessions_count)
 
     top_domain = scores["primary_domain"]
     top_3 = scores["secondary_domains"] # standard compatibility
@@ -3106,6 +3175,23 @@ def analyze_and_save_session(sid, data):
         )
         pattern_analysis = f"Deductive problem-solving speed was balanced. Memory and attention were stable throughout scored cognitive challenges. Divergence levels show strong flexible reasoning."
 
+    # 1. Resolve Personas
+    top_3_list = [scores["primary_domain"]] + scores["secondary_domains"]
+    personas = resolve_personas(top_3_list)
+
+    # 2. Extract NLP signals
+    nlp_signals = extract_nlp_signals(open_ended_answers, api_key)
+
+    # 3. Generate Roadmap
+    sec_dom = scores["secondary_domains"][0] if scores["secondary_domains"] else scores["primary_domain"]
+    roadmap = generate_dynamic_roadmap(scores["primary_domain"], sec_dom, child.get("age", 12), final_scores, child, api_key)
+
+    # 4. Generate Workshops
+    workshops = generate_workshop_recommendations(scores["primary_domain"], sec_dom)
+
+    # 5. Career Pathways
+    career_pathways = get_career_pathways(scores["primary_domain"], sec_dom, child.get("school_year", ""))
+
     personality_val = {
         "metrics": scores["metrics"],
         "facilitator_adjustment": fac_adjustment,
@@ -3113,6 +3199,7 @@ def analyze_and_save_session(sid, data):
         "confidence_level": scores["confidence_level"],
         "confidence_score": scores["confidence_score"],
         "confidence_desc": scores["confidence_desc"],
+        "evidence_sources": scores["evidence_sources"],
         "untapped_potential": scores["untapped_potential"],
         "primary_domain": scores["primary_domain"],
         "secondary_domains": scores["secondary_domains"],
@@ -3122,6 +3209,14 @@ def analyze_and_save_session(sid, data):
         "separation_index": scores["separation_index"],
         "multiple_talents_detected": scores["multiple_talents_detected"],
         "action_plan": scores["action_plan"],
+        "personas": personas,
+        "nlp_signals": nlp_signals,
+        "gti_score": scores["gti_score"],
+        "gti_label": scores["gti_label"],
+        "teg_data": scores["teg_data"],
+        "roadmap": roadmap,
+        "workshops": workshops,
+        "career_pathways": career_pathways,
         "recommendations": {
             "confidence": scores["confidence_level"],
             "rationale": f"Confidence is rated {scores['confidence_level']} based on a task completion density score of {scores['confidence_score']}/100.",
@@ -3792,12 +3887,573 @@ ACTION_PLANS = {
     }
 }
 
-def score_responses(responses, child, discovery_answers=None, facilitator_note=None):
+def get_text_completion_score(val):
+    if not val:
+        return 0.0
+    text = ""
+    if isinstance(val, dict):
+        text = val.get("value", "") or val.get("text", "") or ""
+    else:
+        text = str(val)
+    words = len(text.strip().split())
+    if words >= 15:
+        return 100.0
+    elif words >= 5:
+        return 60.0
+    elif words > 0:
+        return 30.0
+    return 0.0
+
+def local_nlp_extract(open_ended):
+    signals = {}
+    
+    # 1. Curiosity
+    q_text = (open_ended.get("deep_discovery_curiosity", "") or "").lower()
+    if any(k in q_text for k in ["learn", "why", "how", "know", "science", "read", "explore", "discover", "cautious"]):
+        signals["curiosity"] = {"status": True, "evidence": f"Expressed clear learning interest: '{open_ended.get('deep_discovery_curiosity')[:60]}...'"}
+    else:
+        signals["curiosity"] = {"status": False, "evidence": "No clear curiosity indicators detected in written response."}
+        
+    # 2. Self-awareness & Reflection
+    pride_text = (open_ended.get("deep_discovery_pride", "") or "").lower()
+    if any(k in pride_text for k in ["proud", "feel", "happy", "made", "build", "create", "achieve", "win"]):
+        signals["self_awareness"] = {"status": True, "evidence": f"Reflected on personal milestone: '{open_ended.get('deep_discovery_pride')[:60]}...'"}
+        signals["reflection"] = {"status": True, "evidence": "Reflective thinking shown in proudest achievement description."}
+    else:
+        signals["self_awareness"] = {"status": False, "evidence": "Self-awareness indicators are exploratory in self-reflection response."}
+        signals["reflection"] = {"status": False, "evidence": "Reflection indicators are exploratory."}
+
+    # 3. Imagination & Creativity
+    flow_text = (open_ended.get("deep_discovery_flow", "") or "").lower()
+    if any(k in flow_text for k in ["draw", "art", "paint", "build", "craft", "make", "blocks", "play", "game", "write"]):
+        signals["imagination"] = {"status": True, "evidence": f"Described immersive creative activity: '{open_ended.get('deep_discovery_flow')[:60]}...'"}
+    else:
+        signals["imagination"] = {"status": False, "evidence": "Imagination indicators are exploratory."}
+
+    # 4. Problem-solving & Leadership
+    vision_text = (open_ended.get("deep_discovery_vision", "") or "").lower()
+    if any(k in vision_text for k in ["solve", "help", "school", "people", "clean", "tree", "plant", "water", "food"]):
+        signals["problem_solving"] = {"status": True, "evidence": f"Offered community problem-solving vision: '{open_ended.get('deep_discovery_vision')[:60]}...'"}
+        signals["leadership"] = {"status": True, "evidence": "Considers collective benefit and peer organization in future vision."}
+    else:
+        signals["problem_solving"] = {"status": False, "evidence": "Problem-solving indicators are exploratory."}
+        signals["leadership"] = {"status": False, "evidence": "Leadership indicators are exploratory."}
+
+    # 5. EQ
+    if any("feel" in t or "help" in t or "friend" in t for t in [flow_text, pride_text, q_text, vision_text]):
+        signals["eq"] = {"status": True, "evidence": "Demonstrated empathy and social awareness in descriptions."}
+    else:
+        signals["eq"] = {"status": False, "evidence": "EQ indicators are exploratory."}
+
+    # 6. Communication Style
+    total_len = sum(len(t.split()) for t in open_ended.values() if isinstance(t, str))
+    if total_len > 40:
+        signals["communication_style"] = {"status": True, "evidence": f"Descriptive and detailed communication style ({total_len} words total)."}
+    else:
+        signals["communication_style"] = {"status": False, "evidence": "Concise and brief communication style."}
+
+    return signals
+
+def get_parent_intelligence(primary):
+    playbook = {
+        "creative": {
+            "motivators": "Open-ended projects, visual design choices, creative writing, and self-expression.",
+            "discouragers": "Highly repetitive rote tasks, lack of autonomy, and rigid step-by-step rules.",
+            "environments": "Design labs, art studios, project-based learning centers, and sensory-rich spaces."
+        },
+        "spatial": {
+            "motivators": "Constructing physical/3D models, mechanical diagrams, scale drawings, and hands-on tools.",
+            "discouragers": "Sitting for long hours of purely passive listening or lecture-based study.",
+            "environments": "Maker spaces, robotics studios, carpentry/craft shops, and interactive museums."
+        },
+        "logical": {
+            "motivators": "Structured mathematical pattern puzzles, strategy games like chess, and coding challenges.",
+            "discouragers": "Vague goals, emotional arguments with no logical resolution, and arbitrary rule-making.",
+            "environments": "STEM labs, chess/board-game clubs, computer labs, and debate chambers."
+        },
+        "social": {
+            "motivators": "Group discussions, collaborative team activities, leading peers, and helping friends.",
+            "discouragers": "Prolonged isolated work, lack of human interaction, and competitive individual ranking systems.",
+            "environments": "Student council rooms, community volunteer spaces, group workspace layouts, and team sports."
+        },
+        "language": {
+            "motivators": "Storytelling, writing scripts, debates, giving speeches, and playing word games.",
+            "discouragers": "Rote visual transcription without verbal reasoning or discussion.",
+            "environments": "Drama stages, debate chambers, reading clubs, and writing seminars."
+        },
+        "naturalist": {
+            "motivators": "Eco-trails, planting seeds, observing micro-ecosystems, and classification of plants/animals.",
+            "discouragers": "Completely desk-bound instruction, sterile environments with no window light or plants.",
+            "environments": "Botanical gardens, conservation areas, school greenhouse yards, and nature trails."
+        },
+        "kinesthetic": {
+            "motivators": "Agility games, dancing, physical sports, and direct hand-on testing of materials.",
+            "discouragers": "Sedentary classroom lectures, lack of physical breaks, and purely abstract conceptual study.",
+            "environments": "Gymnasiums, dance studios, sports complexes, and experiential building zones."
+        },
+        "intrapersonal": {
+            "motivators": "Independent goals, journal writing, quiet reflection, and self-selected learning topics.",
+            "discouragers": "Highly chaotic or competitive team settings with zero personal quiet time.",
+            "environments": "Quiet libraries, individual study booths, cozy corners, and self-guided project rooms."
+        }
+    }
+    return playbook.get(primary, playbook["logical"])
+
+def get_career_pathways(primary, secondary, school_year):
+    pathways = {
+        "creative": {
+            "careers": ["Interaction/UI Designer", "Creative Director", "Architect", "Animator"],
+            "projects": ["Build a personal digital art folio", "Write and illustrate a comic book"],
+            "competitions": ["National Junior Art Contest", "School Design-a-Thon"],
+            "tracks": ["Visual Arts & Animation", "UX/UI Design & Creative Writing"]
+        },
+        "spatial": {
+            "careers": ["Robotics Engineer", "Civil Engineer", "Industrial Product Designer", "Urban Planner"],
+            "projects": ["Design a cardboard bridge model that supports 5kg", "Program a robotic arm model"],
+            "competitions": ["Junior Robotics Olympiad", "Bridge Building Competition"],
+            "tracks": ["Engineering & CAD Modeling", "Product Design & Robotics"]
+        },
+        "logical": {
+            "careers": ["Data Scientist", "Software Engineer", "Systems Analyst", "Financial Quant"],
+            "projects": ["Analyze school attendance patterns using spreadsheets", "Build a python text-adventure game"],
+            "competitions": ["Mathematics Olympiad", "CodeForces Junior Hackathon"],
+            "tracks": ["Computer Science & Algorithms", "Advanced Statistics & Mathematics"]
+        },
+        "social": {
+            "careers": ["Project Manager", "Organization Director", "Human Resources Head", "Public Relations Expert"],
+            "projects": ["Coordinate a school-wide recycling drive", "Lead a student volunteer group"],
+            "competitions": ["Social Entrepreneurship Pitch Challenge", "Youth Leadership Summit"],
+            "tracks": ["Management & Communications", "Public Policy & Social Innovation"]
+        },
+        "language": {
+            "careers": ["Journalist", "Public Speaker/Advocate", "Content Editor", "Legal Advisor"],
+            "projects": ["Publish a school newsletter", "Write and record a 3-episode audio podcast"],
+            "competitions": ["National School Debate Championship", "Model United Nations (MUN)"],
+            "tracks": ["Journalism & Media", "Pre-Law & Rhetoric Studies"]
+        },
+        "naturalist": {
+            "careers": ["Environmental Scientist", "Agricultural Specialist", "Conservation Biologist", "Veterinarian"],
+            "projects": ["Build a water filtration model", "Establish a native butterfly patch at school"],
+            "competitions": ["Eco-Innovation Fair", "Science & Botany Olympiad"],
+            "tracks": ["Environmental Engineering", "Botany & Animal Health Science"]
+        },
+        "kinesthetic": {
+            "careers": ["Physical Therapist", "Athletic Coach", "Choreographer", "Product Safety Tester"],
+            "projects": ["Create a weekly core agility exercise manual", "Choreograph a team dance routine"],
+            "competitions": ["Athletic Decathlon", "State Choreography Competition"],
+            "tracks": ["Kinesiology & Athletic Coaching", "Performing Arts & Ergonomic Design"]
+        },
+        "intrapersonal": {
+            "careers": ["Research Scientist", "Psychologist/Counselor", "Strategic Planner", "Writer/Scholar"],
+            "projects": ["Log 30 days of emotional response mapping", "Write a personal philosophy journal"],
+            "competitions": ["Social Sciences Research Paper Exhibit", "Creative Writing Portfolio Review"],
+            "tracks": ["Psychology & Behavioral Studies", "Philosophy & Scientific Research Methodologies"]
+        }
+    }
+    p_path = pathways.get(primary, pathways["logical"])
+    s_path = pathways.get(secondary, pathways["creative"])
+    return {
+        "careers": list(set(p_path["careers"][:2] + s_path["careers"][:2])),
+        "projects": [p_path["projects"][0], s_path["projects"][0]],
+        "competitions": [p_path["competitions"][0], s_path["competitions"][0]],
+        "tracks": [p_path["tracks"][0], s_path["tracks"][0]]
+    }
+
+def generate_workshop_recommendations(primary, secondary):
+    workshops_map = {
+        "creative": {"title": "Art & Design", "desc": "Explore visual composition, painting, and digital sketching."},
+        "logical": {"title": "STEM & Coding", "desc": "Learn block-based coding, logical circuits, and math puzzles."},
+        "spatial": {"title": "Tinkering & Making", "desc": "Hands-on model building, electronics assembly, and woodworking."},
+        "social": {"title": "Peer Leadership", "desc": "Public speaking, coordination games, and community projects."},
+        "language": {"title": "Debate & Storytelling", "desc": "Scriptwriting, poetry slams, and team debates."},
+        "naturalist": {"title": "Young Naturalist Trails", "desc": "Nature mapping, ecology walks, and soil chemistry investigations."},
+        "kinesthetic": {"title": "Sports & Movement", "desc": "Agility routines, gymnastics, coordination drills, and dance."},
+        "intrapersonal": {"title": "Goal Setting & Reflective Writing", "desc": "Mindfulness practices, logging milestones, and emotional journaling."}
+    }
+    p_ws = workshops_map.get(primary, workshops_map["logical"])
+    s_ws = workshops_map.get(secondary, workshops_map["creative"])
+    rationale = (
+        f"Although {primary.capitalize()} is the dominant strength, integrating {secondary.capitalize()} "
+        f"activities will strengthen complementary capabilities, building a well-rounded skill pathway."
+    )
+    return [
+        {"title": p_ws["title"], "desc": p_ws["desc"], "reason": f"Nurtures the primary cognitive strength in {primary}."},
+        {"title": s_ws["title"], "desc": s_ws["desc"], "reason": rationale}
+    ]
+
+def generate_dynamic_roadmap(primary, secondary, age, scores, child, api_key=None):
+    try:
+        age_val = int(age)
+    except Exception:
+        age_val = 12
+        
+    if age_val <= 9:
+        age_bracket = "PRIMARY (Ages 6-9)"
+    elif age_val <= 12:
+        age_bracket = "MIDDLE (Ages 10-12)"
+    elif age_val <= 14:
+        age_bracket = "SECONDARY (Ages 13-14)"
+    else:
+        age_bracket = "SENIOR (Ages 15+)"
+
+    if api_key:
+        prompt = f"""
+        You are an expert child development specialist and curriculum designer.
+        Create a personalized 4-week talent development roadmap for a child named {child.get("name", "the child")} (Age {age_val}, Bracket: {age_bracket}).
+        Natural strengths:
+        - Primary strength: {primary.capitalize()} (score: {scores.get(primary, 85)})
+        - Secondary strength: {secondary.capitalize()} (score: {scores.get(secondary, 75)})
+        
+        Generate a 4-week schedule that blends both domains:
+        - Week 1: Introductory {primary.capitalize()} Project
+        - Week 2: Complementary {secondary.capitalize()} Skill
+        - Week 3: Advanced {primary.capitalize()} Integration
+        - Week 4: Cross-Domain Milestone (combining {primary.capitalize()} and {secondary.capitalize()})
+
+        For each week, define:
+        1. "title": A descriptive activity title
+        2. "expected_outcome": What the child will achieve by the end of the week (adjusted for {age_bracket})
+        3. "parent_action": A specific action or support role for the parent
+        4. "mentor_action": A guidance, reviewing, or coaching action for the mentor
+
+        Please respond with a raw JSON block only (no markdown, no formatting, no wrapper) containing a dict with keys: week_1, week_2, week_3, week_4.
+        Example structure:
+        {{
+           "week_1": {{ "title": "...", "expected_outcome": "...", "parent_action": "...", "mentor_action": "..." }},
+           ...
+        }}
+        """
+        try:
+            res = call_gemini_api(prompt, api_key)
+            if res and isinstance(res, dict) and "week_1" in res:
+                return res
+        except Exception as e:
+            print(f"DEBUG: Gemini roadmap generation exception: {e}")
+
+    prim_acts = {
+        "creative": [
+            {"title": "Visual Storyboard Project", "expected_outcome": "Complete a 4-panel storyboard illustrating a personal story", "parent_action": "Provide sketching supplies and ask them to explain the characters", "mentor_action": "Review the narrative flow and give constructive encouragement"},
+            {"title": "Open-Ended Redesign Challenge", "expected_outcome": "Redesign a common household object with 3 new functions", "parent_action": "Help find recyclable items like cardboard/plastic for building", "mentor_action": "Discuss utility vs aesthetics in the design concept"}
+        ],
+        "spatial": [
+            {"title": "3D Scale Model Building", "expected_outcome": "Construct a scale model of a room or dream house", "parent_action": "Provide cardboard, ruler, glue, and a tape measure", "mentor_action": "Review scale ratios and structural stability"},
+            {"title": "Mechanical Assembly Investigation", "expected_outcome": "Take apart an old toy/device to diagram its moving parts", "parent_action": "Provide simple screwdrivers and supervise safety", "mentor_action": "Explain gears, pivots, or linkage systems"}
+        ],
+        "logical": [
+            {"title": "Sequence Cryptography Quest", "expected_outcome": "Create and solve a 5-step cipher puzzle for family members", "parent_action": "Try solving the child's cipher and discuss patterns", "mentor_action": "Introduce basic number systems or binary coding concepts"},
+            {"title": "Logic Matrix Design", "expected_outcome": "Construct a grid puzzle representing a deductive mystery", "parent_action": "Discuss how clue conditions isolate unique variables", "mentor_action": "Evaluate the mathematical logical soundness of the puzzle"}
+        ],
+        "social": [
+            {"title": "Community Project Coordinator", "expected_outcome": "Plan a small community or household cleanup activity", "parent_action": "Support coordinating with neighbors and join the cleanup", "mentor_action": "Provide tips on delegation and motivating team members"},
+            {"title": "Classroom Activity Facilitation", "expected_outcome": "Organize and lead a group game for 4+ friends", "parent_action": "Provide snacks and space for friends to gather", "mentor_action": "Reflect on how conflicts were handled and how to listen"}
+        ],
+        "language": [
+            {"title": "Public Speaking Storytelling", "expected_outcome": "Deliver a 3-minute oral presentation about a favorite topic", "parent_action": "Listen to practice runs and film a short clip", "mentor_action": "Coach on voice modulation, eye contact, and pacing"},
+            {"title": "Dialogue Script Writing", "expected_outcome": "Write a 2-page theatrical dialogue script between two characters", "parent_action": "Read one of the characters' parts aloud with them", "mentor_action": "Provide feedback on character voice and narrative hook"}
+        ],
+        "naturalist": [
+            {"title": "Local Biodiversity Survey", "expected_outcome": "Map and classify 10 distinct plant or insect species in area", "parent_action": "Accompany on a park walk and help photograph species", "mentor_action": "Explain botanical/zoological classification families"},
+            {"title": "Micro-Ecosystem Observation", "expected_outcome": "Log soil humidity and organism activity in a 1-meter zone", "parent_action": "Help set up a small garden pot or compost bin", "mentor_action": "Introduce ecological cycles and decomposer concepts"}
+        ],
+        "kinesthetic": [
+            {"title": "Obstacle Course Coordination", "expected_outcome": "Design and time a physical movement layout with 5 stages", "parent_action": "Supervise safety and track execution times with a stopwatch", "mentor_action": "Discuss biomechanical control and motor planning"},
+            {"title": "Rhythmic Coordination Routine", "expected_outcome": "Perform a coordinated rhythm sequence using feet and hands", "parent_action": "Clap along and practice the rhythm together", "mentor_action": "Review syncopation and movement memory pacing"}
+        ],
+        "intrapersonal": [
+            {"title": "Mindfulness Goal Mapping", "expected_outcome": "Log daily practice times and write emotional reflections", "parent_action": "Allocate 15 minutes of quiet time at home each evening", "mentor_action": "Review goal-setting logs and coach on stress resilience"},
+            {"title": "Reflective Essay Journal", "expected_outcome": "Write a 1-page essay outlining personal growth and hurdles", "parent_action": "Discuss the essay with them, sharing personal hurdle stories", "mentor_action": "Provide validation and help construct action milestones"}
+        ]
+    }
+    
+    p_acts_raw = prim_acts.get(primary, prim_acts["logical"])
+    s_acts_raw = prim_acts.get(secondary, prim_acts["creative"])
+    
+    def adapt_activity(act, bracket):
+        adapted = act.copy()
+        if bracket == "PRIMARY (Ages 6-9)":
+            adapted["expected_outcome"] += " (adapted for younger children: focus on basic exploration and simple steps)"
+            adapted["parent_action"] = "Support closely: " + adapted["parent_action"]
+        elif bracket == "SECONDARY (Ages 13-14)":
+            adapted["expected_outcome"] += " (adapted for middle schoolers: add research notes or a digital presentation component)"
+            adapted["mentor_action"] = "Guide critical thinking: " + adapted["mentor_action"]
+        elif bracket == "SENIOR (Ages 15+)":
+            adapted["expected_outcome"] += " (adapted for older youth: focus on real-world utility, documentation, and advanced tools)"
+            adapted["mentor_action"] = "Challenge with industry-standard practices: " + adapted["mentor_action"]
+        return adapted
+
+    p_acts = [adapt_activity(a, age_bracket) for a in p_acts_raw]
+    s_acts = [adapt_activity(a, age_bracket) for a in s_acts_raw]
+
+    return {
+        "week_1": {
+            "title": f"Introductory {primary.capitalize()} Project: {p_acts[0]['title']}",
+            "expected_outcome": p_acts[0]["expected_outcome"],
+            "parent_action": p_acts[0]["parent_action"],
+            "mentor_action": p_acts[0]["mentor_action"]
+        },
+        "week_2": {
+            "title": f"Complementary {secondary.capitalize()} Skill: {s_acts[0]['title']}",
+            "expected_outcome": s_acts[0]["expected_outcome"],
+            "parent_action": s_acts[0]["parent_action"],
+            "mentor_action": s_acts[0]["mentor_action"]
+        },
+        "week_3": {
+            "title": f"Advanced {primary.capitalize()} Integration: {p_acts[1]['title']}",
+            "expected_outcome": p_acts[1]["expected_outcome"],
+            "parent_action": p_acts[1]["parent_action"],
+            "mentor_action": p_acts[1]["mentor_action"]
+        },
+        "week_4": {
+            "title": f"Cross-Domain Milestone: {s_acts[1]['title']}",
+            "expected_outcome": f"Synthesize {primary.capitalize()} with {secondary.capitalize()}: {s_acts[1]['expected_outcome']}",
+            "parent_action": s_acts[1]["parent_action"],
+            "mentor_action": s_acts[1]["mentor_action"]
+        }
+    }
+
+def resolve_personas(top_3):
+    persona_mapping = {
+        "creative": {"title": "The Creator", "emoji": "🎨", "desc": "Enjoys generating original ideas, imagining possibilities, and expressing thoughts through visual and artistic mediums."},
+        "spatial": {"title": "The Builder", "emoji": "🔧", "desc": "Thinks in three dimensions, loves constructing physical or mental models, and naturally understands design structures."},
+        "logical": {"title": "The Thinker", "emoji": "🧠", "desc": "Highly analytical, naturally notices logical patterns, loves solving puzzles, and thrives on structured reasoning."},
+        "social": {"title": "The Leader", "emoji": "🤝", "desc": "Possesses natural social intelligence, easily connects with others, coordinates collaborative activities, and guides groups."},
+        "language": {"title": "The Communicator", "emoji": "💬", "desc": "Natural affinity for words, excels in verbal storytelling, expresses ideas with high clarity, and loves debate."},
+        "naturalist": {"title": "The Observer", "emoji": "🌱", "desc": "Unusual detail-awareness in nature, notices micro-patterns in ecosystems, and loves classifying details."},
+        "kinesthetic": {"title": "The Explorer", "emoji": "🏃", "desc": "Learns best through physical doing, movement, and hands-on trial-and-error, showing great motor control."},
+        "intrapersonal": {"title": "The Researcher", "emoji": "🧘", "desc": "Exhibits deep self-awareness, prefers reflecting in quiet spaces, understands personal motivations, and sets goals."}
+    }
+    p = persona_mapping.get(top_3[0], persona_mapping["logical"])
+    s = persona_mapping.get(top_3[1], persona_mapping["creative"])
+    e = persona_mapping.get(top_3[2], persona_mapping["kinesthetic"])
+    prim_pi = get_parent_intelligence(top_3[0])
+    sec_pi = get_parent_intelligence(top_3[1])
+    emg_pi = get_parent_intelligence(top_3[2])
+    recs = {
+        "creative": {"strengths": ["Vivid Imagination", "Divergent Thinking"], "growth": ["Structured Completion", "Attention to Rules"]},
+        "spatial": {"strengths": ["3D Visualization", "Structural Logic"], "growth": ["Verbalizing Concepts", "Patience with Theory"]},
+        "logical": {"strengths": ["Pattern Recognition", "Reasoning & Logic"], "growth": ["Handling Vague Goals", "Accepting Ambiguity"]},
+        "social": {"strengths": ["Empathy & Influence", "Group Organization"], "growth": ["Delegating Tasks", "Sustaining Quiet Focus"]},
+        "language": {"strengths": ["Verbal Fluency", "Narrative Structure"], "growth": ["Listening Carefully", "Silent Individual Practice"]},
+        "naturalist": {"strengths": ["Sensory Observation", "Taxonomic Classification"], "growth": ["Abstract Symbolic Tasks", "Sedentary Study"]},
+        "kinesthetic": {"strengths": ["Fine-Motor Precision", "Coordination & Agility"], "growth": ["Passive Auditory Learning", "Prolonged Sitting"]},
+        "intrapersonal": {"strengths": ["Emotional Reflexivity", "Independent Planning"], "growth": ["Highly Competitive Groups", "Spontaneous Speaking"]}
+    }
+    p_rec = recs.get(top_3[0], recs["logical"])
+    s_rec = recs.get(top_3[1], recs["creative"])
+    e_rec = recs.get(top_3[2], recs["kinesthetic"])
+    return {
+        "primary": {
+            "key": top_3[0],
+            "title": p["title"],
+            "emoji": p["emoji"],
+            "desc": p["desc"],
+            "strengths": p_rec["strengths"],
+            "growth": p_rec["growth"],
+            "environments": [prim_pi["environments"]]
+        },
+        "secondary": {
+            "key": top_3[1],
+            "title": s["title"],
+            "emoji": s["emoji"],
+            "desc": s["desc"],
+            "strengths": s_rec["strengths"],
+            "growth": s_rec["growth"],
+            "environments": [sec_pi["environments"]]
+        },
+        "emerging": {
+            "key": top_3[2],
+            "title": e["title"],
+            "emoji": e["emoji"],
+            "desc": e["desc"],
+            "strengths": e_rec["strengths"],
+            "growth": e_rec["growth"],
+            "environments": [emg_pi["environments"]]
+        }
+    }
+
+def calculate_gti(sorted_domains):
+    if not sorted_domains:
+        return 0, "Explorer"
+    top_1 = sorted_domains[0][1] if len(sorted_domains) > 0 else 0
+    top_2 = sorted_domains[1][1] if len(sorted_domains) > 1 else 0
+    top_3 = sorted_domains[2][1] if len(sorted_domains) > 2 else 0
+    
+    gti_score = int(round(0.5 * top_1 + 0.3 * top_2 + 0.2 * top_3))
+    
+    if gti_score < 50:
+        gti_label = "Explorer"
+    elif gti_score <= 64:
+        gti_label = "Emerging"
+    elif gti_score <= 74:
+        gti_label = "Developing"
+    elif gti_score <= 84:
+        gti_label = "Advanced"
+    else:
+        gti_label = "Exceptional"
+        
+    return gti_score, gti_label
+
+def calculate_teg(final_scores, child):
+    teg_data = {}
+    for domain, talent_score in final_scores.items():
+        exp_val = child.get(f"exp_{domain}", 0)
+        exposure_score = int(round((exp_val / 3.0) * 100))
+        
+        opportunity_score = min(100, int(round((talent_score + (100 - exposure_score)) * 0.56)))
+        
+        if talent_score >= 75 and exposure_score <= 33:
+            teg_status = "High Potential, Low Exposure"
+        elif talent_score >= 75 and exposure_score > 66:
+            teg_status = "Nurtured Strength"
+        elif talent_score >= 75 and 33 < exposure_score <= 66:
+            teg_status = "Active Development"
+        elif 50 <= talent_score < 75 and exposure_score <= 50:
+            teg_status = "Developing Potential"
+        else:
+            teg_status = "Exploratory"
+            
+        teg_data[domain] = {
+            "talent_score": talent_score,
+            "exposure_score": exposure_score,
+            "opportunity_score": opportunity_score,
+            "teg_status": teg_status
+        }
+    return teg_data
+
+def extract_nlp_signals(open_ended_answers, api_key=None):
+    indicators = {
+        "curiosity": {"title": "Curiosity", "active": False, "evidence": ""},
+        "self_awareness": {"title": "Self-awareness", "active": False, "evidence": ""},
+        "problem_solving": {"title": "Problem-solving", "active": False, "evidence": ""},
+        "imagination": {"title": "Imagination", "active": False, "evidence": ""},
+        "leadership": {"title": "Leadership", "active": False, "evidence": ""},
+        "emotional_intelligence": {"title": "Emotional intelligence", "active": False, "evidence": ""},
+        "reflection": {"title": "Reflection", "active": False, "evidence": ""},
+        "communication_style": {"title": "Communication style", "active": False, "evidence": ""},
+    }
+    
+    combined_text = " ".join([v for v in open_ended_answers.values() if v]).strip()
+    if not combined_text:
+        return indicators
+
+    if api_key:
+        prompt = f"""
+        You are an advanced educational AI psychometric analyst.
+        Analyze these four open-ended responses written by a child:
+        - What makes them lose track of time (Flow State): "{open_ended_answers.get("deep_discovery_flow", "")}"
+        - Proudest achievement (Pride): "{open_ended_answers.get("deep_discovery_pride", "")}"
+        - One-year learning quest (Curiosity): "{open_ended_answers.get("deep_discovery_curiosity", "")}"
+        - Future problem solving vision (Vision): "{open_ended_answers.get("deep_discovery_vision", "")}"
+
+        We are looking for evidence of 8 specific semantic indicators:
+        1. curiosity: showing a love for learning, questioning, and exploring new ideas.
+        2. self_awareness: understanding one's own feelings, strengths, or personal goals.
+        3. problem_solving: showing logical approach, analytical interest, or desire to fix/solve things.
+        4. imagination: showcasing creativity, drawing, writing, building, or divergent thinking.
+        5. leadership: showing initiative to guide others, organize groups, or coordinate.
+        6. emotional_intelligence: showing empathy, caring about others' feelings, or supporting peers.
+        7. reflection: looking back at past achievements or learning from experiences.
+        8. communication_style: expressiveness in writing, using rich explanation or narrative.
+
+        Please respond with a raw JSON block only (no markdown, no formatting, no wrapper) containing:
+        A dict mapping each key (curiosity, self_awareness, problem_solving, imagination, leadership, emotional_intelligence, reflection, communication_style) to an object with:
+        - "active": boolean (true if there is clear evidence in the text, false otherwise)
+        - "evidence": string (a concise quote or description of evidence from the child's text, e.g. "Expressed pride in 'making a cardboard game'")
+        """
+        try:
+            res = call_gemini_api(prompt, api_key)
+            if res and isinstance(res, dict):
+                for key, val in res.items():
+                    if key in indicators and isinstance(val, dict):
+                        indicators[key]["active"] = bool(val.get("active", False))
+                        indicators[key]["evidence"] = str(val.get("evidence", ""))
+                return indicators
+        except Exception as e:
+            print(f"DEBUG: NLP Gemini analysis exception: {e}")
+            
+    lower_text = combined_text.lower()
+    keywords_map = {
+        "curiosity": {
+            "en": ["learn", "explore", "ask", "why", "how", "wonder", "find", "read", "know", "discover", "science", "space", "stars", "coding", "history"],
+            "hi": ["सीख", "जानना", "खोज", "पूछ", "क्यूं", "क्यों", "कैसे", "पता", "विज्ञान", "अंतरिक्ष", "तारे"]
+        },
+        "self_awareness": {
+            "en": ["myself", "i feel", "happy", "proud", "my dream", "my goal", "improve", "like to", "personal"],
+            "hi": ["सोच", "लगता", "महसूस", "खुश", "गर्व", "खुद", "सपना", "लक्ष्य", "पसंद"]
+        },
+        "problem_solving": {
+            "en": ["solve", "fix", "repair", "code", "math", "problem", "puzzle", "reason", "logic", "mechanic", "engineer", "build a machine"],
+            "hi": ["सुलझा", "ठीक", "हल", "समस्या", "गणित", "पहेली", "मशीन", "इंजीनियर"]
+        },
+        "imagination": {
+            "en": ["build", "draw", "create", "paint", "make", "imagine", "invent", "story", "craft", "design", "art", "music", "sketch", "crafting"],
+            "hi": ["बनाना", "चित्र", "रचना", "कहानी", "बनाऊं", "बनाऊ", "सृजन", "कल्पना", "कला", "संगीत", "रेखाचित्र"]
+        },
+        "leadership": {
+            "en": ["lead", "guide", "organize", "captain", "direct", "head", "group project", "manage", "coordinate"],
+            "hi": ["नेतृत्व", "मार्गदर्शन", "कैप्टन", "टीम", "निर्देशन", "लीड"]
+        },
+        "emotional_intelligence": {
+            "en": ["friend", "help", "care", "feelings", "support", "understand", "kind", "family", "together", "share"],
+            "hi": ["दोस्त", "मित्र", "मदद", "भावना", "समझ", "दया", "ख्याल", "परिवार", "साथ", "बांटना"]
+        },
+        "reflection": {
+            "en": ["past", "completed", "remember", "learnt", "achieved", "learned", "succeeded", "won", "yesterday"],
+            "hi": ["बीता", "याद", "सीखा", "सफलता", "जीता", "अतीत", "पहले"]
+        },
+        "communication_style": {
+            "en": ["talk", "speak", "write", "explain", "tell", "express", "say", "debate", "speech", "english", "hindi", "language", "words"],
+            "hi": ["बात", "बोल", "लिख", "बता", "कह", "भाषण", "वाद-विवाद", "भाषा", "शब्द"]
+        }
+    }
+
+    def find_evidence_snippet(key, keywords_en, keywords_hi):
+        for q_name, q_val in open_ended_answers.items():
+            if not q_val:
+                continue
+            q_val_lower = q_val.lower()
+            for kw in keywords_en + keywords_hi:
+                if kw in q_val_lower:
+                    idx = q_val_lower.find(kw)
+                    start = max(0, idx - 15)
+                    end = min(len(q_val), idx + len(kw) + 25)
+                    snippet = q_val[start:end].strip()
+                    source_label = {
+                        "deep_discovery_flow": "Flow State",
+                        "deep_discovery_pride": "Pride",
+                        "deep_discovery_curiosity": "Curiosity",
+                        "deep_discovery_vision": "Vision"
+                    }.get(q_name, "discovery answers")
+                    return f"Expressed in {source_label}: '...{snippet}...'"
+        return ""
+
+    for key, mapping in keywords_map.items():
+        en_kw = mapping["en"]
+        hi_kw = mapping["hi"]
+        found = False
+        for kw in en_kw + hi_kw:
+            if kw in lower_text:
+                found = True
+                break
+        if found:
+            indicators[key]["active"] = True
+            indicators[key]["evidence"] = find_evidence_snippet(key, en_kw, hi_kw)
+            
+    return indicators
+
+def score_responses(responses, child, discovery_answers=None, facilitator_note=None, weights=None, past_sessions_count=0):
     """
     Core scoring engine.
     Computes Discovery (15%), Exposure (10%), Deep Assessment (60% / 75%), and Facilitator (15%) weights.
     Returns standard tq_scores, integrated, eq_score, visualizer_score, metrics, and new analytics.
     """
+    if weights is None:
+        weights = {
+            "assessment": 0.60,
+            "open_responses": 0.20,
+            "facilitator": 0.20
+        }
+    
     # Balanced discovery mapping
     discovery_mapping = {
         "q_discovery_1": {0: "logical", 1: "creative", 2: "language", 3: "social"},
@@ -3934,25 +4590,51 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
         else:
             facilitator_scores[domain] = 70.0
 
-    # Combine with weights
+    # Combine with weights (Adjustable weights implementation)
+    if not has_notes:
+        w_assess = 0.80
+        w_open = 0.20
+        w_fac = 0.0
+    else:
+        w_assess = weights.get("assessment", 0.60)
+        w_open = weights.get("open_responses", 0.20)
+        w_fac = weights.get("facilitator", 0.20)
+
+    # Calculate Open Responses score
+    open_scores = {}
+    flow_score = get_text_completion_score(responses.get("deep_discovery_flow"))
+    pride_score = get_text_completion_score(responses.get("deep_discovery_pride"))
+    curiosity_score = get_text_completion_score(responses.get("deep_discovery_curiosity"))
+    vision_score = get_text_completion_score(responses.get("deep_discovery_vision"))
+    avg_open_all = (flow_score + pride_score + curiosity_score + vision_score) / 4.0
+
     blended = {}
     for domain in DOMAIN_WEIGHTS.keys():
         s_disc = (discovery_counts.get(domain, 0) / 6.0) * 100.0
         s_exp = (child.get(f"exp_{domain}", 0) / 3.0) * 100.0
         s_deep = tq_raw_scores.get(domain, 0.0)
         s_fac = facilitator_scores[domain]
-        if has_notes:
-            blended[domain] = 0.15 * s_disc + 0.10 * s_exp + 0.60 * s_deep + 0.15 * s_fac
+        
+        # Domain-specific open score mapping
+        if domain == "intrapersonal":
+            s_open = (flow_score + pride_score + curiosity_score) / 3.0
+        elif domain == "social":
+            s_open = vision_score
         else:
-            blended[domain] = 0.15 * s_disc + 0.10 * s_exp + 0.75 * s_deep
+            s_open = avg_open_all
+            
+        s_assess = 0.75 * s_deep + 0.15 * s_disc + 0.10 * s_exp
+        blended[domain] = w_assess * s_assess + w_open * s_open + w_fac * s_fac
 
-    # Stretch-normalization to prevent domain clustering
+    # Wide stretch-normalization to prevent domain clustering (target 35 to 95)
     max_raw = max(blended.values())
     min_raw = min(blended.values())
     final_scores = {}
     if max_raw > min_raw:
-        target_max = max(75.0, min(95.0, max_raw))
-        target_min = max(35.0, min(60.0, min_raw))
+        target_min = 35.0
+        target_max = 95.0
+        target_min = 35.0
+        target_max = 95.0
         for domain, raw_val in blended.items():
             ratio = (raw_val - min_raw) / (max_raw - min_raw)
             final_scores[domain] = int(round(target_min + ratio * (target_max - target_min)))
@@ -3972,7 +4654,7 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
     # 1. Task Completion Rate (max 30 pts)
     task_pts = 30 if tasks_answered >= 24 else 20 if tasks_answered >= 16 else 10 if tasks_answered >= 8 else 5
     
-    # 2. Response Consistency (max 20 pts)
+    # 2. Response Consistency/accuracy (max 20 pts)
     metrics = extract_metric_summary(responses)
     accuracy_rate = metrics.get("accuracy_rate", 0.0) or 0.0
     consistency_pts = 20 if 0.4 <= accuracy_rate <= 0.85 else 10
@@ -3984,22 +4666,39 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
     separation_pts = 20 if separation_gap >= 12 else 10 if separation_gap >= 6 else 5
     separation_desc = "strong separation between domains" if separation_gap >= 12 else "moderate domain differentiation"
     
-    # 4. Evidence Density (max 15 pts)
-    strong_domains = [d for d, ev in evidence.items() if ev["level"] == "Strong"]
-    density_pts = 15 if len(strong_domains) >= 2 else 10 if len(strong_domains) == 1 else 5
+    # 4. Facilitator note validation status (max 15 pts)
+    fac_validation_pts = 15 if facilitator_note is not None else 0
     
-    # 5. Exposure Alignment (max 15 pts)
-    top_exposure_domains = sorted(child.items(), key=lambda x: x[1] if x[0].startswith("exp_") else -1, reverse=True)
-    top_exp_key = top_exposure_domains[0][0].replace("exp_", "") if top_exposure_domains else ""
-    alignment_pts = 15 if top_domain == top_exp_key else 5
+    # 5. Repeated assessment count (max 15 pts)
+    repeated_pts = 15 if past_sessions_count >= 2 else 10 if past_sessions_count == 1 else 0
+
+    confidence_score = task_pts + consistency_pts + separation_pts + fac_validation_pts + repeated_pts
     
-    confidence_score = task_pts + consistency_pts + separation_pts + density_pts + alignment_pts
-    confidence_level = "High" if confidence_score >= 75 else "Moderate" if confidence_score >= 50 else "Low"
-    
+    # Map confidence to levels
+    if confidence_score >= 85:
+        confidence_level = "Very High"
+    elif confidence_score >= 70:
+        confidence_level = "High"
+    elif confidence_score >= 50:
+        confidence_level = "Moderate"
+    else:
+        confidence_level = "Low"
+
     confidence_desc = (
         f"Confidence is {confidence_level} ({confidence_score}/100) because {tasks_answered} interactive tasks "
         f"were completed, the child demonstrated {consistency_desc}, and their scores showed {separation_desc}."
     )
+
+    # Expose evidence sources
+    combined_res = {**(discovery_answers or {}), **responses}
+    has_open_ended = any(len(str(combined_res.get(k, "") or "")) > 0 for k in ["deep_discovery_flow", "deep_discovery_pride", "deep_discovery_curiosity", "deep_discovery_vision"])
+    
+    evidence_sources = {
+        "assessment_responses": tasks_answered > 0,
+        "open_ended_answers": has_open_ended,
+        "facilitator_validation": facilitator_note is not None,
+        "repeated_assessments": past_sessions_count > 0
+    }
 
     # Untapped potential (Strict trigger: score >= 75, exposure level <= 1, and strong evidence level)
     untapped_potential = []
@@ -4020,6 +4719,10 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
     viz_val = responses.get("visualizer_overall", None)
     visualizer_score = int(round((answer_to_scale(viz_val) / 4.0) * 100)) if viz_val is not None else int(round((final_scores.get("creative", 50) + final_scores.get("spatial", 50)) / 2))
 
+    # Compute GTI and TEG
+    gti_score, gti_label = calculate_gti(sorted_domains)
+    teg_data = calculate_teg(final_scores, child)
+
     return {
         "tq_scores": final_scores,
         "integrated": final_scores,
@@ -4030,6 +4733,10 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
         "confidence_level": confidence_level,
         "confidence_score": confidence_score,
         "confidence_desc": confidence_desc,
+        "evidence_sources": evidence_sources,
+        "gti_score": gti_score,
+        "gti_label": gti_label,
+        "teg_data": teg_data,
         "untapped_potential": untapped_potential,
         "primary_domain": top_domain,
         "secondary_domains": [d for d, _ in sorted_domains[1:3]],

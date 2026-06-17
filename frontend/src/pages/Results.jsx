@@ -229,6 +229,46 @@ function TQGauge({ score, color }) {
   );
 }
 
+function GTIGauge({ score, label }) {
+  const radius = 60;
+  const stroke = 10;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+  
+  const colors = {
+    Exceptional: "#E84118",
+    Advanced: "#0984E3",
+    Developing: "#00B8A9",
+    Emerging: "#FDCB6E",
+    Explorer: "#95A5A6"
+  };
+  const color = colors[label] || "#6C5CE7";
+
+  return (
+    <div style={{ position: "relative", width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg height={140} width={140}>
+        <circle stroke="rgba(0,0,0,0.04)" fill="transparent" strokeWidth={stroke} r={normalizedRadius} cx={70} cy={70} />
+        <circle
+          stroke={color}
+          fill="transparent"
+          strokeWidth={stroke}
+          strokeDasharray={circumference + ' ' + circumference}
+          style={{ strokeDashoffset, transition: "stroke-dashoffset 1s ease-in-out", transform: "rotate(-90deg)", transformOrigin: "50% 50%" }}
+          r={normalizedRadius}
+          cx={70}
+          cy={70}
+          strokeLinecap="round"
+        />
+      </svg>
+      <div style={{ position: "absolute", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+        <span style={{ fontSize: "28px", fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{score}</span>
+        <span style={{ fontSize: "10px", fontWeight: 800, color, textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 4 }}>{label}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Results() {
   const { sid } = useParams();
   const [params] = useSearchParams();
@@ -475,6 +515,99 @@ export default function Results() {
   const childPersona = PERSONAS[primaryDomain] || PERSONAS.creative;
   const guide = parentGuides[primaryDomain] || parentGuides.creative;
 
+  const calculateFallbackGTI = (integ_scores) => {
+    const sorted_entries = Object.entries(integ_scores).sort((a, b) => b[1] - a[1]);
+    const top_1 = sorted_entries[0]?.[1] || 0;
+    const top_2 = sorted_entries[1]?.[1] || 0;
+    const top_3 = sorted_entries[2]?.[1] || 0;
+    const score = Math.round(0.5 * top_1 + 0.3 * top_2 + 0.2 * top_3);
+    let label = "Explorer";
+    if (score >= 85) label = "Exceptional";
+    else if (score >= 75) label = "Advanced";
+    else if (score >= 65) label = "Developing";
+    else if (score >= 50) label = "Emerging";
+    return { score, label };
+  };
+
+  const fallbackGTI = calculateFallbackGTI(integ);
+  const gtiScore = analysis.gti_score !== undefined ? analysis.gti_score : fallbackGTI.score;
+  const gtiLabel = analysis.gti_label || fallbackGTI.label;
+
+  const getGtiDescription = (label) => {
+    switch (label) {
+      case "Exceptional":
+        return "Demonstrates highly advanced logical coordination and cognitive flexibility across multiple talent domains. Extremely strong indicators.";
+      case "Advanced":
+        return "Showcases strong, well-developed talent patterns with clear indicators of active inquiry and structured logic.";
+      case "Developing":
+        return "Displays steady foundational capabilities and solid indicators of comfort with problem solving. Good potential for growth.";
+      case "Emerging":
+        return "Shows early-stage talent indicators; shows creative curiosity and intuitive approach in multiple tasks.";
+      default:
+        return "Active explorer of cognitive tasks. Broad interest patterns with great opportunity for structured exposure.";
+    }
+  };
+
+  const getFallbackPersonas = () => {
+    const top_3 = [primaryDomain, ...secondaryDomains];
+    const resolved = {};
+    const keys = ["primary", "secondary", "emerging"];
+    keys.forEach((key, idx) => {
+      const dom = top_3[idx] || "logical";
+      const pData = PERSONAS[dom] || PERSONAS.logical;
+      const guideData = parentGuides[dom] || parentGuides.logical;
+      resolved[key] = {
+        key: dom,
+        title: pData.title,
+        emoji: pData.emoji,
+        desc: pData.desc,
+        strengths: pData.strengths,
+        growth: pData.growth,
+        environments: [guideData.environments || "Design labs and STEM spaces"]
+      };
+    });
+    return resolved;
+  };
+  
+  const childPersonas = analysis.personas || getFallbackPersonas();
+
+  const getFallbackTegData = () => {
+    const data = {};
+    Object.entries(integ).forEach(([domain, talent_score]) => {
+      const exp_val = child?.[`exp_${domain}`] !== undefined ? child[`exp_${domain}`] : 1;
+      const exposure_score = Math.round((exp_val / 3) * 100);
+      const opportunity_score = Math.min(100, Math.round((talent_score + (100 - exposure_score)) * 0.56));
+      let teg_status = "Exploratory";
+      if (talent_score >= 75 && exposure_score <= 33) teg_status = "High Potential, Low Exposure";
+      else if (talent_score >= 75 && exposure_score > 66) teg_status = "Nurtured Strength";
+      else if (talent_score >= 75) teg_status = "Active Development";
+      else if (talent_score >= 50 && exposure_score <= 50) teg_status = "Developing Potential";
+      data[domain] = { talent_score, exposure_score, opportunity_score, teg_status };
+    });
+    return data;
+  };
+  const activeTegData = analysis.teg_data || getFallbackTegData();
+
+  const getFallbackRoadmap = () => {
+    return {
+      week_1: { title: `Introductory ${primaryDomain.toUpperCase()} Workshop`, expected_outcome: "Begin basic exploration of skills", parent_action: "Provide materials and quiet environment", mentor_action: "Observe interest and check in weekly" },
+      week_2: { title: `Collaborative project task`, expected_outcome: "Participate in group challenges", parent_action: "Encourage cooperation and discuss outcomes", mentor_action: "Guide peer interaction and resolve conflicts" },
+      week_3: { title: `Advanced independent challenges`, expected_outcome: "Solve a complex project autonomously", parent_action: "Praise effort and record child's explanation", mentor_action: "Evaluate logical soundness and accuracy" },
+      week_4: { title: `Mentorship showcase and review`, expected_outcome: "Present project to family or peers", parent_action: "Celebrate achievement and display project", mentor_action: "Review progress and set next developmental goals" }
+    };
+  };
+  const roadmapData = analysis.roadmap || getFallbackRoadmap();
+
+  const getFallbackCareerPathways = () => {
+    return {
+      careers: ["Specialist", "Engineer", "Innovator", "Consultant"],
+      projects: ["Design and prototype a functional model"],
+      competitions: ["National Science Fair", "Math/Arts Olympiad"],
+      tracks: ["STEM / Practical Arts"]
+    };
+  };
+  const activeCareerPathways = analysis.career_pathways || getFallbackCareerPathways();
+
   const safeName = (child?.name || "Student").trim().replace(/\s+/g, "_");
   const personalizedSnapshot = `${child?.name || "The student"} appears to demonstrate strong developmental indicators in ${primaryLabel} activities, particularly in open-ended exploration and problem-solving styles. These findings suggest a natural comfort with ${primaryLabel} concepts. Secondary indicators also suggest potential in ${secondaryDomains.map(d => DOMAINS[d]?.label || d).join(" and ")} areas. Nurturing these talents in structured settings will provide a clearer picture of their long-term growth.`;
   const pdfUrl = `${api.downloadPDF(sid)}?token=${sessionStorage.getItem("goat_token")}&cid=${cid}`;
@@ -525,174 +658,496 @@ export default function Results() {
           </div>
         </div>
 
-        {/* Hero Section: Persona & TQ Score */}
-        <div className="card" style={{
-          display: "grid",
-          gridTemplateColumns: "1.6fr 1fr",
-          gap: 24,
-          background: "linear-gradient(135deg, rgba(91, 76, 240, 0.05) 0%, rgba(0, 184, 169, 0.05) 100%)",
-          border: "1px solid rgba(91, 76, 240, 0.12)",
-          borderRadius: 20,
-          padding: "32px",
-          marginBottom: 24,
-          alignItems: "center"
-        }}>
-          <div style={{ display: "flex", gap: 20, alignItems: "start", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "64px", lineHeight: 1, filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.1))" }}>{childPersona.emoji}</span>
-            <div style={{ flex: 1, minWidth: 280 }}>
-              <div style={{ display: "inline-flex", padding: "4px 10px", borderRadius: 99, background: "#5B4CF0", color: "#fff", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
-                Primary Persona
+        {/* Master GTI Gauge Card & Persona Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24, marginBottom: 24 }}>
+          {/* Executive GTI Summary Card */}
+          <div className="card summary-grid" style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 2.5fr",
+            gap: 24,
+            background: "linear-gradient(135deg, rgba(108, 92, 231, 0.04) 0%, rgba(0, 184, 169, 0.04) 100%)",
+            border: "1px solid rgba(108, 92, 231, 0.15)",
+            borderRadius: 20,
+            padding: "24px",
+            alignItems: "center"
+          }}>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <GTIGauge score={gtiScore} label={gtiLabel} />
+            </div>
+            <div>
+              <div style={{ display: "inline-flex", padding: "4px 10px", borderRadius: 99, background: "#6C5CE7", color: "#fff", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+                GOAT Talent Index (GTI)
               </div>
-              <h2 style={{ fontSize: "28px", fontWeight: 900, color: "#3C2EB9", margin: "0 0 8px 0" }}>{childPersona.title}</h2>
-              <p style={{ fontSize: "15px", lineHeight: "1.6", color: "var(--text-mid)", marginBottom: 16 }}>{childPersona.desc}</p>
-              
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {childPersona.strengths.map(s => (
-                  <span key={s} style={{ fontSize: "12px", fontWeight: 700, color: "#0F6E56", background: "#E1F5EE", padding: "4px 10px", borderRadius: 6 }}>
-                    ✓ {s}
-                  </span>
-                ))}
-              </div>
+              <h2 style={{ fontSize: "22px", fontWeight: 900, color: "var(--text)", margin: "0 0 6px 0" }}>Cognitive Synthesis</h2>
+              <p style={{ fontSize: "14.5px", lineHeight: "1.6", color: "var(--text-mid)", margin: 0 }}>
+                {getGtiDescription(gtiLabel)} This index represents the child's composite cognitive potential, computed across spatial, logical, and verbal reasoning capabilities.
+              </p>
             </div>
           </div>
-          
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", borderLeft: "1px solid rgba(91, 76, 240, 0.15)", paddingLeft: 24 }}>
-            <TQGauge score={integ[primaryDomain] || 50} color={DOMAINS[primaryDomain]?.color} />
-            <div style={{ textAlign: "center", marginTop: 12 }}>
-              <span style={{ fontWeight: 800, color: "var(--text)", display: "block" }}>{primaryLabel} Aptitude</span>
-              <span style={{ fontSize: "12px", color: "var(--text-light)" }}>Outstanding developmental indicators</span>
+
+          {/* Persona Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+            {/* Primary Persona */}
+            <div className="card" style={{
+              border: "2px solid #5B4CF0",
+              background: "linear-gradient(135deg, rgba(91, 76, 240, 0.04) 0%, #FFFFFF 100%)",
+              borderRadius: 16,
+              padding: 20,
+              boxShadow: "0 8px 20px rgba(91, 76, 240, 0.04)"
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ fontSize: 32 }}>{childPersonas.primary.emoji}</span>
+                <span style={{ fontSize: 10, fontWeight: 950, background: "#5B4CF0", color: "#fff", padding: "4px 8px", borderRadius: 20, textTransform: "uppercase" }}>Primary Strength</span>
+              </div>
+              <h3 style={{ margin: "0 0 6px 0", fontSize: 18, fontWeight: 800, color: "#3C2EB9" }}>{childPersonas.primary.title}</h3>
+              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.5, margin: "0 0 14px 0" }}>{childPersonas.primary.desc}</p>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>Strength Indicators</span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    {childPersonas.primary.strengths.map(s => (
+                      <span key={s} style={{ fontSize: 11, fontWeight: 700, color: "#0F6E56", background: "#E1F5EE", padding: "3px 8px", borderRadius: 4 }}>✓ {s}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginTop: 6 }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>Development Opportunities</span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    {childPersonas.primary.growth.map(g => (
+                      <span key={g} style={{ fontSize: 11, fontWeight: 700, color: "#7F8C8D", background: "#F5F6FA", padding: "3px 8px", borderRadius: 4 }}>⚬ {g}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Persona */}
+            <div className="card" style={{
+              border: "1px solid rgba(0, 184, 169, 0.3)",
+              background: "linear-gradient(135deg, rgba(0, 184, 169, 0.03) 0%, #FFFFFF 100%)",
+              borderRadius: 16,
+              padding: 20
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ fontSize: 32 }}>{childPersonas.secondary.emoji}</span>
+                <span style={{ fontSize: 10, fontWeight: 950, background: "#00B8A9", color: "#fff", padding: "4px 8px", borderRadius: 20, textTransform: "uppercase" }}>Secondary Strength</span>
+              </div>
+              <h3 style={{ margin: "0 0 6px 0", fontSize: 18, fontWeight: 800, color: "#0F6E56" }}>{childPersonas.secondary.title}</h3>
+              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.5, margin: "0 0 14px 0" }}>{childPersonas.secondary.desc}</p>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>Strength Indicators</span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    {childPersonas.secondary.strengths.map(s => (
+                      <span key={s} style={{ fontSize: 11, fontWeight: 700, color: "#0F6E56", background: "#E1F5EE", padding: "3px 8px", borderRadius: 4 }}>✓ {s}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginTop: 6 }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>Development Opportunities</span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    {childPersonas.secondary.growth.map(g => (
+                      <span key={g} style={{ fontSize: 11, fontWeight: 700, color: "#7F8C8D", background: "#F5F6FA", padding: "3px 8px", borderRadius: 4 }}>⚬ {g}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Emerging Persona */}
+            <div className="card" style={{
+              border: "1px solid rgba(253, 203, 110, 0.4)",
+              background: "linear-gradient(135deg, rgba(253, 203, 110, 0.03) 0%, #FFFFFF 100%)",
+              borderRadius: 16,
+              padding: 20
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ fontSize: 32 }}>{childPersonas.emerging.emoji}</span>
+                <span style={{ fontSize: 10, fontWeight: 950, background: "#FDCB6E", color: "#fff", padding: "4px 8px", borderRadius: 20, textTransform: "uppercase" }}>Emerging Potential</span>
+              </div>
+              <h3 style={{ margin: "0 0 6px 0", fontSize: 18, fontWeight: 800, color: "#B7791F" }}>{childPersonas.emerging.title}</h3>
+              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.5, margin: "0 0 14px 0" }}>{childPersonas.emerging.desc}</p>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>Strength Indicators</span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    {childPersonas.emerging.strengths.map(s => (
+                      <span key={s} style={{ fontSize: 11, fontWeight: 700, color: "#0F6E56", background: "#E1F5EE", padding: "3px 8px", borderRadius: 4 }}>✓ {s}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginTop: 6 }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>Development Opportunities</span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                    {childPersonas.emerging.growth.map(g => (
+                      <span key={g} style={{ fontSize: 11, fontWeight: 700, color: "#7F8C8D", background: "#F5F6FA", padding: "3px 8px", borderRadius: 4 }}>⚬ {g}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Main Grid: Radar Chart & Domain Scores vs Guides & Potential */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }} className="summary-grid">
-          {/* Left Column: Aptitude Chart & Scores */}
-          <div className="card" style={{ padding: 24 }}>
-            <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 20 }}>Cognitive Talent Mapping</h3>
-            <div style={{ width: "100%", height: "240px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+        {/* Cognitive Talent Profile (Categorized Sections) */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Cognitive Talent Profile</h3>
+          <p style={{ fontSize: "13px", color: "var(--text-light)", marginBottom: 20 }}>Categorized domains based on final stretched percentile scores.</p>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Primary Strengths (>= 85) */}
+            <div>
+              <h4 style={{ color: "#E84118", fontSize: "13.5px", fontWeight: 850, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: "1.5px solid #FAD3CF", paddingBottom: 6, marginBottom: 10 }}>🌟 Primary Strengths (Percentile ≥ 85)</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+                {sorted.filter(([_, s]) => s >= 85).map(([domain, score]) => {
+                  const d = DOMAINS[domain];
+                  return (
+                    <div key={domain} style={{ background: "rgba(232, 65, 24, 0.03)", border: "1.5px solid #FAD3CF", borderRadius: 10, padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>
+                        <span style={{ color: "var(--text)" }}>{d?.emoji} {d?.label}</span>
+                        <span style={{ color: "#E84118" }}>{score}% (Exceptional)</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 12, color: "var(--text-light)" }}>{DOMAIN_INSIGHTS[domain]}</p>
+                    </div>
+                  );
+                })}
+                {sorted.filter(([_, s]) => s >= 85).length === 0 && (
+                  <span style={{ fontSize: 12.5, color: "var(--text-light)", fontStyle: "italic" }}>No domains scored in this tier.</span>
+                )}
+              </div>
+            </div>
+
+            {/* Secondary Strengths (65-84) */}
+            <div style={{ marginTop: 8 }}>
+              <h4 style={{ color: "#00B8A9", fontSize: "13.5px", fontWeight: 850, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: "1.5px solid #BCEBE7", paddingBottom: 6, marginBottom: 10 }}>✨ Secondary Strengths (Percentile 65-84)</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+                {sorted.filter(([_, s]) => s >= 65 && s < 85).map(([domain, score]) => {
+                  const d = DOMAINS[domain];
+                  let qual = score >= 75 ? "Strong" : "Developing";
+                  return (
+                    <div key={domain} style={{ background: "rgba(0, 184, 169, 0.02)", border: "1.5px solid #BCEBE7", borderRadius: 10, padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>
+                        <span style={{ color: "var(--text)" }}>{d?.emoji} {d?.label}</span>
+                        <span style={{ color: "#00B8A9" }}>{score}% ({qual})</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 12, color: "var(--text-light)" }}>{DOMAIN_INSIGHTS[domain]}</p>
+                    </div>
+                  );
+                })}
+                {sorted.filter(([_, s]) => s >= 65 && s < 85).length === 0 && (
+                  <span style={{ fontSize: 12.5, color: "var(--text-light)", fontStyle: "italic" }}>No domains scored in this tier.</span>
+                )}
+              </div>
+            </div>
+
+            {/* Growth Opportunities (< 65) */}
+            <div style={{ marginTop: 8 }}>
+              <h4 style={{ color: "#7F8C8D", fontSize: "13.5px", fontWeight: 850, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: "1.5px solid #E2E8F0", paddingBottom: 6, marginBottom: 10 }}>🌱 Growth Opportunities (Percentile &lt; 65)</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+                {sorted.filter(([_, s]) => s < 65).map(([domain, score]) => {
+                  const d = DOMAINS[domain];
+                  let qual = score >= 50 ? "Emerging" : "Exploratory";
+                  return (
+                    <div key={domain} style={{ background: "#F8F9FA", border: "1.5px solid #E2E8F0", borderRadius: 10, padding: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>
+                        <span style={{ color: "var(--text)" }}>{d?.emoji} {d?.label}</span>
+                        <span style={{ color: "#7F8C8D" }}>{score}% ({qual})</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 12, color: "var(--text-light)" }}>{DOMAIN_INSIGHTS[domain]}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Talent Map & TEG Index Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 24, marginBottom: 24 }} className="summary-grid">
+          {/* Left: Radar Chart */}
+          <div className="card" style={{ padding: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <h3 style={{ fontSize: "17px", fontWeight: 800, color: "var(--text)", marginBottom: 14, alignSelf: "start" }}>Cognitive Talent Mapping</h3>
+            <div style={{ width: "100%", height: "240px", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <RadarChart scores={integ} />
             </div>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {sorted.map(([domain, score]) => {
-                const d = DOMAINS[domain];
-                const interp = getInterpretation(score);
-                return (
-                  <div key={domain} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
-                      <span style={{ fontWeight: 700, color: "var(--text)" }}>{d?.emoji} {d?.label}</span>
-                      <span style={{ fontWeight: 800, color: d?.color }}>{score}% ({interp.label})</span>
-                    </div>
-                    <div style={{ height: 8, background: "rgba(0,0,0,0.04)", borderRadius: 99, overflow: "hidden" }}>
-                      <div style={{ width: `${score}%`, height: "100%", background: d?.color || "var(--blue)", borderRadius: 99 }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
 
-          {/* Right Column: Guides, Recommendations & Opportunities */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {/* Guide & Activities */}
-            <div className="card" style={{ padding: 24 }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>Parent Nurturing Playbook</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                <div style={{ background: "rgba(0, 184, 169, 0.04)", borderLeft: "4px solid var(--teal)", padding: 14, borderRadius: "0 8px 8px 0" }}>
-                  <span style={{ fontWeight: 800, color: "var(--teal)", display: "block", marginBottom: 4, fontSize: 13.5 }}>🛠️ Recommended At-Home Activities</span>
-                  <ul style={{ paddingLeft: 16, margin: 0, fontSize: "13px", lineHeight: 1.5, color: "var(--text-mid)", fontWeight: 600 }}>
-                    {guide.support.map(s => <li key={s}>{s}</li>)}
-                  </ul>
-                </div>
-                
-                <div style={{ background: "rgba(91, 76, 240, 0.04)", borderLeft: "4px solid var(--blue)", padding: 14, borderRadius: "0 8px 8px 0" }}>
-                  <span style={{ fontWeight: 800, color: "var(--blue)", display: "block", marginBottom: 4, fontSize: 13.5 }}>🎯 Key Motivators</span>
-                  <p style={{ margin: 0, fontSize: "13px", color: "var(--text-mid)" }}>
-                    Highly responsive to <strong>{guide.activities}</strong>. Best engaged via {guide.motivators}.
+          {/* Right: TEG index table */}
+          <div className="card" style={{ padding: 20 }}>
+            <h3 style={{ fontSize: "17px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Talent Exposure Gap (TEG) Dashboard</h3>
+            <p style={{ fontSize: "12px", color: "var(--text-light)", marginBottom: 14 }}>Exposure metrics mapped 0-100%.</p>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1.5px solid var(--border)", color: "var(--text-light)", fontSize: 11, fontWeight: 800, textAlign: "left" }}>
+                    <th style={{ padding: "8px 4px" }}>Domain</th>
+                    <th style={{ padding: "8px 4px" }}>Talent</th>
+                    <th style={{ padding: "8px 4px" }}>Exposure</th>
+                    <th style={{ padding: "8px 4px" }}>Opportunity</th>
+                    <th style={{ padding: "8px 4px" }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map(([domain, score]) => {
+                    const d = DOMAINS[domain];
+                    const teg = activeTegData[domain] || { talent_score: score, exposure_score: 30, opportunity_score: 50, teg_status: "Exploratory" };
+                    let statusBg = "#F5F6FA";
+                    let statusColor = "#7F8C8D";
+                    if (teg.teg_status === "High Potential, Low Exposure") {
+                      statusBg = "#FFF5E6";
+                      statusColor = "#D35400";
+                    } else if (teg.teg_status === "Nurtured Strength") {
+                      statusBg = "#E1F5EE";
+                      statusColor = "#0F6E56";
+                    } else if (teg.teg_status === "Active Development") {
+                      statusBg = "#E8F4FD";
+                      statusColor = "#0984E3";
+                    } else if (teg.teg_status === "Developing Potential") {
+                      statusBg = "#F3E8FF";
+                      statusColor = "#6C5CE7";
+                    }
+                    return (
+                      <tr key={domain} style={{ borderBottom: "1px solid var(--border)", fontSize: 12.5 }}>
+                        <td style={{ padding: "10px 4px", fontWeight: 700, color: "var(--text)" }}>{d?.emoji} {d?.label}</td>
+                        <td style={{ padding: "10px 4px", color: d?.color, fontWeight: 800 }}>{teg.talent_score}%</td>
+                        <td style={{ padding: "10px 4px" }}>{teg.exposure_score}%</td>
+                        <td style={{ padding: "10px 4px", fontWeight: 800, color: "#6C5CE7" }}>{teg.opportunity_score}/100</td>
+                        <td style={{ padding: "10px 4px" }}>
+                          <span style={{ fontSize: 9.5, fontWeight: 800, background: statusBg, color: statusColor, padding: "2px 6px", borderRadius: 10 }}>
+                            {teg.teg_status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Confidence rating and checklist */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 12 }}>Talent Confidence Rating</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 2fr", gap: 24, alignItems: "center" }} className="summary-grid">
+            <div style={{ textAlign: "center", background: "var(--surface-soft)", padding: 20, borderRadius: 14, border: "1.5px solid var(--border)" }}>
+              <span style={{ fontSize: 11, fontWeight: 900, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: 0.8 }}>Assessment Confidence</span>
+              <div style={{ fontSize: 36, fontWeight: 900, color: "#6C5CE7", margin: "8px 0" }}>{analysis.confidence_score || 75}/100</div>
+              <span style={{
+                fontSize: 12,
+                fontWeight: 900,
+                background: (analysis.confidence_level === "Very High" || analysis.confidence_level === "High") ? "#E1F5EE" : "#FFFBF2",
+                color: (analysis.confidence_level === "Very High" || analysis.confidence_level === "High") ? "#0F6E56" : "#E2B25B",
+                padding: "4px 12px",
+                borderRadius: 20
+              }}>
+                {analysis.confidence_level || "High"} Confidence
+              </span>
+            </div>
+            
+            <div>
+              <p style={{ margin: "0 0 14px 0", fontSize: 13.5, lineHeight: 1.5, color: "var(--text-mid)" }}>
+                {analysis.confidence_desc || "Cognitive confidence rating is high based on verified responses, consistency metrics, and facilitator validations."}
+              </p>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {[
+                  { label: "Interactive Tasks Completed", key: "assessment_responses", desc: "Completed deep assessment puzzles" },
+                  { label: "Qualitative Input Logged", key: "open_ended_answers", desc: "Written discovery logs verified" },
+                  { label: "Facilitator Review Active", key: "facilitator_validation", desc: "Classroom observation signed off" },
+                  { label: "Repeated Assessment Logged", key: "repeated_assessments", desc: "Longitudinal data verified" }
+                ].map(item => {
+                  const isActive = analysis.evidence_sources ? analysis.evidence_sources[item.key] : (item.key === "assessment_responses" || item.key === "open_ended_answers");
+                  return (
+                    <div key={item.key} style={{ display: "flex", gap: 8, alignItems: "start" }}>
+                      <span style={{
+                        fontSize: 14,
+                        color: isActive ? "#20BF6B" : "#BDC3C7",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: isActive ? "rgba(32,191,107,0.08)" : "transparent",
+                        borderRadius: "50%",
+                        width: 20,
+                        height: 20
+                      }}>
+                        {isActive ? "✓" : "○"}
+                      </span>
+                      <div>
+                        <strong style={{ fontSize: 12.5, color: isActive ? "var(--text)" : "var(--text-light)" }}>{item.label}</strong>
+                        <span style={{ display: "block", fontSize: 11, color: "var(--text-light)" }}>{item.desc}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* NLP Evidence board */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Qualitative Cognitive Evidence</h3>
+          <p style={{ fontSize: "13px", color: "var(--text-light)", marginBottom: 16 }}>Extracted semantic indicators from the child's open-ended answers indicating curiosity, self-awareness, and imagination.</p>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+            {Object.entries(analysis.nlp_signals || {}).map(([key, signal]) => {
+              if (!signal.active) return null;
+              return (
+                <div key={key} style={{ background: "rgba(108, 92, 231, 0.03)", border: "1px solid rgba(108, 92, 231, 0.12)", padding: 14, borderRadius: 12 }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: "#6C5CE7", textTransform: "uppercase", letterSpacing: 0.8, display: "block" }}>{signal.title}</span>
+                  <p style={{ margin: "6px 0 0 0", fontSize: 12.5, fontStyle: "italic", color: "var(--text-mid)", lineHeight: 1.45 }}>
+                    {signal.evidence ? signal.evidence : "Demonstrated clear interest indicators in open discovery responses."}
                   </p>
                 </div>
+              );
+            })}
+            {!analysis.nlp_signals || Object.values(analysis.nlp_signals).filter(s => s.active).length === 0 ? (
+              <div style={{ gridColumn: "1/-1", padding: 20, textAlign: "center", border: "1.5px dashed var(--border)", borderRadius: 12, color: "var(--text-light)" }}>
+                ✍️ No open-ended text inputs have been analyzed or completed for this session yet.
               </div>
-            </div>
-
-            {/* Hidden Opportunities (Untapped Potential) */}
-            <div className="card" style={{ padding: 24, border: untapped_potential.length > 0 ? "1.5px dashed #F7B731" : "1px solid var(--border)", background: untapped_potential.length > 0 ? "rgba(247, 183, 49, 0.02)" : "#fff" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 12 }}>Untapped Opportunities</h3>
-              
-              {untapped_potential.length > 0 ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {untapped_potential.map(u => (
-                    <div key={u} style={{ background: "rgba(247, 183, 49, 0.06)", border: "1px solid rgba(247, 183, 49, 0.2)", padding: 12, borderRadius: 10 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                        <span style={{ fontWeight: 800, fontSize: "14px", color: "#B7791F" }}>🔥 High Potential in {DOMAINS[u]?.label}</span>
-                        <span style={{ background: "#F7B731", color: "#fff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: 4 }}>Low Exposure</span>
-                      </div>
-                      <p style={{ fontSize: "12.5px", lineHeight: "1.5", color: "var(--text-mid)", margin: 0 }}>
-                        {child?.name} scored <strong>{integ[u]}%</strong> in {DOMAINS[u]?.label} challenges but has very limited exposure history. Providing basic workshops or toys in this area is highly recommended.
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ padding: "16px", background: "rgba(0, 184, 169, 0.03)", border: "1px dashed rgba(0, 184, 169, 0.2)", borderRadius: "10px", textAlign: "center", fontSize: "13.5px", color: "var(--teal)", fontWeight: 700 }}>
-                  🌿 All cognitive potentials align well with prior exposures. No significant hidden talents were left undeveloped!
-                </div>
-              )}
-            </div>
+            ) : null}
           </div>
         </div>
 
-        {/* 30-Day Developmental Plan Timeline */}
+        {/* Parent Playbook */}
         <div className="card" style={{ padding: 24, marginBottom: 24 }}>
-          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>30-Day Developmental Roadmap</h3>
-          <p style={{ fontSize: "13.5px", color: "var(--text-light)", marginBottom: 20 }}>Personalized, week-by-week cognitive action plan recommended by GOAT System</p>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>Parent Intelligence &amp; Playbook</h3>
           
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-            {[
-              { week: "Week 1", desc: analysis.action_plan?.week_1 || "Introductory workshops in primary domain", icon: "🌱" },
-              { week: "Week 2", desc: analysis.action_plan?.week_2 || "Collaborative projects and group exercises", icon: "🌿" },
-              { week: "Week 3", desc: analysis.action_plan?.week_3 || "Advanced challenge-based tasks", icon: "🌲" },
-              { week: "Week 4", desc: analysis.action_plan?.week_4 || "Mentorship check-in and showcase", icon: "🌳" }
-            ].map(item => (
-              <div key={item.week} style={{ background: "var(--surface-soft)", border: "1px solid var(--border)", padding: 16, borderRadius: 12, display: "flex", gap: 12, flexDirection: "column" }}>
-                <span style={{ fontSize: 24, height: 40, width: 40, borderRadius: 8, background: "rgba(108, 92, 231, 0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>{item.icon}</span>
-                <div>
-                  <span style={{ fontWeight: 800, color: "#5B4CF0", fontSize: 12, textTransform: "uppercase" }}>{item.week}</span>
-                  <p style={{ margin: "4px 0 0 0", fontSize: 13, lineHeight: 1.4, color: "var(--text-mid)", fontWeight: 500 }}>{item.desc}</p>
-                </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }} className="summary-grid">
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ background: "#E8F4FD", borderLeft: "4px solid #0984E3", padding: 14, borderRadius: "0 8px 8px 0" }}>
+                <span style={{ fontWeight: 800, color: "#0984E3", display: "block", marginBottom: 4, fontSize: 13 }}>🚀 Key Motivators</span>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--text-mid)", lineHeight: 1.4 }}>
+                  {childPersonas.primary.title} thrives with: <strong>{guide.motivators}</strong>
+                </p>
               </div>
-            ))}
+              
+              <div style={{ background: "#FFF5E6", borderLeft: "4px solid #D35400", padding: 14, borderRadius: "0 8px 8px 0" }}>
+                <span style={{ fontWeight: 800, color: "#D35400", display: "block", marginBottom: 4, fontSize: 13 }}>⚠️ Potential Discouragers</span>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--text-mid)", lineHeight: 1.4 }}>
+                  Could feel restricted by: <strong>{guide.challenges}</strong>
+                </p>
+              </div>
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ background: "#E1F5EE", borderLeft: "4px solid #0F6E56", padding: 14, borderRadius: "0 8px 8px 0" }}>
+                <span style={{ fontWeight: 800, color: "#0F6E56", display: "block", marginBottom: 4, fontSize: 13 }}>🏫 Best Learning Environments</span>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--text-mid)", lineHeight: 1.4 }}>
+                  Thrives in spaces like: <strong>{childPersonas.primary.environments.join(", ")}</strong>
+                </p>
+              </div>
+              
+              <div style={{ background: "#F3E8FF", borderLeft: "4px solid #6C5CE7", padding: 14, borderRadius: "0 8px 8px 0" }}>
+                <span style={{ fontWeight: 800, color: "#6C5CE7", display: "block", marginBottom: 4, fontSize: 13 }}>🧩 Extracurricular Recommendations</span>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--text-mid)", lineHeight: 1.4 }}>
+                  Activity tracks: <strong>{guide.activities}</strong>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Growth Journey timeline and validations */}
+        {/* 4-Week developmental roadmap */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>4-Week Talent Development Roadmap</h3>
+          <p style={{ fontSize: "13px", color: "var(--text-light)", marginBottom: 20 }}>Week-by-week actionable plan blending strengths with age-appropriate milestones.</p>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {Object.entries(roadmapData).map(([weekKey, week]) => {
+              const weekNum = weekKey.replace("week_", "Week ");
+              return (
+                <div key={weekKey} style={{ background: "var(--surface-soft)", border: "1px solid var(--border)", borderRadius: 12, padding: 18 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, borderBottom: "1px solid var(--border)", paddingBottom: 8, marginBottom: 10 }}>
+                    <span style={{ fontWeight: 900, color: "#6C5CE7", fontSize: 13, textTransform: "uppercase" }}>{weekNum}: {week.title}</span>
+                  </div>
+                  
+                  <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: 16 }} className="summary-grid">
+                    <div>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase" }}>Expected Outcome</span>
+                      <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "var(--text)" }}>{week.expected_outcome}</p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase" }}>Parent Action</span>
+                      <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "var(--text-mid)" }}>{week.parent_action}</p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase" }}>Mentor Action</span>
+                      <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "var(--text-mid)" }}>{week.mentor_action}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Career Pathways */}
+        {activeCareerPathways && (
+          <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+            <div style={{ display: "inline-flex", padding: "4px 10px", borderRadius: 99, background: "#0984E3", color: "#fff", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>
+              Future Career Pathways (Secondary / Senior)
+            </div>
+            <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Academic Tracks &amp; Opportunities</h3>
+            <p style={{ fontSize: "13px", color: "var(--text-light)", marginBottom: 16 }}>Advanced career tracks, projects, and academic competitions matching strengths.</p>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }} className="summary-grid">
+              <div style={{ background: "rgba(9, 132, 227, 0.03)", border: "1px solid rgba(9, 132, 227, 0.1)", padding: 14, borderRadius: 10 }}>
+                <strong style={{ fontSize: 13, color: "#0984E3", display: "block", marginBottom: 6 }}>Suggested Careers &amp; Tracks</strong>
+                <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "var(--text-mid)", lineHeight: 1.4 }}>
+                  {activeCareerPathways.careers.map(c => <li key={c}>{c}</li>)}
+                  {activeCareerPathways.tracks && activeCareerPathways.tracks[0] && (
+                    <li style={{ marginTop: 6, fontWeight: 700, listStyle: "none", marginLeft: -16 }}>Academic Track: {activeCareerPathways.tracks[0]}</li>
+                  )}
+                </ul>
+              </div>
+              <div style={{ background: "rgba(108, 92, 231, 0.03)", border: "1px solid rgba(108, 92, 231, 0.1)", padding: 14, borderRadius: 10 }}>
+                <strong style={{ fontSize: 13, color: "#6C5CE7", display: "block", marginBottom: 6 }}>🏆 Projects &amp; Competitions</strong>
+                <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: "var(--text-mid)", lineHeight: 1.4 }}>
+                  {activeCareerPathways.projects && activeCareerPathways.projects[0] && (
+                    <li><strong>Project:</strong> {activeCareerPathways.projects[0]}</li>
+                  )}
+                  {activeCareerPathways.competitions && activeCareerPathways.competitions[0] && (
+                    <li><strong>Competition:</strong> {activeCareerPathways.competitions[0]}</li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Growth Tracker & Facilitator review */}
         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 24, marginBottom: 24 }} className="summary-grid">
-          {/* History Chart */}
-          <div className="card" style={{ padding: 24 }}>
-            <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>Longitudinal Journey Tracker</h3>
+          {/* Left: History Chart */}
+          <div className="card" style={{ padding: 20 }}>
+            <h3 style={{ fontSize: "17px", fontWeight: 800, color: "var(--text)", marginBottom: 14 }}>Longitudinal Journey Tracker</h3>
             <GrowthChart history={history} />
           </div>
 
-          {/* Validation Review summary */}
-          <div className="card" style={{ padding: 24, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          {/* Right: Validation status */}
+          <div className="card" style={{ padding: 20, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div>
-              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Mentor Validation Status</h3>
-              <p style={{ fontSize: "13.5px", color: "var(--text-light)", marginBottom: 16 }}>Observations logged by facilitators during hands-on classes</p>
+              <h3 style={{ fontSize: "17px", fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Mentor Validation Status</h3>
+              <p style={{ fontSize: "12.5px", color: "var(--text-light)", marginBottom: 14 }}>Observations logged by facilitators during hands-on classes.</p>
               
               {notes.length > 0 ? (
-                <div style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(91, 76, 240, 0.1)", borderRadius: 12, padding: 16 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(0,0,0,0.06)", paddingBottom: 10, marginBottom: 12 }}>
-                    <span style={{ fontWeight: 700 }}>Reviewer: {notes[0].facilitator}</span>
-                    <span style={{ background: "#E1F5EE", color: "#0F6E56", fontWeight: 800, fontSize: 11, padding: "2px 8px", borderRadius: 4 }}>
+                <div style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(91, 76, 240, 0.1)", borderRadius: 12, padding: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(0,0,0,0.06)", paddingBottom: 8, marginBottom: 10 }}>
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Reviewer: {notes[0].facilitator}</span>
+                    <span style={{ background: "#E1F5EE", color: "#0F6E56", fontWeight: 800, fontSize: 10, padding: "2px 6px", borderRadius: 4 }}>
                       ✓ Validated
                     </span>
                   </div>
-                  <p style={{ margin: "0 0 8px 0", fontSize: "13px" }}><strong>Observed Strengths:</strong> {notes[0].strengths_observed || "Excellent spatial organization and teamwork."}</p>
-                  <p style={{ margin: "0 0 8px 0", fontSize: "13px" }}><strong>Observed Challenges:</strong> {notes[0].concerns || "None flagged."}</p>
-                  <p style={{ margin: 0, fontSize: "13px" }}><strong>Notes:</strong> {notes[0].notes || notes[0].evidence_notes}</p>
+                  <p style={{ margin: "0 0 6px 0", fontSize: "12.5px" }}><strong>Observed Strengths:</strong> {notes[0].strengths_observed || "Excellent spatial organization and teamwork."}</p>
+                  <p style={{ margin: "0 0 6px 0", fontSize: "12.5px" }}><strong>Observed Challenges:</strong> {notes[0].concerns || "None flagged."}</p>
+                  <p style={{ margin: 0, fontSize: "12.5px" }}><strong>Notes:</strong> {notes[0].notes || notes[0].evidence_notes}</p>
                 </div>
               ) : (
-                <div style={{ padding: "24px 16px", background: "#FFFBF2", border: "1px dashed #E2B25B", borderRadius: 12, color: "#5D4037", textAlign: "center", fontWeight: 600, fontSize: 13.5 }}>
+                <div style={{ padding: "20px 14px", background: "#FFFBF2", border: "1px dashed #E2B25B", borderRadius: 12, color: "#5D4037", textAlign: "center", fontWeight: 650, fontSize: 13 }}>
                   💡 Facilitator review pending validation. Mentor observations can be logged below using the screen form.
                 </div>
               )}
@@ -700,7 +1155,7 @@ export default function Results() {
 
             <button
               className="btn btn-teal btn-lg btn-full"
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 16 }}
               onClick={() => navigate(`/mentor/${cid}?domain=${primaryDomain}&sid=${sid}`)}
             >
               🤝 Find domain-expert mentors in {primaryLabel}

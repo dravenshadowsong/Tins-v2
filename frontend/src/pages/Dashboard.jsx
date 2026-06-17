@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, BASE } from "../api";
 import { DOMAINS } from "../data/questions";
@@ -120,6 +120,143 @@ export default function Dashboard() {
         </div>
       </div>
     );
+  }
+
+  const aggregates = useMemo(() => {
+    let highPotentialStudents = [];
+    let lowExposureStudents = [];
+    let workshopCounts = {};
+
+    children.forEach(child => {
+      const pdata = typeof child.personality_data === "string" ? JSON.parse(child.personality_data) : child.personality_data;
+      const tq = typeof child.tq_scores === "string" ? JSON.parse(child.tq_scores) : child.tq_scores || {};
+
+      // 1. High-Potential Students: scored >= 85 in any domain
+      let highDomains = [];
+      Object.entries(tq).forEach(([dom, score]) => {
+        if (score >= 85) {
+          highDomains.push({ domain: dom, score });
+        }
+      });
+      if (highDomains.length > 0 && child.latest_session_id) {
+        highPotentialStudents.push({
+          id: child.id,
+          name: child.name,
+          age: child.age,
+          center: child.center_name || "Unassigned",
+          latest_session_id: child.latest_session_id,
+          highDomains
+        });
+      }
+
+      // 2. Low-Exposure Opportunities: TEG status "High Potential, Low Exposure"
+      if (pdata && pdata.teg_data) {
+        let lowExpDomains = [];
+        Object.entries(pdata.teg_data).forEach(([dom, details]) => {
+          if (details.teg_status === "High Potential, Low Exposure" || (details.talent_score >= 75 && details.exposure_score <= 33)) {
+            lowExpDomains.push({
+              domain: dom,
+              talent_score: details.talent_score,
+              exposure_score: details.exposure_score,
+              opportunity_score: details.opportunity_score
+            });
+          }
+        });
+        if (lowExpDomains.length > 0 && child.latest_session_id) {
+          lowExposureStudents.push({
+            id: child.id,
+            name: child.name,
+            age: child.age,
+            center: child.center_name || "Unassigned",
+            latest_session_id: child.latest_session_id,
+            lowExpDomains
+          });
+        }
+      }
+
+      // 3. Workshop Recommendations: aggregate recommended workshops
+      if (pdata && pdata.workshops) {
+        pdata.workshops.forEach(ws => {
+          const title = ws.title;
+          if (!workshopCounts[title]) {
+            workshopCounts[title] = {
+              title,
+              desc: ws.desc,
+              count: 0,
+              reasons: [],
+              students: []
+            };
+          }
+          workshopCounts[title].count += 1;
+          if (!workshopCounts[title].students.includes(child.name)) {
+            workshopCounts[title].students.push(child.name);
+          }
+          if (ws.reason && !workshopCounts[title].reasons.includes(ws.reason)) {
+            workshopCounts[title].reasons.push(ws.reason);
+          }
+        });
+      }
+    });
+
+    // 4. Talent Clusters: Group children by top_domain and untapped_potential
+    const domainCounts = {};
+    children.forEach(child => {
+      if (child.top_domain) {
+        domainCounts[child.top_domain] = (domainCounts[child.top_domain] || 0) + 1;
+      }
+      const pdata = typeof child.personality_data === "string" ? JSON.parse(child.personality_data) : child.personality_data;
+      if (pdata && pdata.secondary_domains) {
+        pdata.secondary_domains.forEach(dom => {
+          domainCounts[dom] = (domainCounts[dom] || 0) + 0.5;
+        });
+      }
+    });
+
+    const sortedDomains = Object.entries(domainCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([dom, val]) => [dom, val]);
+
+    return {
+      highPotentialStudents,
+      lowExposureStudents,
+      workshopCounts: Object.values(workshopCounts).sort((a, b) => b.count - a.count),
+      sortedDomains
+    };
+  }, [children]);
+
+  function getClusterNarrative(sortedDomains) {
+    if (!sortedDomains || sortedDomains.length === 0) {
+      return "Complete assessments to analyze student talent clusters and generate custom curriculum strategies.";
+    }
+    
+    const top1 = sortedDomains[0]?.[0];
+    const top2 = sortedDomains[1]?.[0];
+    
+    if (!top2) {
+      return `We observe a singular focus in the ${top1} domain. Establish introductory groups to nurture this potential.`;
+    }
+
+    const keys = [top1, top2].sort().join("-");
+    
+    const narrativeMap = {
+      "creative-logical": "STEAM Fusion: A strong combination of analytical minds and creative spirits. We recommend projects like block coding with visual design, generative art, and building customized puzzles.",
+      "logical-spatial": "Engineering & Tinkering: Strong spatial reasoning paired with logical aptitude. Prioritize hands-on physics modeling, robotics assembly, electronics kit-making, or woodwork designs.",
+      "creative-spatial": "Maker Crafts & Design: High visual-spatial skills combined with creative artistry. Students will thrive in design-build projects, building scale models, sculpture, painting, and visual installations.",
+      "language-social": "Community Advocates & Debaters: Prominent linguistic ability and peer leadership. Perfect alignment for Model UN, structured debate groups, collaborative storytelling, drama, or running community-focused journals.",
+      "creative-language": "Expressive Arts & Storytellers: Strong artistic expression coupled with language competency. Excellent for scriptwriting, illustrated storytelling, poetry slams, theater productions, or comic creation.",
+      "kinesthetic-social": "Cooperative Sports & Drama: Physical agility and active social coordination. Ideal for team sports tournaments, collaborative dance productions, street play acting, or outdoor leadership camps.",
+      "naturalist-spatial": "Eco-Builders & Eco-Tech: Naturalist observation combined with spatial construction. Focus on planting system design, nature-mapping boards, building bird feeders, composting model construction, or soil chemistry tools.",
+      "intrapersonal-language": "Reflective Writers & Thinkers: Self-awareness coupled with language strengths. Encourage journaling circles, creative writing workshops, personal goal-setting plans, and individual reading programs.",
+      "intrapersonal-logical": "Problem-Solvers & Strategists: Analytical skills paired with a reflective mindset. Highly suited for independent coding challenges, chess instruction, logic puzzles, and strategic scientific research projects."
+    };
+
+    if (narrativeMap[keys]) {
+      return narrativeMap[keys];
+    }
+    
+    const label1 = DOMAINS[top1]?.label || top1;
+    const label2 = DOMAINS[top2]?.label || top2;
+    return `Multi-disciplinary Opportunities: The dominant talent clusters are ${label1} and ${label2}. Consider hosting collaborative workshops that blend these two domains to encourage peer learning and cross-domain development.`;
   }
 
   const pendingUsers = users.filter(u => u.role && u.role.toLowerCase().startsWith("pending_"));
@@ -304,6 +441,194 @@ export default function Dashboard() {
                   {Object.keys(analytics.untapped_potential || {}).length === 0 && (
                     <span style={{ color: "#999", fontSize: "14px" }}>No secondary potential indexed yet.</span>
                   )}
+                </div>
+              </div>
+
+              {/* TALENT INTELLIGENCE & RECOMMENDATIONS SECTION */}
+              <div style={{ margin: "28px 0" }}>
+                <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#1e1b4b", marginBottom: "18px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>🎯</span> Talent Intelligence & Nurturing Recommendations
+                </h2>
+                
+                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", gap: "24px", marginBottom: "24px" }}>
+                  
+                  {/* Talent Clusters Card */}
+                  <div className="card" style={{ padding: "24px", borderRadius: "16px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 12px 0", color: "#1e1b4b", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span>🧬</span> Center Talent Clusters
+                      </h3>
+                      <p className="text-light" style={{ fontSize: "14px", margin: "0 0 16px 0", lineHeight: "1.5" }}>
+                        Aggregated analysis of top talent domains and secondary potentials across all active student assessments.
+                      </p>
+                      
+                      {aggregates.sortedDomains.length > 0 ? (
+                        <div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+                            {aggregates.sortedDomains.slice(0, 3).map(([dom, val], idx) => {
+                              const d = DOMAINS[dom] || { emoji: "⭐", label: dom, color: "#5b4cf0" };
+                              const totalWeight = aggregates.sortedDomains.reduce((acc, curr) => acc + curr[1], 0);
+                              const ratio = Math.round((val / (totalWeight || 1)) * 100);
+                              return (
+                                <div key={dom} style={{ display: "flex", alignItems: "center", gap: "12px", background: "#f9fafb", padding: "10px 14px", borderRadius: "12px", borderLeft: `4px solid ${d.color}`, border: "1px solid #e5e7eb", borderLeftWidth: "4px" }}>
+                                  <span style={{ fontSize: "22px" }}>{d.emoji}</span>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                                      <span style={{ fontWeight: 700, fontSize: "14.5px", color: "#1e1b4b" }}>{d.label}</span>
+                                      <span style={{ fontSize: "12px", fontWeight: 700, color: d.color }}>Weight: {val.toFixed(1)}</span>
+                                    </div>
+                                    <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "2px" }}>
+                                      Rank #{idx + 1} Cluster · Contributing {ratio}% of center's overall talent profile.
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          
+                          <div style={{ background: "linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%)", padding: "16px", borderRadius: "12px", border: "1px solid rgba(91, 76, 240, 0.15)", fontSize: "14px", lineHeight: "1.6", color: "#3730a3" }}>
+                            <strong>💡 Educational Strategy:</strong> {getClusterNarrative(aggregates.sortedDomains)}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ color: "#9ca3af", textAlign: "center", padding: "20px 0" }}>No completed assessments to generate clusters.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Aggregate Workshop Recommendations */}
+                  <div className="card" style={{ padding: "24px", borderRadius: "16px" }}>
+                    <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 12px 0", color: "#1e1b4b", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>🛠️</span> Demanded Workshops (Aggregated Recommendations)
+                    </h3>
+                    <p className="text-light" style={{ fontSize: "14px", margin: "0 0 16px 0", lineHeight: "1.5" }}>
+                      Cumulative workshop demands recommended to nurture active student profiles in this center.
+                    </p>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "320px", overflowY: "auto", paddingRight: "4px" }}>
+                      {aggregates.workshopCounts.length > 0 ? (
+                        aggregates.workshopCounts.map(ws => {
+                          const domainKey = Object.keys(DOMAINS).find(k => {
+                            const map = {
+                              "creative": "Art & Design",
+                              "logical": "STEM & Coding",
+                              "spatial": "Tinkering & Making",
+                              "social": "Peer Leadership",
+                              "language": "Debate & Storytelling",
+                              "naturalist": "Young Naturalist Trails",
+                              "kinesthetic": "Sports & Movement",
+                              "intrapersonal": "Goal Setting & Reflective Writing"
+                            };
+                            return map[k] === ws.title;
+                          });
+                          const d = DOMAINS[domainKey] || { emoji: "📚", color: "#4b5563", light: "#f3f4f6" };
+                          
+                          return (
+                            <div key={ws.title} style={{ border: "1px solid #e5e7eb", borderRadius: "12px", padding: "12px 16px", display: "flex", gap: "12px", background: "#fff" }}>
+                              <span style={{ fontSize: "24px", background: d.light, borderRadius: "8px", width: "42px", height: "42px", display: "flex", alignItems: "center", justifyContent: "center" }}>{d.emoji}</span>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <span style={{ fontWeight: 800, fontSize: "14.5px", color: "#1e1b4b" }}>{ws.title}</span>
+                                  <span className="domain-badge" style={{ background: d.light, color: d.color, fontSize: "11px", fontWeight: 700 }}>
+                                    {ws.count} {ws.count === 1 ? "student" : "students"}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: "13px", color: "#4b5563", marginTop: "4px" }}>{ws.desc}</div>
+                                <div style={{ fontSize: "11px", color: "#6b7280", marginTop: "6px", fontStyle: "italic" }}>
+                                  Target: {ws.students.slice(0, 4).join(", ")}{ws.students.length > 4 ? ` (+${ws.students.length - 4} more)` : ""}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div style={{ color: "#9ca3af", textAlign: "center", padding: "20px 0" }}>No workshops recommended yet. Complete assessments first.</div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", gap: "24px", marginBottom: "24px" }}>
+                  
+                  {/* High-Potential Students Card */}
+                  <div className="card" style={{ padding: "24px", borderRadius: "16px" }}>
+                    <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 12px 0", color: "#1e1b4b", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>🚀</span> High-Potential Students (Stretched Domain Score ≥ 85%)
+                    </h3>
+                    <p className="text-light" style={{ fontSize: "14px", margin: "0 0 16px 0", lineHeight: "1.5" }}>
+                      Students exhibiting outstanding aptitude. Provide advanced mentoring or accelerated learning opportunities.
+                    </p>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "320px", overflowY: "auto", paddingRight: "4px" }}>
+                      {aggregates.highPotentialStudents.length > 0 ? (
+                        aggregates.highPotentialStudents.map(student => (
+                          <div key={student.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f9fafb", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
+                            <div style={{ flex: 1, marginRight: "10px" }}>
+                              <div style={{ fontWeight: 700, fontSize: "14.5px", color: "#1e1b4b" }}>
+                                {student.name} <span style={{ fontSize: "12px", color: "#6b7280", fontWeight: 500 }}>(Age {student.age} · {student.center})</span>
+                              </div>
+                              <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap" }}>
+                                {student.highDomains.map(dInfo => {
+                                  const d = DOMAINS[dInfo.domain] || { emoji: "⭐", label: dInfo.domain, color: "#4b5563" };
+                                  return (
+                                    <span key={dInfo.domain} style={{ fontSize: "11px", fontWeight: 700, background: "#f3f4f6", border: `1px solid ${d.color}20`, padding: "2px 6px", borderRadius: "6px", color: d.color, display: "flex", alignItems: "center", gap: "4px" }}>
+                                      <span>{d.emoji}</span> {d.label.split(" ")[0]} ({dInfo.score}%)
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <button className="btn btn-ghost btn-sm" style={{ fontWeight: 700, color: "#5b4cf0", whiteSpace: "nowrap" }} onClick={() => navigate(`/results/${student.latest_session_id}?cid=${student.id}`)}>
+                              View Report
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ color: "#9ca3af", textAlign: "center", padding: "20px 0" }}>No high-potential students identified yet (Stretched score ≥ 85%).</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Low-Exposure Opportunities Card (TEG gaps) */}
+                  <div className="card" style={{ padding: "24px", borderRadius: "16px" }}>
+                    <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "0 0 12px 0", color: "#1e1b4b", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>🔍</span> Untapped Talent Exposure Gaps (TEG)
+                    </h3>
+                    <p className="text-light" style={{ fontSize: "14px", margin: "0 0 16px 0", lineHeight: "1.5" }}>
+                      Children with high natural talent but low exposure. Prioritize enrolling these students in relevant workshops.
+                    </p>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "320px", overflowY: "auto", paddingRight: "4px" }}>
+                      {aggregates.lowExposureStudents.length > 0 ? (
+                        aggregates.lowExposureStudents.map(student => (
+                          <div key={student.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fffbf2", padding: "10px 14px", borderRadius: "12px", border: "1px solid #fde68a" }}>
+                            <div style={{ flex: 1, marginRight: "10px" }}>
+                              <div style={{ fontWeight: 700, fontSize: "14.5px", color: "#854F0B" }}>
+                                {student.name} <span style={{ fontSize: "12px", color: "#b45309", fontWeight: 500 }}>(Age {student.age} · {student.center})</span>
+                              </div>
+                              <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap" }}>
+                                {student.lowExpDomains.map(dInfo => {
+                                  const d = DOMAINS[dInfo.domain] || { emoji: "⭐", label: dInfo.domain, color: "#854F0B" };
+                                  return (
+                                    <span key={dInfo.domain} style={{ fontSize: "11px", fontWeight: 700, background: "#fffbeb", border: "1px solid #fcd34d", padding: "2px 6px", borderRadius: "6px", color: "#b45309", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      <span>{d.emoji}</span> {d.label.split(" ")[0]} (Aptitude: {dInfo.talent_score}% | Exposure: {dInfo.exposure_score}%)
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <button className="btn btn-ghost btn-sm" style={{ fontWeight: 700, color: "#b45309", whiteSpace: "nowrap" }} onClick={() => navigate(`/results/${student.latest_session_id}?cid=${student.id}`)}>
+                              View Report
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ color: "#9ca3af", textAlign: "center", padding: "20px 0" }}>No significant talent exposure gaps found.</div>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
