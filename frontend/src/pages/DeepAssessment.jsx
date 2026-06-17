@@ -185,6 +185,7 @@ export default function DeepAssessment() {
         <h2 className="card-title-tight">{taskTitle}</h2>
         <p className="q-text">{taskPrompt}</p>
         <TaskRenderer
+          key={task.key}
           task={task}
           answer={currentAnswer}
           startedAt={startedAt}
@@ -289,26 +290,29 @@ function PatternChoice({ task, answer, startedAt, setAnswer, selectedLanguage })
 }
 
 function SymbolScan({ task, answer, startedAt, setAnswer, selectedLanguage }) {
-  const [count, setCount] = useState(answer?.value || "");
+  const [count, setCount] = useState(answer?.value !== undefined ? answer.value : "");
 
-  const submit = () => {
-    const numeric = Number(count);
-    const difference = Math.abs(numeric - task.answer);
-    setAnswer(baseAnswer(task, numeric, {
-      correct: difference === 0,
-      accuracy: Math.max(0, 1 - difference / task.answer),
-      response_ms: Date.now() - startedAt,
-    }));
+  const handleChange = (val) => {
+    setCount(val);
+    if (val !== "") {
+      const numeric = Number(val);
+      const difference = Math.abs(numeric - task.answer);
+      setAnswer(baseAnswer(task, numeric, {
+        correct: difference === 0,
+        accuracy: Math.max(0, 1 - difference / task.answer),
+        response_ms: Date.now() - startedAt,
+      }));
+    } else {
+      setAnswer(null);
+    }
   };
 
   const strings = {
     English: {
-      placeholder: `Number of ${task.target}`,
-      lock: "Lock answer"
+      placeholder: `Number of ${task.target}`
     },
     Hindi: {
-      placeholder: `${task.target} की संख्या`,
-      lock: "उत्तर लॉक करें"
+      placeholder: `${task.target} की संख्या`
     }
   }[selectedLanguage];
 
@@ -317,17 +321,15 @@ function SymbolScan({ task, answer, startedAt, setAnswer, selectedLanguage }) {
       <div className="symbol-grid">
         {task.symbols.map((symbol, i) => <span key={`${symbol}-${i}`}>{symbol}</span>)}
       </div>
-      <div className="form-row">
+      <div className="form-row" style={{ justifyContent: "center" }}>
         <input
           type="number"
           min="0"
           value={count}
-          onChange={e => setCount(e.target.value)}
+          onChange={e => handleChange(e.target.value)}
           placeholder={strings.placeholder}
+          style={{ maxWidth: "200px", textAlign: "center" }}
         />
-        <button className="btn btn-primary" onClick={submit} disabled={count === ""}>
-          {strings.lock}
-        </button>
       </div>
     </div>
   );
@@ -406,6 +408,15 @@ function OrderSteps({ task, answer, startedAt, setAnswer, selectedLanguage }) {
 
   useEffect(() => {
     setOrdered(answer?.ordered || shuffledList);
+    if (!answer) {
+      const correct = shuffledList.filter((step, idx) => step === stepsList[idx]).length;
+      setAnswer(baseAnswer(task, (correct / stepsList.length) * 4, {
+        ordered: shuffledList,
+        correct: correct === stepsList.length,
+        accuracy: correct / stepsList.length,
+        response_ms: Date.now() - startedAt,
+      }));
+    }
   }, [task, selectedLanguage]);
 
   const move = (idx, direction) => {
@@ -414,12 +425,10 @@ function OrderSteps({ task, answer, startedAt, setAnswer, selectedLanguage }) {
     const next = [...ordered];
     [next[idx], next[target]] = [next[target], next[idx]];
     setOrdered(next);
-  };
 
-  const submit = () => {
-    const correct = ordered.filter((step, idx) => step === stepsList[idx]).length;
+    const correct = next.filter((step, idx) => step === stepsList[idx]).length;
     setAnswer(baseAnswer(task, (correct / stepsList.length) * 4, {
-      ordered,
+      ordered: next,
       correct: correct === stepsList.length,
       accuracy: correct / stepsList.length,
       response_ms: Date.now() - startedAt,
@@ -429,13 +438,11 @@ function OrderSteps({ task, answer, startedAt, setAnswer, selectedLanguage }) {
   const strings = {
     English: {
       up: "Up",
-      down: "Down",
-      lock: "Lock order"
+      down: "Down"
     },
     Hindi: {
       up: "ऊपर",
-      down: "नीचे",
-      lock: "क्रम लॉक करें"
+      down: "नीचे"
     }
   }[selectedLanguage];
 
@@ -456,49 +463,115 @@ function OrderSteps({ task, answer, startedAt, setAnswer, selectedLanguage }) {
           </div>
         ))}
       </div>
-      <button className="btn btn-primary" onClick={submit}>
-        {strings.lock}
-      </button>
     </div>
   );
 }
 
 function IdeaList({ task, answer, startedAt, setAnswer, selectedLanguage }) {
-  const [text, setText] = useState(answer?.text || "");
+  const [ideas, setIdeas] = useState(() => {
+    if (answer?.text) {
+      const parts = answer.text.split(/\n/).map(item => item.trim()).filter(Boolean);
+      return [parts[0] || "", parts[1] || "", parts[2] || ""];
+    }
+    return ["", "", ""];
+  });
 
-  const submit = () => {
-    const ideas = text.split(/\n|,/).map(item => item.trim()).filter(Boolean);
-    const uniqueIdeas = new Set(ideas.map(i => i.toLowerCase())).size;
-    setAnswer(baseAnswer(task, Math.min(4, uniqueIdeas), {
-      text,
-      idea_count: uniqueIdeas,
-      fluency_score: Math.min(1, uniqueIdeas / task.minIdeas),
-      response_ms: Date.now() - startedAt,
-    }));
+  const handleIdeaChange = (index, val) => {
+    const nextIdeas = [...ideas];
+    nextIdeas[index] = val;
+    setIdeas(nextIdeas);
+
+    const filtered = nextIdeas.map(i => i.trim()).filter(Boolean);
+    const uniqueCount = new Set(filtered.map(i => i.toLowerCase())).size;
+
+    if (filtered.length > 0) {
+      setAnswer(baseAnswer(task, Math.min(4, uniqueCount), {
+        text: filtered.join("\n"),
+        idea_count: uniqueCount,
+        fluency_score: Math.min(1, uniqueCount / task.minIdeas),
+        response_ms: Date.now() - startedAt,
+      }));
+    } else {
+      setAnswer(null);
+    }
   };
 
   const strings = {
     English: {
-      placeholder: "One idea per line, or separate ideas with commas",
-      lock: "Lock ideas"
+      labels: [
+        "First funny or amazing idea:",
+        "Second funny or amazing idea:",
+        "Third funny or amazing idea:"
+      ],
+      placeholders: [
+        "e.g. Desks and chairs will slide to the wall!",
+        "e.g. Walking sideways to the blackboard",
+        "e.g. Homework flying sideways out the window!"
+      ],
+      alertTitle: "Sideways Gravity Alert!",
+      alertDesc: "Everything falls sideways towards the wall instead of the floor! Imagine walking horizontally on walls and books sliding sideways."
     },
     Hindi: {
-      placeholder: "प्रति पंक्ति एक विचार लिखें, या विचारों को अल्पविराम (comma) से अलग करें",
-      lock: "विचार लॉक करें"
+      labels: [
+        "पहला मजेदार या अनोखा विचार:",
+        "दूसरा मजेदार या अनोखा विचार:",
+        "तीसरा मजेदार या अनोखा विचार:"
+      ],
+      placeholders: [
+        "उदा. डेस्क और कुर्सियां दीवार से चिपक जाएंगी!",
+        "उदा. ब्लैकबोर्ड पर लिखने के लिए तिरछा चलना पड़ेगा",
+        "उदा. कॉपियां खिड़की से बाहर उड़ जाएंगी!"
+      ],
+      alertTitle: "तिरछा गुरुत्वाकर्षण (Sideways Gravity)",
+      alertDesc: "सोचें कि सब कुछ फर्श (floor) के बजाय दाईं या बाईं दीवार (sideways wall) की तरफ गिरने लगा है! लोग, बैग और डेस्क दीवार पर टिके हैं।"
     }
-  }[selectedLanguage];
+  }[selectedLanguage] || strings.English;
 
   return (
-    <div className="task-stack">
-      <textarea
-        rows={5}
-        value={text}
-        onChange={e => setText(e.target.value)}
-        placeholder={strings.placeholder}
-      />
-      <button className="btn btn-primary" onClick={submit} disabled={!text.trim()}>
-        {strings.lock}
-      </button>
+    <div className="task-stack" style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "16px" }}>
+      <div style={{
+        background: "linear-gradient(135deg, #f5f3ff 0%, #e879f915 100%)",
+        padding: "16px",
+        borderRadius: "16px",
+        border: "1.5px dashed #c084fc",
+        display: "flex",
+        alignItems: "center",
+        gap: "16px",
+        textAlign: "left"
+      }}>
+        <div style={{ fontSize: "40px", transform: "rotate(-90deg)", display: "inline-block" }}>🏫🎒🚶💨</div>
+        <div style={{ flex: 1 }}>
+          <strong style={{ color: "#7c3aed", fontSize: "14.5px", display: "block", marginBottom: "4px" }}>
+            {strings.alertTitle}
+          </strong>
+          <span style={{ fontSize: "13px", lineHeight: "1.4", color: "#5b21b6", display: "block" }}>
+            {strings.alertDesc}
+          </span>
+        </div>
+      </div>
+
+      {ideas.map((idea, idx) => (
+        <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "6px", textAlign: "left" }}>
+          <label style={{ fontSize: "14.5px", fontWeight: 700, color: "#1e1b4b" }}>
+            {strings.labels[idx]}
+          </label>
+          <input
+            type="text"
+            value={idea}
+            onChange={e => handleIdeaChange(idx, e.target.value)}
+            placeholder={strings.placeholders[idx]}
+            style={{
+              padding: "12px",
+              borderRadius: "10px",
+              border: "1px solid #cbd5e1",
+              fontSize: "14.5px",
+              outline: "none",
+              background: "#fff",
+              transition: "border-color 0.2s"
+            }}
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -616,21 +689,24 @@ function ReactionTask({ task, answer, setAnswer, selectedLanguage }) {
 function OpenEndedTask({ task, answer, startedAt, setAnswer, selectedLanguage }) {
   const [text, setText] = useState(answer?.text || "");
 
-  const submit = () => {
-    setAnswer(baseAnswer(task, text, {
-      text,
-      response_ms: Date.now() - startedAt,
-    }));
+  const handleChange = (val) => {
+    setText(val);
+    if (val.trim()) {
+      setAnswer(baseAnswer(task, val, {
+        text: val,
+        response_ms: Date.now() - startedAt,
+      }));
+    } else {
+      setAnswer(null);
+    }
   };
 
   const strings = {
     English: {
-      placeholder: "Type your thoughts here... Write as much as you like!",
-      lock: "Save response"
+      placeholder: "Type your thoughts here... Write as much as you like!"
     },
     Hindi: {
-      placeholder: "अपने विचार यहाँ लिखें... आप जितना चाहें उतना लिख सकते हैं!",
-      lock: "जवाब सहेजें"
+      placeholder: "अपने विचार यहाँ लिखें... आप जितना चाहें उतना लिख सकते हैं!"
     }
   }[selectedLanguage];
 
@@ -639,7 +715,7 @@ function OpenEndedTask({ task, answer, startedAt, setAnswer, selectedLanguage })
       <textarea
         rows={6}
         value={text}
-        onChange={e => setText(e.target.value)}
+        onChange={e => handleChange(e.target.value)}
         placeholder={strings.placeholder}
         style={{
           width: "100%",
@@ -655,9 +731,6 @@ function OpenEndedTask({ task, answer, startedAt, setAnswer, selectedLanguage })
           marginBottom: "16px"
         }}
       />
-      <button className="btn btn-primary" onClick={submit} disabled={!text.trim()}>
-        {strings.lock}
-      </button>
     </div>
   );
 }
