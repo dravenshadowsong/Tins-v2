@@ -3,37 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 const EXPOSURE_QUESTIONS = [
-  { id: "lang_1", title: "Speaking & Stage", desc: "Have you ever spoken or performed on a stage in front of a group?" },
-  { id: "lang_2", title: "Storytelling to Kids", desc: "Have you ever told stories or read books aloud to younger children?" },
-  { id: "lang_3", title: "Speech Competitions", desc: "Have you ever participated in a speech, debate, or poetry competition?" },
-  
-  { id: "creative_1", title: "Drawing & Art", desc: "Have you ever drawn, painted, or sketched pictures in your free time?" },
-  { id: "creative_2", title: "Music & Dance", desc: "Have you ever sung, danced, hummed, or played music for others?" },
-  { id: "creative_3", title: "Creative Drama", desc: "Have you ever made up a play, script, or song for friends to watch?" },
-  
-  { id: "logical_1", title: "Math Puzzles", desc: "Have you ever solved math riddles, puzzles, or board games?" },
-  { id: "logical_2", title: "Strategy Games", desc: "Have you ever played strategy games or worked with calculators/apps?" },
-  { id: "logical_3", title: "Patterns & Magic", desc: "Have you ever tried to understand how magic tricks or patterns work?" },
-  
-  { id: "spatial_1", title: "Blocks & Making", desc: "Have you ever built models with blocks, cardboard, or construction kits?" },
-  { id: "spatial_2", title: "3D Art & Folding", desc: "Have you ever sketched 3D shapes, drew maps, or folded origami?" },
-  { id: "spatial_3", title: "Fixing Things", desc: "Have you ever taken toys or sharpeners apart to fix them?" },
-  
-  { id: "kinesthetic_1", title: "Sports & Tag", desc: "Have you ever participated in physical sports or playground tag?" },
-  { id: "kinesthetic_2", title: "Active Moves", desc: "Have you ever practiced dance steps, karate, gymnastics, or yoga?" },
-  { id: "kinesthetic_3", title: "Balance Games", desc: "Have you ever played balance or target throwing games?" },
-  
-  { id: "naturalist_1", title: "Gardening & Seeds", desc: "Have you ever sowed seeds, watered gardens, or cared for house plants?" },
-  { id: "naturalist_2", title: "Observing Animals", desc: "Have you ever watched animal tracks, insects, or birds outdoors?" },
-  { id: "naturalist_3", title: "Nature Collections", desc: "Have you ever collected and sorted rocks, leaves, or feathers by pattern?" },
-  
-  { id: "social_1", title: "Leading Groups", desc: "Have you ever led school teams, projects, or classroom cleanliness activities?" },
-  { id: "social_2", title: "Settling Arguments", desc: "Have you ever helped classmates settle a loud dispute or playground argument?" },
-  { id: "social_3", title: "Helping Events", desc: "Have you ever welcomed new students or organized center activities?" },
-  
-  { id: "intrapersonal_1", title: "Planning Routines", desc: "Have you ever planned studying or practice routines and tracked progress?" },
-  { id: "intrapersonal_2", title: "Writing Journals", desc: "Have you ever logged thoughts, journals, or daily reflection lists?" },
-  { id: "intrapersonal_3", title: "Quiet Reflection", desc: "Have you ever spent quiet time thinking about personal strengths and weaknesses?" }
+  { id: "exp_language", title: "Language & Communication", desc: "Have you ever spoken or performed on a stage in front of a group?", desc_hi: "क्या आपने कभी किसी समूह के सामने मंच पर बात की है या कोई प्रस्तुति दी है?" },
+  { id: "exp_creative", title: "Creative & Artistic", desc: "Have you ever made art, crafts, or creative projects?", desc_hi: "क्या आपने कभी कला, शिल्प (क्राफ्ट) या कोई रचनात्मक चीज़ बनाई है?" },
+  { id: "exp_logical", title: "Logical & Analytical", desc: "Have you ever solved riddles, code puzzles, or math games?", desc_hi: "क्या आपने कभी पहेलियाँ, कोड पहेलियाँ या गणित के खेल हल किए हैं?" },
+  { id: "exp_social", title: "Social & Leadership", desc: "Have you ever led a team, group, or classroom activity?", desc_hi: "क्या आपने कभी किसी टीम, समूह या कक्षा की गतिविधि का नेतृत्व किया है?" },
+  { id: "exp_spatial", title: "Spatial & Making", desc: "Have you ever built models with blocks, cardboard, or toys?", desc_hi: "क्या आपने कभी ब्लॉक, गत्ते या खिलौनों से मॉडल बनाए हैं?" },
+  { id: "exp_kinesthetic", title: "Kinesthetic & Physical", desc: "Have you ever participated in running games, sports, or dance?", desc_hi: "क्या आपने कभी दौड़ने वाले खेलों, खेलकूद या नृत्य में भाग लिया है?" },
+  { id: "exp_naturalist", title: "Naturalist & Environmental", desc: "Have you ever sowed seeds, watered gardens, or cared for animals?", desc_hi: "क्या आपने कभी बीज बोए हैं, बगीचे में पानी दिया है या जानवरों की देखभाल की है?" },
+  { id: "exp_intrapersonal", title: "Intrapersonal & Reflective", desc: "Have you ever set personal goals or written in a diary?", desc_hi: "क्या आपने कभी अपने लिए लक्ष्य तय किए हैं या डायरी में लिखा है?" }
 ];
 
 export default function Intake() {
@@ -43,14 +20,14 @@ export default function Intake() {
   const [form, setForm] = useState({
     name: "", age: "", language: "Hindi", school_year: "", gender: "", center_id: "",
     exposure_data: {
-      lang_1: 0, lang_2: 0, lang_3: 0,
-      creative_1: 0, creative_2: 0, creative_3: 0,
-      logical_1: 0, logical_2: 0, logical_3: 0,
-      spatial_1: 0, spatial_2: 0, spatial_3: 0,
-      kinesthetic_1: 0, kinesthetic_2: 0, kinesthetic_3: 0,
-      naturalist_1: 0, naturalist_2: 0, naturalist_3: 0,
-      social_1: 0, social_2: 0, social_3: 0,
-      intrapersonal_1: 0, intrapersonal_2: 0, intrapersonal_3: 0
+      exp_language: 0,
+      exp_creative: 0,
+      exp_logical: 0,
+      exp_spatial: 0,
+      exp_kinesthetic: 0,
+      exp_naturalist: 0,
+      exp_social: 0,
+      exp_intrapersonal: 0
     }
   });
 
@@ -76,22 +53,18 @@ export default function Intake() {
     setSaving(true);
 
     const q = form.exposure_data;
-    // Map the 24 V4 questions (0-3 scale) directly to the 8 legacy fields for database compatibility
-    const legacy_exp = {
-      exp_language: Math.min(3, Math.round((q.lang_1 + q.lang_2 + q.lang_3) / 3)),
-      exp_creative: Math.min(3, Math.round((q.creative_1 + q.creative_2 + q.creative_3) / 3)),
-      exp_logical: Math.min(3, Math.round((q.logical_1 + q.logical_2 + q.logical_3) / 3)),
-      exp_spatial: Math.min(3, Math.round((q.spatial_1 + q.spatial_2 + q.spatial_3) / 3)),
-      exp_kinesthetic: Math.min(3, Math.round((q.kinesthetic_1 + q.kinesthetic_2 + q.kinesthetic_3) / 3)),
-      exp_naturalist: Math.min(3, Math.round((q.naturalist_1 + q.naturalist_2 + q.naturalist_3) / 3)),
-      exp_social: Math.min(3, Math.round((q.social_1 + q.social_2 + q.social_3) / 3)),
-      exp_intrapersonal: Math.min(3, Math.round((q.intrapersonal_1 + q.intrapersonal_2 + q.intrapersonal_3) / 3))
-    };
 
     try {
       const child = await api.createChild({ 
         ...form, 
-        ...legacy_exp,
+        exp_language: q.exp_language,
+        exp_creative: q.exp_creative,
+        exp_logical: q.exp_logical,
+        exp_spatial: q.exp_spatial,
+        exp_kinesthetic: q.exp_kinesthetic,
+        exp_naturalist: q.exp_naturalist,
+        exp_social: q.exp_social,
+        exp_intrapersonal: q.exp_intrapersonal,
         age: parseInt(form.age),
         center_id: parseInt(form.center_id)
       });
@@ -175,12 +148,13 @@ export default function Intake() {
           {EXPOSURE_QUESTIONS.map((q, idx) => (
             <div key={q.id} className="exposure-row" style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "16px", background: "#f9fafb", borderRadius: "12px", border: "1px solid #e5e7eb" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", color: "#6b7280" }}>Exposure Question {idx + 1} of 12</span>
+                <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", color: "#6b7280" }}>Exposure Question {idx + 1} of 8</span>
                 <span style={{ fontSize: "11px", fontWeight: 800, color: "#5b4cf0", textTransform: "uppercase" }}>Opportunity Access</span>
               </div>
               <div>
                 <div style={{ fontWeight: 800, fontSize: "16px", color: "#1e1b4b" }}>{q.title}</div>
                 <div style={{ fontSize: "13.5px", color: "#4b5563", marginTop: "4px", lineHeight: "1.5" }}>{q.desc}</div>
+                <div style={{ fontSize: "13.5px", color: "#4b5563", marginTop: "2px", lineHeight: "1.5", fontStyle: "italic" }}>{q.desc_hi}</div>
               </div>
               <div className="segmented-control" style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
                 {currentScale.map((lbl, i) => (

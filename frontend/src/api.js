@@ -72,5 +72,6 @@ export const api = {
   scheduleReassessment:(cid)   => req("POST", "/sessions/reassess", { child_id: cid }),
   getAnalytics:    ()          => req("GET",  "/analytics"),
   downloadPDF:     (sid)       => `${BASE}/sessions/${sid}/pdf`,
+  getAdaptiveQuestions: (id, data) => req("POST", `/sessions/${id}/adaptive`, data),
 };
 

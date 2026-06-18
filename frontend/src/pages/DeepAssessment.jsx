@@ -49,6 +49,7 @@ export default function DeepAssessment() {
   const [child, setChild] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [taskList, setTaskList] = useState([]);
 
   useEffect(() => {
     async function loadData() {
@@ -59,6 +60,19 @@ export default function DeepAssessment() {
         ]);
         setSession(s);
         setChild(c);
+        
+        let tasks = ASSESSMENT_TASKS;
+        if (s?.generated_tasks) {
+          try {
+            tasks = JSON.parse(s.generated_tasks);
+          } catch (e) {
+            console.error("Error parsing AI generated tasks:", e);
+          }
+        }
+        if (c) {
+          tasks = getAdaptedDeepTasks(tasks, c.school_year, c.age, c.language);
+        }
+        setTaskList(tasks);
       } catch (e) {
         console.error("Error loading assessment data:", e);
       } finally {
@@ -67,22 +81,6 @@ export default function DeepAssessment() {
     }
     loadData();
   }, [sid, cid]);
-
-  // Dynamically resolve AI generated tasks or default fallback
-  const taskList = useMemo(() => {
-    let tasks = ASSESSMENT_TASKS;
-    if (session?.generated_tasks) {
-      try {
-        tasks = JSON.parse(session.generated_tasks);
-      } catch (e) {
-        console.error("Error parsing AI generated tasks:", e);
-      }
-    }
-    if (child) {
-      tasks = getAdaptedDeepTasks(tasks, child.school_year, child.age, child.language);
-    }
-    return tasks;
-  }, [session, child]);
 
   const task = taskList[step];
   const total = taskList.length;
@@ -100,6 +98,29 @@ export default function DeepAssessment() {
 
   const next = async () => {
     if (!currentAnswer) return;
+
+    if (step === 19 && taskList.length === 20) {
+      setSubmitting(true);
+      try {
+        const res = await api.getAdaptiveQuestions(parseInt(sid), {
+          child_id: parseInt(cid),
+          responses: answers,
+        });
+        let adaptive = res.adaptive_tasks || [];
+        if (child) {
+          adaptive = getAdaptedDeepTasks(adaptive, child.school_year, child.age, child.language);
+        }
+        setTaskList(prev => [...prev, ...adaptive]);
+        setStep(s => s + 1);
+      } catch (e) {
+        console.error("Failed to load adaptive questions:", e);
+        alert("Failed to load adaptive questions. Check if backend is running.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     if (step < total - 1) {
       setStep(s => s + 1);
       return;

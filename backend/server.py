@@ -1562,263 +1562,6 @@ def get_session(sid):
 
 # ── Dynamic AI Custom Puzzle Generator ────────────────────────────────────────
 
-DEFAULT_AI_PUZZLES = [
-    {
-        "key": "language_race",
-        "type": "order_steps",
-        "domain": "language",
-        "component": "performance_1",
-        "title": {
-            "English": "Story Order",
-            "Hindi": "कहानी का क्रम"
-        },
-        "prompt": {
-            "English": "Put these steps in the correct order to tell a story:",
-            "Hindi": "कहानी बताने के लिए इन चरणों को सही क्रम में रखें:"
-        },
-        "steps": {
-            "English": [
-                "We lined up at the starting line.",
-                "The whistle blew and we ran fast.",
-                "I crossed the finish line third.",
-                "We clapped and cheered for the winner."
-            ],
-            "Hindi": [
-                "हम शुरुआती रेखा पर खड़े हुए।",
-                "सीटी बजी और हम तेजी से दौड़े।",
-                "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
-                "हमने विजेता के लिए तालियाँ बजाईं।"
-            ]
-        },
-        "shuffled": {
-            "English": [
-                "We clapped and cheered for the winner.",
-                "We lined up at the starting line.",
-                "I crossed the finish line third.",
-                "The whistle blew and we ran fast."
-            ],
-            "Hindi": [
-                "हमने विजेता के लिए तालियाँ बजाईं।",
-                "हम शुरुआती रेखा पर खड़े हुए।",
-                "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
-                "सीटी बजी और हम तेजी से दौड़े।"
-            ]
-        },
-        "metric": "sequence_accuracy",
-        "difficulty": "easy",
-        "ai_interpretation_notes": "Story building sequencing task."
-    },
-    {
-        "key": "language_pic_interpret",
-        "type": "choice",
-        "domain": "language",
-        "component": "performance_2",
-        "title": {
-            "English": "Picture Clues",
-            "Hindi": "चित्र के सुराग"
-        },
-        "prompt": {
-            "English": "A dog is barking at a cat stuck in a tall tree. A boy runs, gets a wooden ladder, and helps the cat climb down. What is this picture showing?",
-            "Hindi": "एक कुत्ता पेड़ पर फंसी बिल्ली पर भौंक रहा है। एक लड़का लकड़ी की सीढ़ी लाता है और बिल्ली को नीचे उतारने में मदद करता है। यह चित्र क्या दिखाता है?"
-        },
-        "options": [
-            {
-                "label": {
-                    "English": "A boy helping an animal in trouble",
-                    "Hindi": "एक लड़का मुसीबत में फंसे जानवर की मदद कर रहा है"
-                },
-                "value": 4
-            },
-            {
-                "label": {
-                    "English": "A cat playing on a tree branch",
-                    "Hindi": "एक बिल्ली पेड़ की शाखा पर खेल रही है"
-                },
-                "value": 1
-            },
-            {
-                "label": {
-                    "English": "A dog chasing a boy with a ladder",
-                    "Hindi": "एक कुत्ता सीढ़ी वाले लड़के का पीछा कर रहा है"
-                },
-                "value": 2
-            },
-            {
-                "label": {
-                    "English": "A boy building a wooden ladder",
-                    "Hindi": "एक लड़का लकड़ी की सीढ़ी बना रहा है"
-                },
-                "value": 0
-            }
-        ],
-        "answer": "A boy helping an animal in trouble",
-        "metric": "correctness",
-        "difficulty": "easy",
-        "ai_interpretation_notes": "Picture interpretation and comprehension task."
-    },
-    {
-        "key": "language_explain_game",
-        "type": "choice",
-        "domain": "language",
-        "component": "situational",
-        "title": {
-            "English": "Teaching a Game",
-            "Hindi": "खेल सिखाना"
-        },
-        "prompt": {
-            "English": "You want to teach a new Class 1 student how to play your favorite playground game. What is the best way to explain it?",
-            "Hindi": "आप पहली कक्षा के एक नए छात्र को अपना पसंदीदा खेल सिखाना चाहते हैं। इसे समझाने का सबसे अच्छा तरीका क्या है?"
-        },
-        "options": [
-            {
-                "label": {
-                    "English": "Show them the actions slowly and play a practice round together",
-                    "Hindi": "उन्हें धीरे-धीरे इशारों से समझाएं और साथ में एक अभ्यास खेल खेलें"
-                },
-                "value": 4
-            },
-            {
-                "label": {
-                    "English": "Read the full rulebook to them very quickly",
-                    "Hindi": "नियमों की पूरी किताब उन्हें बहुत तेजी से पढ़कर सुनाएं"
-                },
-                "value": 1
-            },
-            {
-                "label": {
-                    "English": "Tell them to watch other students play from far away",
-                    "Hindi": "उन्हें दूर से अन्य छात्रों को खेलते हुए देखने के लिए कहें"
-                },
-                "value": 2
-            },
-            {
-                "label": {
-                    "English": "Write down a list of rules and give it to them to read",
-                    "Hindi": "नियमों की एक सूची लिखकर उन्हें पढ़ने के लिए दे दें"
-                },
-                "value": 0
-            }
-        ],
-        "answer": "Show them the actions slowly and play a practice round together",
-        "metric": "correctness",
-        "difficulty": "easy",
-        "ai_interpretation_notes": "Situational logic measuring empathetic communication."
-    },
-    {
-        "key": "language_story_words",
-        "type": "open_ended",
-        "domain": "language",
-        "component": "open_response",
-        "title": {
-            "English": "Three Words Story",
-            "Hindi": "तीन शब्दों की कहानी"
-        },
-        "prompt": {
-            "English": "Use these 3 words to write a short, fun story: dog, box, balloon.",
-            "Hindi": "इन 3 शब्दों का उपयोग करके एक छोटी और मजेदार कहानी लिखें: कुत्ता (dog), डिब्बा (box), गुब्बारा (balloon)।"
-        },
-        "metric": "narrative_expression",
-        "difficulty": "adaptive",
-        "ai_interpretation_notes": "Measures story fluency, word usage, and imagination."
-    },
-    {
-        "key": "creative_circles",
-        "type": "idea_list",
-        "domain": "creative",
-        "component": "performance_1",
-        "title": {
-            "English": "Circles Challenge",
-            "Hindi": "गोला चुनौती"
-        },
-        "prompt": {
-            "English": "Imagine 3 empty circles. Write down 3 different and unique things you could draw by adding lines to these circles!",
-            "Hindi": "3 खाली गोलों (circles) की कल्पना करें। कुछ लाइनें जोड़कर आप उनसे 3 अलग और अनोखी चीजें क्या बना सकते हैं, लिखें!"
-        },
-        "minIdeas": 3,
-        "metric": "fluency",
-        "difficulty": "adaptive",
-        "ai_interpretation_notes": "Visual circle transformation test."
-    },
-    {
-        "key": "creative_cloud",
-        "type": "idea_list",
-        "domain": "creative",
-        "component": "performance_2",
-        "title": {
-            "English": "Teacup Cloud",
-            "Hindi": "कप जैसा बादल"
-        },
-        "prompt": {
-            "English": "You see a cloud shaped like a giant teacup. Write down 3 unusual or magical things that could pour out of it!",
-            "Hindi": "आप एक बड़े चाय के कप के आकार का बादल देखते हैं। कल्पना करें और 3 अनोखी या जादुई चीजें लिखें जो इसमें से गिर सकती हैं!"
-        },
-        "minIdeas": 3,
-        "metric": "fluency",
-        "difficulty": "adaptive",
-        "ai_interpretation_notes": "Divergent thinking and semantic flexibility."
-    },
-    {
-        "key": "creative_box_situational",
-        "type": "choice",
-        "domain": "creative",
-        "component": "situational",
-        "title": {
-            "English": "Cardboard Box Use",
-            "Hindi": "गत्ते के डिब्बे का उपयोग"
-        },
-        "prompt": {
-            "English": "You find a large, empty cardboard box. What is the most creative way to use it?",
-            "Hindi": "आपको एक बड़ा, खाली गत्ते का डिब्बा मिलता है। इसका उपयोग करने का सबसे रचनात्मक तरीका क्या है?"
-        },
-        "options": [
-            {
-                "label": {
-                    "English": "Turn it into a puppet theater with cut-out windows for a show",
-                    "Hindi": "इसे एक पपेट थियेटर (कटपुतली थियेटर) में बदलें और नाटक दिखाएं"
-                },
-                "value": 4
-            },
-            {
-                "label": {
-                    "English": "Use it to store old school notebooks neatly",
-                    "Hindi": "पुरानी स्कूल नोटबुक्स को रखने के लिए इसका उपयोग करें"
-                },
-                "value": 2
-            },
-            {
-                "label": {
-                    "English": "Flatten it and throw it in the dustbin",
-                    "Hindi": "इसे मोड़कर कचरे के डिब्बे में फेंक दें"
-                },
-                "value": 1
-            },
-            {
-                "label": {
-                    "English": "Keep it in the corner of the room empty",
-                    "Hindi": "कमरे के कोने में इसे खाली रख दें"
-                },
-                "value": 0
-            }
-        ],
-        "answer": "Turn it into a puppet theater with cut-out windows for a show",
-        "metric": "correctness",
-        "difficulty": "easy",
-        "ai_interpretation_notes": "Situational creative divergent thinking."
-    },
-    {
-        "key": "creative_toy_invent",
-        "type": "open_ended",
-        "domain": "creative",
-        "component": "open_response",
-        "title": {
-            "English": "Invent a Toy",
-            "Hindi": "एक खिलौना बनाएं"
-        },
-        "prompt": {
-            "English": "Describe an entirely new toy you would invent. What does it look like and how do children play with it?",
-            "Hindi": "एक बिल्कुल नए खिलौने के बारे में बताएं जिसे आप बनाना चाहते हैं। वह कैसा दिखता है और बच्चे उससे कैसे खेलते हैं?"
-        },
-        "metric": "narrative_expression",
         "difficulty": "adaptive",
         "ai_interpretation_notes": "Measures product concept fluency and visual imagination."
     },
@@ -3288,21 +3031,22 @@ def adapt_tasks_with_gemini(tasks, complexity, language, api_key):
     return None
 
 def generate_ai_tasks(child, discovery_answers):
-    # In V4, all 32 deep puzzles are served to the child.
     db_puzzles = load_puzzles_from_db()
-    raw_tasks = []
     
-    for domain in ["logical", "spatial", "creative", "language", "kinesthetic", "social", "naturalist", "intrapersonal"]:
-        domain_puzzles = [p for p in db_puzzles if p["domain"] == domain and p.get("component") != "discovery_preference"]
-        component_order = {"performance_1": 1, "performance_2": 2, "situational": 3, "open_response": 4}
-        domain_puzzles_sorted = sorted(
-            domain_puzzles,
-            key=lambda x: component_order.get(x.get("component"), 9)
-        )
-        for p in domain_puzzles_sorted:
-            raw_tasks.append(p)
-            
-    return raw_tasks
+    # 1. Filter and sort Core Deep questions (exactly 2 per domain)
+    core_deep = [p for p in db_puzzles if p.get("component") == "core_deep"]
+    domain_order = ["logical", "spatial", "creative", "language", "kinesthetic", "social", "naturalist", "intrapersonal"]
+    core_deep_sorted = sorted(
+        core_deep, 
+        key=lambda x: domain_order.index(x["domain"]) if x["domain"] in domain_order else 9
+    )
+    
+    # 2. Filter Reflection questions (exactly 4)
+    reflection = [p for p in db_puzzles if p.get("component") == "reflection"]
+    # Sort reflection questions by key to keep a stable order
+    reflection_sorted = sorted(reflection, key=lambda x: x.get("key", ""))
+    
+    return core_deep_sorted + reflection_sorted
 
 
 
@@ -3371,6 +3115,88 @@ def submit_discovery(sid):
     db.commit()
     
     return jsonify({"status": "success", "count": len(generated_tasks)})
+
+@app.route("/api/sessions/<int:sid>/adaptive", methods=["POST"])
+def get_adaptive_questions_route(sid):
+    data = request.json or {}
+    responses = data.get("responses", {})
+    child_id = data.get("child_id")
+    
+    db = get_db()
+    child = db.execute("SELECT * FROM children WHERE id=?", (child_id,)).fetchone()
+    if not child:
+        return jsonify({"error": "Child not found"}), 404
+    child = dict(child)
+    
+    # Load discovery answers
+    session_row = db.execute("SELECT responses, generated_tasks FROM sessions WHERE id=?", (sid,)).fetchone()
+    if not session_row:
+        return jsonify({"error": "Session not found"}), 404
+        
+    discovery_answers = {}
+    if session_row["responses"]:
+        try:
+            discovery_answers = json.loads(session_row["responses"])
+        except Exception:
+            pass
+            
+    # Calculate preliminary scores to identify Primary, Secondary, Emerging domains
+    scores = score_responses(responses, child, discovery_answers)
+    
+    primary = scores["primary_domain"]
+    secondary = scores["secondary_domains"][0] if scores["secondary_domains"] else "creative"
+    
+    # Select emerging domain: first one from emerging_domains list or fallback
+    emerging = scores["emerging_domains"][0] if scores["emerging_domains"] else "spatial"
+    
+    # Load all puzzles from the DB
+    all_puzzles = load_puzzles_from_db()
+    
+    # Filter for adaptive puzzles
+    adaptive_bank = [p for p in all_puzzles if p.get("component") == "adaptive"]
+    
+    # If bank is empty, fall back to default adaptive questions
+    selected_adaptive = []
+    for dom in [primary, secondary, emerging]:
+        dom_puzzles = [p for p in adaptive_bank if p["domain"] == dom]
+        # Sort or take first 2
+        selected_adaptive.extend(dom_puzzles[:2])
+        
+    # Append to existing generated tasks in the session
+    existing_tasks = []
+    if session_row["generated_tasks"]:
+        try:
+            existing_tasks = json.loads(session_row["generated_tasks"])
+        except Exception:
+            pass
+            
+    # Remove any existing adaptive questions to prevent duplicates on refresh
+    existing_tasks = [t for t in existing_tasks if t.get("component") != "adaptive" and not t["key"].startswith("adaptive_")]
+    
+    new_tasks = existing_tasks + selected_adaptive
+    
+    # Update SQLite session
+    db.execute("""
+        UPDATE sessions SET generated_tasks = ? WHERE id = ?
+    """, (json.dumps(new_tasks), sid))
+    db.commit()
+    
+    # Update Supabase Postgres session if available
+    if supabase_client:
+        try:
+            supabase_client.table("sessions").update({
+                "generated_tasks": json.dumps(new_tasks)
+            }).eq("id", sid).execute()
+        except Exception as e:
+            print(f"DEBUG: Exception updating adaptive tasks in Supabase: {e}")
+            
+    return jsonify({
+        "status": "success",
+        "primary": primary,
+        "secondary": secondary,
+        "emerging": emerging,
+        "adaptive_tasks": selected_adaptive
+    })
 
 @app.route("/api/sessions/<int:sid>/submit", methods=["POST"])
 @app.route("/api/sessions/<int:sid>/submit/", methods=["POST"])
@@ -3782,6 +3608,18 @@ def add_note():
             
     facilitator_name = data.get("facilitator") or (user["name"] if user else "GOAT Mentor")
 
+    obs_ratings = {
+        "curiosity": int(data.get("obs_curiosity", 3)),
+        "confidence": int(data.get("obs_confidence", 3)),
+        "focus": int(data.get("obs_focus", 3)),
+        "creativity": int(data.get("obs_creativity", 3)),
+        "communication": int(data.get("obs_communication", 3)),
+        "leadership": int(data.get("obs_leadership", 3)),
+        "persistence": int(data.get("obs_persistence", 3)),
+        "emotional_regulation": int(data.get("obs_emotional_regulation", 3))
+    }
+    observation_text = json.dumps(obs_ratings)
+
     cur = db.execute("""
         INSERT INTO facilitator_notes
           (session_id, child_id, facilitator, confirmed, observation, override_domain, notes,
@@ -3792,18 +3630,18 @@ def add_note():
     """, (
         data["session_id"], data["child_id"],
         facilitator_name, data.get("confirmed", 0),
-        data.get("observation", ""), data.get("override_domain", ""),
+        observation_text, data.get("override_domain", ""),
         data.get("notes", ""),
         data.get("agreement", "Agree"),
         data.get("strengths_observed", ""),
         data.get("concerns", ""),
         data.get("suggested_workshop", ""),
-        data.get("obs_creativity", 0),
-        data.get("obs_communication", 0),
-        data.get("obs_leadership", 0),
-        data.get("obs_focus", 0),
+        int(data.get("obs_creativity", 3)),
+        int(data.get("obs_communication", 3)),
+        int(data.get("obs_leadership", 3)),
+        int(data.get("obs_focus", 3)),
         data.get("evidence_notes", ""),
-        data.get("obs_curiosity", 0),
+        int(data.get("obs_curiosity", 3)),
         data.get("validation_status", "Pending Validation")
     ))
     db.commit()
@@ -4874,32 +4712,25 @@ def extract_nlp_signals(open_ended_answers, api_key=None):
 
 def score_responses(responses, child, discovery_answers=None, facilitator_note=None, weights=None, past_sessions_count=0):
     """
-    Core scoring engine for V4.
+    Core scoring engine for V5.
     Blends:
-    - 10% Exposure / Opportunity
     - 20% Discovery / Spontaneous Preference
-    - 50% Deep Assessment / Demonstrated Ability
-    - 20% Facilitator Observation
+    - 50% Core Deep Assessment / Demonstrated Ability
+    - 15% Reflection
+    - 15% Adaptive Assessment
+    - 0% Exposure (Opportunity/TEG only)
     """
     
-    # 16-question balanced discovery mapping
+    # V5 Discovery Mapping
     discovery_mapping = {
-        "q_discovery_1": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_2": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_3": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_4": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_5": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_6": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_7": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_8": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_9": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_10": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_11": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_12": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_13": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_14": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"},
-        "q_discovery_15": {0: "language", 1: "creative", 2: "logical", 3: "spatial"},
-        "q_discovery_16": {0: "kinesthetic", 1: "naturalist", 2: "social", 3: "intrapersonal"}
+        "q_discovery_1": {0: ["language", "creative"], 1: ["logical", "spatial"], 2: ["social", "language"], 3: ["intrapersonal"]},
+        "q_discovery_2": {0: ["creative", "spatial"], 1: ["spatial", "logical"], 2: ["social", "language"], 3: ["intrapersonal"]},
+        "q_discovery_3": {0: ["logical", "spatial"], 1: ["creative", "spatial"], 2: ["language", "social"], 3: ["intrapersonal"]},
+        "q_discovery_4": {0: ["spatial", "logical"], 1: ["kinesthetic", "spatial"], 2: ["social", "language"], 3: ["intrapersonal"]},
+        "q_discovery_5": {0: ["kinesthetic", "creative"], 1: ["logical", "naturalist"], 2: ["social", "language"], 3: ["intrapersonal"]},
+        "q_discovery_6": {0: ["naturalist", "logical"], 1: ["creative", "naturalist"], 2: ["language", "social"], 3: ["intrapersonal"]},
+        "q_discovery_7": {0: ["language", "social"], 1: ["kinesthetic", "social"], 2: ["intrapersonal"], 3: ["creative", "social"]},
+        "q_discovery_8": {0: ["intrapersonal", "logical"], 1: ["creative"], 2: ["social", "language"], 3: ["kinesthetic"]}
     }
     
     discovery_counts = {
@@ -4913,87 +4744,71 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
                 try:
                     choice_val = int(choice)
                     if choice_val in opts:
-                        dom = opts[choice_val]
-                        discovery_counts[dom] += 1
+                        doms = opts[choice_val]
+                        for dom in doms:
+                            discovery_counts[dom] += 1
                 except Exception:
                     pass
 
-    rich_mode = any(isinstance(v, dict) for v in responses.values())
-    rich_component_scores = {}
-    if rich_mode:
-        for answer in responses.values():
-            if not isinstance(answer, dict):
-                continue
-            domain = answer.get("domain")
-            component = answer.get("component")
-            if domain not in DOMAIN_WEIGHTS or component not in DOMAIN_WEIGHTS[domain]:
-                continue
-            key = f"{domain}_{component}"
-            rich_component_scores.setdefault(key, []).append(answer_to_scale(answer))
-
-    # Compile Evidence log based on actual 3-indicator psychometric validity
-    evidence = {}
+    # Form mapping for evidence log
     FORMAL_MAPPING = {
         "logical_lock": "Pattern Completion",
         "logical_legs": "Visual Reasoning",
-        "logical_bottles_situational": "Water Bottles Solution",
-        "logical_queue_solution": "Queue Problem Solving",
         "spatial_shape_match": "Puzzle Piece Selection",
         "spatial_clock": "Shape Rotation",
-        "spatial_room_situational": "Room Arrangement",
-        "spatial_treehouse_design": "Treehouse Design",
         "creative_circles": "Circle Transformation",
-        "creative_cloud": "Cloud Shape Interpretation",
         "creative_box_situational": "Cardboard Box Creation",
-        "creative_toy_invent": "Toy Invention",
         "language_race": "Story Sequencing",
-        "language_pic_interpret": "Picture Interpretation",
         "language_explain_game": "Explaining to Younger Child",
-        "language_story_words": "Three Words Story",
         "visualizer_memory_grid": "Memory Sequence Grid",
         "kinesthetic_catch": "Action Pattern Recognition",
-        "kinesthetic_team_losing": "Sports Situational Reaction",
-        "kinesthetic_learn_sport": "Learning New Sport",
         "naturalist_weather": "Nature Observation",
         "naturalist_plants": "Plant Difference Spotting",
-        "naturalist_sick_plant": "Garden Patches Diagnostics",
-        "naturalist_notice_nature": "Nature Observation Report",
         "social_planning": "Team Task Delegation",
-        "social_decision": "Group Walk Panic Reaction",
         "social_conflict_resolution": "Playground Mediator",
-        "social_helped_others": "Peer Help Reflection",
         "intrapersonal_goals": "Goal Setting Practice",
         "intrapersonal_reflection": "Growth Mindset Challenge",
-        "intrapersonal_frustration": "Kite Frustration Control",
-        "intrapersonal_difficult_moment": "Personal Failure Reflection"
+        
+        "adaptive_language_story": "Story Interpretation",
+        "adaptive_language_teach": "Teaching Challenge",
+        "adaptive_creative_transform": "Object Transformation",
+        "adaptive_creative_design": "Symbolic Design",
+        "adaptive_logical_reasoning": "Multi-Step Deduction",
+        "adaptive_logical_problem": "Resource Allocation",
+        "adaptive_spatial_construction": "Structural Stability",
+        "adaptive_spatial_reasoning": "Spatial Net Folding",
+        "adaptive_kinesthetic_strategy": "Movement Strategy",
+        "adaptive_kinesthetic_learning": "Skill Breakdown",
+        "adaptive_naturalist_observation": "Ecosystem Diagnosis",
+        "adaptive_naturalist_problem": "Water Scarcity Solution",
+        "adaptive_social_conflict": "Group Dispute Resolution",
+        "adaptive_social_planning": "Community Task Organization",
+        "adaptive_intrapersonal_reflection": "Competition Resilience",
+        "adaptive_intrapersonal_goals": "Goal Planning & Tracking"
     }
 
+    evidence = {}
     for domain in DOMAIN_WEIGHTS.keys():
-        # 1. Preference indicator (Exposure >= 1)
-        exp_val = child.get(f"exp_{domain}", 0)
+        exp_val = child.get(f"exp_{domain}", 0) or 0
         has_pref = exp_val >= 1
         pref_label = ["Never tried it", "Tried a few times", "Do it sometimes", "Do it regularly"][exp_val]
         pref_desc = f"Observed exposure preference: '{pref_label}'" if has_pref else "No prior preference or regular exposure observed."
 
-        # 2. Behavioral indicator (Discovery Count >= 1)
         disc_count = discovery_counts.get(domain, 0)
         has_behav = disc_count >= 1
         behav_desc = f"Selected spontaneous behavior in {disc_count} discovery scenarios" if has_behav else "No spontaneous behavior observed in discovery scenarios."
 
-        # 3. Performance indicator (Deep Assessment puzzles scored >= 2.0)
         perf_tasks = []
-        if rich_mode:
-            for q_key, answer in responses.items():
-                if isinstance(answer, dict) and answer.get("domain") == domain:
-                    score = answer_to_scale(answer)
-                    if score >= 2.0:
-                        perf_tasks.append(q_key)
-        has_perf = len(perf_tasks) >= 2
+        for q_key, answer in responses.items():
+            if isinstance(answer, dict) and answer.get("domain") == domain:
+                score = answer_to_scale(answer)
+                if score >= 2.0:
+                    perf_tasks.append(q_key)
+        has_perf = len(perf_tasks) >= 1
         
         task_categories = list(set([FORMAL_MAPPING.get(t, t.replace("_", " ").title()) for t in perf_tasks]))
         perf_desc = f"Demonstrated accuracy in {len(perf_tasks)} puzzles: {', '.join(task_categories[:2])}" if has_perf else "Performance on scored cognitive challenges was insufficient to establish independent evidence."
 
-        # Overall Evidence Level: Requires at least 3 independent sources for "Strong"
         level = "Strong" if (has_pref and has_behav and has_perf) else "Moderate" if (sum([has_pref, has_behav, has_perf]) >= 2) else "Needs Validation"
 
         evidence[domain] = {
@@ -5009,33 +4824,62 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
             "needs_validation": [FORMAL_MAPPING.get(t, t.replace("_", " ").title()) for t, val in responses.items() if isinstance(val, dict) and val.get("domain") == domain and answer_to_scale(val) < 2.0]
         }
 
-    tq_raw_scores = {}
-    for domain, components in DOMAIN_WEIGHTS.items():
-        raw = 0
-        total_weight = 0
-        for component, weight in components.items():
-            key = f"{domain}_{component}"
-            if rich_mode:
-                if key not in rich_component_scores:
-                    continue
-                val = sum(rich_component_scores[key]) / len(rich_component_scores[key])
-            else:
-                val = answer_to_scale(responses.get(key, 0))
-            raw += (val / 4.0) * weight
-            total_weight += weight
-        tq_raw_scores[domain] = (raw / total_weight) * 100 if total_weight else 0
-
-    # Calculate pre-facilitator scores
-    raw_blended = {}
+    blended = {}
     for domain in DOMAIN_WEIGHTS.keys():
-        s_disc = (discovery_counts.get(domain, 0) / 8.0) * 100.0
-        s_exp = (child.get(f"exp_{domain}", 0) / 3.0) * 100.0
-        s_deep = tq_raw_scores.get(domain, 0.0)
-        raw_blended[domain] = 0.10 * s_exp + 0.20 * s_disc + 0.70 * s_deep
+        # 1. Discovery (20%)
+        s_disc = min(100.0, (discovery_counts.get(domain, 0) / 3.0) * 100.0)
+        
+        # 2. Core Deep (50%) & Adaptive (15%)
+        core_deep_scores = []
+        adaptive_scores = []
+        for q_key, answer in responses.items():
+            if not isinstance(answer, dict):
+                continue
+            if answer.get("domain") != domain:
+                continue
+            comp = answer.get("component", "")
+            if comp == "adaptive" or q_key.startswith("adaptive_"):
+                adaptive_scores.append(answer_to_scale(answer))
+            else:
+                core_deep_scores.append(answer_to_scale(answer))
+                
+        s_deep = (sum(core_deep_scores) / (len(core_deep_scores) * 4.0)) * 100.0 if core_deep_scores else 50.0
+        
+        # 3. Reflection (15%)
+        s_pride = get_text_completion_score(responses.get("reflection_pride"))
+        s_flow = get_text_completion_score(responses.get("reflection_flow"))
+        s_learning = get_text_completion_score(responses.get("reflection_learning"))
+        s_community = get_text_completion_score(responses.get("reflection_community"))
+        if domain == "intrapersonal":
+            s_refl = (s_pride + s_flow + s_learning) / 3.0
+        elif domain == "social":
+            s_refl = s_community
+        else:
+            s_refl = (s_pride + s_flow + s_learning + s_community) / 4.0
+            
+        # 4. Adaptive Assessment (15%)
+        if adaptive_scores:
+            s_adap = (sum(adaptive_scores) / (len(adaptive_scores) * 4.0)) * 100.0
+            blended[domain] = 0.20 * s_disc + 0.50 * s_deep + 0.15 * s_refl + 0.15 * s_adap
+        else:
+            # No adaptive questions answered for this domain, scale weights of remaining parts (85% total) to 100%
+            raw_unscaled = 0.20 * s_disc + 0.50 * s_deep + 0.15 * s_refl
+            blended[domain] = (raw_unscaled / 0.85)
 
-    original_top = max(raw_blended.items(), key=lambda x: x[1])[0] if raw_blended else "unknown"
+    tq_raw_scores = {}
+    for domain in DOMAIN_WEIGHTS.keys():
+        all_deep = []
+        for q_key, answer in responses.items():
+            if isinstance(answer, dict) and answer.get("domain") == domain:
+                all_deep.append(answer_to_scale(answer))
+        tq_raw_scores[domain] = (sum(all_deep) / (len(all_deep) * 4.0)) * 100.0 if all_deep else 50.0
 
-    # Compute facilitator validation score
+    # Calculate original top domain before overrides or validation adjustments
+    original_top = max(blended.items(), key=lambda x: x[1])[0] if blended else "unknown"
+
+    # Handle facilitator overrides if confirmed/override_domain is set
+    # Maintain standard TM profile logic but do NOT alter finalstretched/GTI score with notes.
+    # We will compute the final blended scores.
     has_notes = facilitator_note is not None
     facilitator_scores = {}
     for domain in DOMAIN_WEIGHTS.keys():
@@ -5056,32 +4900,27 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
         else:
             facilitator_scores[domain] = 70.0
 
-    blended = {}
+    # If facilitator override is provided, we can blend it to adjust top list
+    blended_final = {}
     for domain in DOMAIN_WEIGHTS.keys():
-        s_disc = (discovery_counts.get(domain, 0) / 8.0) * 100.0
-        s_exp = (child.get(f"exp_{domain}", 0) / 3.0) * 100.0
-        s_deep = tq_raw_scores.get(domain, 0.0)
-        s_fac = facilitator_scores[domain]
-        
-        if has_notes:
-            blended[domain] = 0.10 * s_exp + 0.20 * s_disc + 0.50 * s_deep + 0.20 * s_fac
+        if has_notes and facilitator_note.get("override_domain"):
+            # Blend facilitator override slightly for final result ranking:
+            blended_final[domain] = blended[domain] * 0.8 + facilitator_scores[domain] * 0.2
         else:
-            blended[domain] = 0.10 * s_exp + 0.20 * s_disc + 0.70 * s_deep
+            blended_final[domain] = blended[domain]
 
     # Wide stretch-normalization to prevent domain clustering (target 35 to 95)
-    max_raw = max(blended.values())
-    min_raw = min(blended.values())
+    max_raw = max(blended_final.values())
+    min_raw = min(blended_final.values())
     final_scores = {}
     if max_raw > min_raw:
         target_min = 35.0
         target_max = 95.0
-        target_min = 35.0
-        target_max = 95.0
-        for domain, raw_val in blended.items():
+        for domain, raw_val in blended_final.items():
             ratio = (raw_val - min_raw) / (max_raw - min_raw)
             final_scores[domain] = int(round(target_min + ratio * (target_max - target_min)))
     else:
-        for domain, raw_val in blended.items():
+        for domain, raw_val in blended_final.items():
             final_scores[domain] = int(round(raw_val))
 
     # Sort domains by final stretched score
@@ -5089,12 +4928,12 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
     top_domain = sorted_domains[0][0] if sorted_domains else "unknown"
     top_3 = [d for d, _ in sorted_domains[:3]]
 
-    # Confidence scoring engine (rigorous psychometric build)
+    # Confidence scoring engine (V5: adjusted by facilitator observation ratings)
     structured_answers = [v for v in responses.values() if isinstance(v, dict)]
     tasks_answered = len(structured_answers)
     
     # 1. Task Completion Rate (max 30 pts)
-    task_pts = 30 if tasks_answered >= 24 else 20 if tasks_answered >= 16 else 10 if tasks_answered >= 8 else 5
+    task_pts = 30 if tasks_answered >= 20 else 20 if tasks_answered >= 12 else 10 if tasks_answered >= 6 else 5
     
     # 2. Response Consistency/accuracy (max 20 pts)
     metrics = extract_metric_summary(responses)
@@ -5108,15 +4947,39 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
     separation_pts = 20 if separation_gap >= 12 else 10 if separation_gap >= 6 else 5
     separation_desc = "strong separation between domains" if separation_gap >= 12 else "moderate domain differentiation"
     
-    # 4. Facilitator note validation status (max 15 pts)
-    fac_validation_pts = 15 if facilitator_note is not None else 0
+    # 4. Facilitator Observation Ratings (max 15 pts)
+    fac_validation_pts = 0
+    obs_avg = 3.0
+    if facilitator_note:
+        obs_text = facilitator_note.get("observation", "")
+        try:
+            obs_json = json.loads(obs_text)
+            if isinstance(obs_json, dict):
+                curiosity = int(obs_json.get("curiosity", 3))
+                confidence = int(obs_json.get("confidence", 3))
+                focus = int(obs_json.get("focus", 3))
+                creativity = int(obs_json.get("creativity", 3))
+                communication = int(obs_json.get("communication", 3))
+                leadership = int(obs_json.get("leadership", 3))
+                persistence = int(obs_json.get("persistence", 3))
+                emotional_regulation = int(obs_json.get("emotional_regulation", 3))
+                obs_avg = (curiosity + confidence + focus + creativity + communication + leadership + persistence + emotional_regulation) / 8.0
+        except Exception:
+            # Fallback to direct columns
+            obs_avg = (
+                (facilitator_note.get("obs_curiosity", 3) or 3) +
+                (facilitator_note.get("obs_creativity", 3) or 3) +
+                (facilitator_note.get("obs_communication", 3) or 3) +
+                (facilitator_note.get("obs_leadership", 3) or 3) +
+                (facilitator_note.get("obs_focus", 3) or 3)
+            ) / 5.0
+        fac_validation_pts = int(round((obs_avg / 5.0) * 15.0))
     
     # 5. Repeated assessment count (max 15 pts)
     repeated_pts = 15 if past_sessions_count >= 2 else 10 if past_sessions_count == 1 else 0
 
     confidence_score = task_pts + consistency_pts + separation_pts + fac_validation_pts + repeated_pts
     
-    # Map confidence to levels
     if confidence_score >= 85:
         confidence_level = "Very High"
     elif confidence_score >= 70:
@@ -5133,7 +4996,7 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
 
     # Expose evidence sources
     combined_res = {**(discovery_answers or {}), **responses}
-    has_open_ended = any(len(str(combined_res.get(k, "") or "")) > 0 for k in ["deep_discovery_flow", "deep_discovery_pride", "deep_discovery_curiosity", "deep_discovery_vision"])
+    has_open_ended = any(len(str(combined_res.get(k, "") or "")) > 0 for k in ["reflection_pride", "reflection_flow", "reflection_learning", "reflection_community"])
     
     evidence_sources = {
         "assessment_responses": tasks_answered > 0,
@@ -5142,26 +5005,23 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
         "repeated_assessments": past_sessions_count > 0
     }
 
-    # Untapped potential (Strict trigger: score >= 75, exposure level <= 1, and strong evidence level)
+    # Untapped potential
     untapped_potential = []
     for d, score in final_scores.items():
-        exp_val = child.get(f"exp_{d}", 0)
+        exp_val = child.get(f"exp_{d}", 0) or 0
         if score >= 75 and exp_val <= 1 and evidence.get(d, {}).get("level") == "Strong":
             untapped_potential.append(d)
 
-    # Domain Separation Index as difference between top 2 domains
     separation_diff = 0
     if len(sorted_domains) > 1:
         separation_diff = sorted_domains[0][1] - sorted_domains[1][1]
     multiple_talents_detected = separation_diff < 5
 
-    # EQ and Visualizer Scores
     eq_val = responses.get("eq_overall", None)
     eq_score = int(round((answer_to_scale(eq_val) / 4.0) * 100)) if eq_val is not None else int(round((final_scores.get("social", 50) + final_scores.get("intrapersonal", 50)) / 2))
     viz_val = responses.get("visualizer_overall", None)
     visualizer_score = int(round((answer_to_scale(viz_val) / 4.0) * 100)) if viz_val is not None else int(round((final_scores.get("creative", 50) + final_scores.get("spatial", 50)) / 2))
 
-    # Compute GTI and TEG
     gti_score, gti_label = calculate_gti(sorted_domains)
     teg_data = calculate_teg(final_scores, child)
 

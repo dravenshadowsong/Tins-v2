@@ -20,6 +20,14 @@ export default function Facilitator() {
     strengths_observed: "",
     concerns: "",
     suggested_workshop: "",
+    obs_curiosity: 3,
+    obs_confidence: 3,
+    obs_focus: 3,
+    obs_creativity: 3,
+    obs_communication: 3,
+    obs_leadership: 3,
+    obs_persistence: 3,
+    obs_emotional_regulation: 3
   });
 
   useEffect(() => {
@@ -117,6 +125,50 @@ export default function Facilitator() {
             </div>
           </div>
 
+          <div className="form-group" style={{ marginBottom: "24px" }}>
+            <label style={{ fontWeight: 800, color: "var(--text)", display: "block", marginBottom: "12px" }}>Facilitator Observation Ratings (1-5)</label>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+              {[
+                { key: "obs_curiosity", label: "Curiosity (जिज्ञासा)" },
+                { key: "obs_confidence", label: "Confidence (आत्मविश्वास)" },
+                { key: "obs_focus", label: "Focus (एकाग्रता)" },
+                { key: "obs_creativity", label: "Creativity (रचनात्मकता)" },
+                { key: "obs_communication", label: "Communication (संचार)" },
+                { key: "obs_leadership", label: "Leadership (नेतृत्व)" },
+                { key: "obs_persistence", label: "Persistence (दृढ़ता)" },
+                { key: "obs_emotional_regulation", label: "Emotional Regulation (भावना नियंत्रण)" }
+              ].map(indicator => (
+                <div key={indicator.key} style={{ display: "flex", flexDirection: "column", gap: "6px", padding: "12px", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+                  <span style={{ fontSize: "13.5px", fontWeight: 600, color: "#374151" }}>{indicator.label}</span>
+                  <div style={{ display: "flex", gap: "4px" }}>
+                    {[1, 2, 3, 4, 5].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => set(indicator.key, val)}
+                        style={{
+                          flex: 1,
+                          padding: "6px 0",
+                          fontSize: "13px",
+                          fontWeight: 700,
+                          borderRadius: "6px",
+                          border: "1px solid",
+                          borderColor: form[indicator.key] === val ? "#5b4cf0" : "#d1d5db",
+                          background: form[indicator.key] === val ? "#5b4cf0" : "#ffffff",
+                          color: form[indicator.key] === val ? "#ffffff" : "#374151",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="form-group">
             <label>Override Domain (optional, if you disagree or partially agree)</label>
             <select value={form.override_domain} onChange={e => set("override_domain", e.target.value)}>
@@ -131,7 +183,6 @@ export default function Facilitator() {
             <textarea rows={3} placeholder="What notable strengths, talents, or abilities did you observe in this child directly during assessment tasks?"
               value={form.strengths_observed} onChange={e => {
                 set("strengths_observed", e.target.value);
-                set("observation", e.target.value);
               }} />
           </div>
 
