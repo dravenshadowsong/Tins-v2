@@ -4691,168 +4691,165 @@ def get_analytics():
     role = user.get("role")
     org_id = user.get("organization_id")
     center_id = user.get("center_id")
-    
+
+    # Facilitators without an assigned org/center see aggregate (master_admin) data
+    if role not in ("master_admin", "admin") and (not org_id or not center_id):
+        role = "master_admin"
+
     db = get_db()
-    
-    # 1. Talent Distribution query
-    if role == "master_admin":
-        sessions = db.execute("SELECT top_domain, COUNT(*) as cnt FROM sessions WHERE status='complete' GROUP BY top_domain").fetchall()
-    elif role == "admin":
-        sessions = db.execute("""
-            SELECT s.top_domain, COUNT(*) as cnt 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=?
-            GROUP BY s.top_domain
-        """, (org_id,)).fetchall()
-    else:
-        sessions = db.execute("""
-            SELECT s.top_domain, COUNT(*) as cnt 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
-            GROUP BY s.top_domain
-        """, (org_id, center_id)).fetchall()
-    talent_dist = {r["top_domain"]: r["cnt"] for r in sessions if r["top_domain"]}
-    
-    # 2. Workshop demand query
-    if role == "master_admin":
-        workshops = db.execute("SELECT domain, COUNT(*) as cnt FROM workshops GROUP BY domain").fetchall()
-    elif role == "admin":
-        workshops = db.execute("""
-            SELECT domain, COUNT(*) as cnt 
-            FROM workshops 
-            WHERE organization_id=? 
-            GROUP BY domain
-        """, (org_id,)).fetchall()
-    else:
-        workshops = db.execute("""
-            SELECT domain, COUNT(*) as cnt 
-            FROM workshops 
-            WHERE organization_id=? AND center_id=? 
-            GROUP BY domain
-        """, (org_id, center_id)).fetchall()
-    workshop_demand = {r["domain"]: r["cnt"] for r in workshops if r["domain"]}
-    
-    # 3. Untapped potential query
-    if role == "master_admin":
-        sessions_all = db.execute("SELECT child_id, personality_data FROM sessions WHERE status='complete'").fetchall()
-    elif role == "admin":
-        sessions_all = db.execute("""
-            SELECT s.child_id, s.personality_data 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=?
-        """, (org_id,)).fetchall()
-    else:
-        sessions_all = db.execute("""
-            SELECT s.child_id, s.personality_data 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
-        """, (org_id, center_id)).fetchall()
-        
-    untapped_counts = {}
-    for s in sessions_all:
-        try:
-            pdata = json.loads(s["personality_data"] or "{}")
-            untapped = pdata.get("untapped_potential", [])
-            for u in untapped:
-                untapped_counts[u] = untapped_counts.get(u, 0) + 1
-        except Exception:
-            pass
-            
-    # 4. Growth data query
-    if role == "master_admin":
-        growth_rows = db.execute("SELECT top_domain, tq_scores, completed_at FROM sessions WHERE status='complete' ORDER BY completed_at").fetchall()
-    elif role == "admin":
-        growth_rows = db.execute("""
-            SELECT s.top_domain, s.tq_scores, s.completed_at 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=?
-            ORDER BY s.completed_at
-        """, (org_id,)).fetchall()
-    else:
-        growth_rows = db.execute("""
-            SELECT s.top_domain, s.tq_scores, s.completed_at 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
-            ORDER BY s.completed_at
-        """, (org_id, center_id)).fetchall()
-        
-    growth_data = {}
-    for r in growth_rows:
-        dom = r["top_domain"]
-        if not dom: continue
-        try:
-            tq = json.loads(r["tq_scores"] or "{}")
-            score = tq.get(dom, 50)
-            date_str = r["completed_at"][:10] if r["completed_at"] else "Unknown"
-            growth_data.setdefault(dom, []).append({"date": date_str, "score": score})
-        except Exception:
-            pass
-            
-    # 5. Funnel query totals
-    if role == "master_admin":
-        total_registered = db.execute("SELECT COUNT(*) FROM children").fetchone()[0]
-        total_assessed = db.execute("SELECT COUNT(DISTINCT child_id) FROM sessions WHERE status='complete'").fetchone()[0]
-        total_matched = db.execute("SELECT COUNT(*) FROM mentor_matches WHERE status='active'").fetchone()[0]
-        total_enrolled = db.execute("SELECT COUNT(DISTINCT child_id) FROM workshop_attendance WHERE status='Present'").fetchone()[0]
-    elif role == "admin":
-        total_registered = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=?", (org_id,)).fetchone()[0]
-        total_assessed = db.execute("""
-            SELECT COUNT(DISTINCT s.child_id) 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=?
-        """, (org_id,)).fetchone()[0]
-        total_matched = db.execute("""
-            SELECT COUNT(*) 
-            FROM mentor_matches mm
-            JOIN children c ON mm.child_id = c.id
-            WHERE mm.status='active' AND c.organization_id=?
-        """, (org_id,)).fetchone()[0]
-        total_enrolled = db.execute("""
-            SELECT COUNT(DISTINCT a.child_id) 
-            FROM workshop_attendance a
-            JOIN children c ON a.child_id = c.id
-            WHERE a.status='Present' AND c.organization_id=?
-        """, (org_id,)).fetchone()[0]
-    else:
-        total_registered = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=? AND center_id=?", (org_id, center_id)).fetchone()[0]
-        total_assessed = db.execute("""
-            SELECT COUNT(DISTINCT s.child_id) 
-            FROM sessions s
-            JOIN children c ON s.child_id = c.id
-            WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
-        """, (org_id, center_id)).fetchone()[0]
-        total_matched = db.execute("""
-            SELECT COUNT(*) 
-            FROM mentor_matches mm
-            JOIN children c ON mm.child_id = c.id
-            WHERE mm.status='active' AND c.organization_id=? AND c.center_id=?
-        """, (org_id, center_id)).fetchone()[0]
-        total_enrolled = db.execute("""
-            SELECT COUNT(DISTINCT a.child_id) 
-            FROM workshop_attendance a
-            JOIN children c ON a.child_id = c.id
-            WHERE a.status='Present' AND c.organization_id=? AND c.center_id=?
-        """, (org_id, center_id)).fetchone()[0]
-        
-    return jsonify({
-        "talent_distribution": talent_dist,
-        "workshop_demand": workshop_demand,
-        "untapped_potential": untapped_counts,
-        "growth_data": growth_data,
-        "progress_funnel": {
-            "registered": total_registered,
-            "assessed": total_assessed,
-            "matched": total_matched,
-            "enrolled": total_enrolled
-        }
-    })
+    try:
+        # 1. Talent Distribution
+        if role == "master_admin":
+            sessions = db.execute(
+                "SELECT top_domain, COUNT(*) as cnt FROM sessions WHERE status='complete' GROUP BY top_domain"
+            ).fetchall()
+        elif role == "admin":
+            sessions = db.execute("""
+                SELECT s.top_domain, COUNT(*) as cnt FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=?
+                GROUP BY s.top_domain
+            """, (org_id,)).fetchall()
+        else:
+            sessions = db.execute("""
+                SELECT s.top_domain, COUNT(*) as cnt FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+                GROUP BY s.top_domain
+            """, (org_id, center_id)).fetchall()
+        talent_dist = {r["top_domain"]: r["cnt"] for r in sessions if r["top_domain"]}
+
+        # 2. Workshop Demand
+        if role == "master_admin":
+            workshops = db.execute(
+                "SELECT domain, COUNT(*) as cnt FROM workshops GROUP BY domain"
+            ).fetchall()
+        elif role == "admin":
+            workshops = db.execute("""
+                SELECT domain, COUNT(*) as cnt FROM workshops WHERE organization_id=? GROUP BY domain
+            """, (org_id,)).fetchall()
+        else:
+            workshops = db.execute("""
+                SELECT domain, COUNT(*) as cnt FROM workshops
+                WHERE organization_id=? AND center_id=? GROUP BY domain
+            """, (org_id, center_id)).fetchall()
+        workshop_demand = {r["domain"]: r["cnt"] for r in workshops if r["domain"]}
+
+        # 3. Untapped Potential
+        if role == "master_admin":
+            sessions_all = db.execute(
+                "SELECT child_id, personality_data FROM sessions WHERE status='complete'"
+            ).fetchall()
+        elif role == "admin":
+            sessions_all = db.execute("""
+                SELECT s.child_id, s.personality_data FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=?
+            """, (org_id,)).fetchall()
+        else:
+            sessions_all = db.execute("""
+                SELECT s.child_id, s.personality_data FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+            """, (org_id, center_id)).fetchall()
+        untapped_counts = {}
+        for s in sessions_all:
+            try:
+                pdata = json.loads(s["personality_data"] or "{}")
+                for u in pdata.get("untapped_potential", []):
+                    untapped_counts[u] = untapped_counts.get(u, 0) + 1
+            except Exception:
+                pass
+
+        # 4. Growth Data
+        if role == "master_admin":
+            growth_rows = db.execute(
+                "SELECT top_domain, tq_scores, completed_at FROM sessions WHERE status='complete' ORDER BY completed_at"
+            ).fetchall()
+        elif role == "admin":
+            growth_rows = db.execute("""
+                SELECT s.top_domain, s.tq_scores, s.completed_at FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=?
+                ORDER BY s.completed_at
+            """, (org_id,)).fetchall()
+        else:
+            growth_rows = db.execute("""
+                SELECT s.top_domain, s.tq_scores, s.completed_at FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+                ORDER BY s.completed_at
+            """, (org_id, center_id)).fetchall()
+        growth_data = {}
+        for r in growth_rows:
+            dom = r["top_domain"]
+            if not dom:
+                continue
+            try:
+                tq = json.loads(r["tq_scores"] or "{}")
+                score = tq.get(dom, 50)
+                date_str = r["completed_at"][:10] if r["completed_at"] else "Unknown"
+                growth_data.setdefault(dom, []).append({"date": date_str, "score": score})
+            except Exception:
+                pass
+
+        # 5. Funnel Totals
+        if role == "master_admin":
+            total_registered = db.execute("SELECT COUNT(*) FROM children").fetchone()[0]
+            total_assessed = db.execute("SELECT COUNT(DISTINCT child_id) FROM sessions WHERE status='complete'").fetchone()[0]
+            total_matched = db.execute("SELECT COUNT(*) FROM mentor_matches WHERE status='active'").fetchone()[0]
+            total_enrolled = db.execute("SELECT COUNT(DISTINCT child_id) FROM workshop_attendance WHERE status='Present'").fetchone()[0]
+        elif role == "admin":
+            total_registered = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=?", (org_id,)).fetchone()[0]
+            total_assessed = db.execute("""
+                SELECT COUNT(DISTINCT s.child_id) FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=?
+            """, (org_id,)).fetchone()[0]
+            total_matched = db.execute("""
+                SELECT COUNT(*) FROM mentor_matches mm
+                JOIN children c ON mm.child_id = c.id
+                WHERE mm.status='active' AND c.organization_id=?
+            """, (org_id,)).fetchone()[0]
+            total_enrolled = db.execute("""
+                SELECT COUNT(DISTINCT a.child_id) FROM workshop_attendance a
+                JOIN children c ON a.child_id = c.id
+                WHERE a.status='Present' AND c.organization_id=?
+            """, (org_id,)).fetchone()[0]
+        else:
+            total_registered = db.execute("SELECT COUNT(*) FROM children WHERE organization_id=? AND center_id=?", (org_id, center_id)).fetchone()[0]
+            total_assessed = db.execute("""
+                SELECT COUNT(DISTINCT s.child_id) FROM sessions s
+                JOIN children c ON s.child_id = c.id
+                WHERE s.status='complete' AND c.organization_id=? AND c.center_id=?
+            """, (org_id, center_id)).fetchone()[0]
+            total_matched = db.execute("""
+                SELECT COUNT(*) FROM mentor_matches mm
+                JOIN children c ON mm.child_id = c.id
+                WHERE mm.status='active' AND c.organization_id=? AND c.center_id=?
+            """, (org_id, center_id)).fetchone()[0]
+            total_enrolled = db.execute("""
+                SELECT COUNT(DISTINCT a.child_id) FROM workshop_attendance a
+                JOIN children c ON a.child_id = c.id
+                WHERE a.status='Present' AND c.organization_id=? AND c.center_id=?
+            """, (org_id, center_id)).fetchone()[0]
+
+        return jsonify({
+            "talent_distribution": talent_dist,
+            "workshop_demand": workshop_demand,
+            "untapped_potential": untapped_counts,
+            "growth_data": growth_data,
+            "progress_funnel": {
+                "registered": total_registered,
+                "assessed": total_assessed,
+                "matched": total_matched,
+                "enrolled": total_enrolled
+            }
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Analytics query failed: {str(e)}"}), 500
 
 # ── EXPORT ENGINE ───────────────────────────────────────────────────────────
 import csv
