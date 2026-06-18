@@ -3,18 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 const EXPOSURE_QUESTIONS = [
-  { id: "q1", title: "Computers & Technology", desc: "Have you ever used a computer, a laptop, coding apps, or technology projects?" },
-  { id: "q2", title: "Science Experiments", desc: "Have you ever done science experiments or science activities?" },
-  { id: "q3", title: "Building & Making", desc: "Have you ever built something using blocks, cardboard, tools, kits, or recycled materials?" },
-  { id: "q4", title: "Art & Design", desc: "Have you ever taken part in drawing, painting, craft, design, or creative art activities?" },
-  { id: "q5", title: "Music, Dance & Performance", desc: "Have you ever performed, danced, acted, sung, or played music in front of others?" },
-  { id: "q6", title: "Public Speaking", desc: "Have you ever spoken in front of a group, class, audience, or on stage?" },
-  { id: "q7", title: "Leadership Activities", desc: "Have you ever been chosen to lead a team, group, activity, class task, or event?" },
-  { id: "q8", title: "Sports & Physical Training", desc: "Have you ever received coaching, training, or participated in sports competitions?" },
-  { id: "q9", title: "Nature & Environment", desc: "Have you ever cared for plants, animals, gardens, or taken part in nature activities?" },
-  { id: "q10", title: "Business & Money Activities", desc: "Have you ever helped sell something, manage money, run a stall, or help in a family business?" },
-  { id: "q11", title: "Reading & Writing", desc: "Have you ever regularly read books, written stories, journals, poems, or articles?" },
-  { id: "q12", title: "Competitions & Events", desc: "Have you ever participated in competitions, exhibitions, tournaments, talent shows, or contests?" }
+  { id: "lang_1", title: "Speaking & Stage", desc: "Have you ever spoken or performed on a stage in front of a group?" },
+  { id: "lang_2", title: "Storytelling to Kids", desc: "Have you ever told stories or read books aloud to younger children?" },
+  { id: "lang_3", title: "Speech Competitions", desc: "Have you ever participated in a speech, debate, or poetry competition?" },
+  
+  { id: "creative_1", title: "Drawing & Art", desc: "Have you ever drawn, painted, or sketched pictures in your free time?" },
+  { id: "creative_2", title: "Music & Dance", desc: "Have you ever sung, danced, hummed, or played music for others?" },
+  { id: "creative_3", title: "Creative Drama", desc: "Have you ever made up a play, script, or song for friends to watch?" },
+  
+  { id: "logical_1", title: "Math Puzzles", desc: "Have you ever solved math riddles, puzzles, or board games?" },
+  { id: "logical_2", title: "Strategy Games", desc: "Have you ever played strategy games or worked with calculators/apps?" },
+  { id: "logical_3", title: "Patterns & Magic", desc: "Have you ever tried to understand how magic tricks or patterns work?" },
+  
+  { id: "spatial_1", title: "Blocks & Making", desc: "Have you ever built models with blocks, cardboard, or construction kits?" },
+  { id: "spatial_2", title: "3D Art & Folding", desc: "Have you ever sketched 3D shapes, drew maps, or folded origami?" },
+  { id: "spatial_3", title: "Fixing Things", desc: "Have you ever taken toys or sharpeners apart to fix them?" },
+  
+  { id: "kinesthetic_1", title: "Sports & Tag", desc: "Have you ever participated in physical sports or playground tag?" },
+  { id: "kinesthetic_2", title: "Active Moves", desc: "Have you ever practiced dance steps, karate, gymnastics, or yoga?" },
+  { id: "kinesthetic_3", title: "Balance Games", desc: "Have you ever played balance or target throwing games?" },
+  
+  { id: "naturalist_1", title: "Gardening & Seeds", desc: "Have you ever sowed seeds, watered gardens, or cared for house plants?" },
+  { id: "naturalist_2", title: "Observing Animals", desc: "Have you ever watched animal tracks, insects, or birds outdoors?" },
+  { id: "naturalist_3", title: "Nature Collections", desc: "Have you ever collected and sorted rocks, leaves, or feathers by pattern?" },
+  
+  { id: "social_1", title: "Leading Groups", desc: "Have you ever led school teams, projects, or classroom cleanliness activities?" },
+  { id: "social_2", title: "Settling Arguments", desc: "Have you ever helped classmates settle a loud dispute or playground argument?" },
+  { id: "social_3", title: "Helping Events", desc: "Have you ever welcomed new students or organized center activities?" },
+  
+  { id: "intrapersonal_1", title: "Planning Routines", desc: "Have you ever planned studying or practice routines and tracked progress?" },
+  { id: "intrapersonal_2", title: "Writing Journals", desc: "Have you ever logged thoughts, journals, or daily reflection lists?" },
+  { id: "intrapersonal_3", title: "Quiet Reflection", desc: "Have you ever spent quiet time thinking about personal strengths and weaknesses?" }
 ];
 
 export default function Intake() {
@@ -24,7 +43,14 @@ export default function Intake() {
   const [form, setForm] = useState({
     name: "", age: "", language: "Hindi", school_year: "", gender: "", center_id: "",
     exposure_data: {
-      q1: 0, q2: 0, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0, q8: 0, q9: 0, q10: 0, q11: 0, q12: 0
+      lang_1: 0, lang_2: 0, lang_3: 0,
+      creative_1: 0, creative_2: 0, creative_3: 0,
+      logical_1: 0, logical_2: 0, logical_3: 0,
+      spatial_1: 0, spatial_2: 0, spatial_3: 0,
+      kinesthetic_1: 0, kinesthetic_2: 0, kinesthetic_3: 0,
+      naturalist_1: 0, naturalist_2: 0, naturalist_3: 0,
+      social_1: 0, social_2: 0, social_3: 0,
+      intrapersonal_1: 0, intrapersonal_2: 0, intrapersonal_3: 0
     }
   });
 
@@ -50,16 +76,16 @@ export default function Intake() {
     setSaving(true);
 
     const q = form.exposure_data;
-    // Map 12 questions (0-4 scale) to the 8 legacy fields (0-3 scale) for database backward compatibility
+    // Map the 24 V4 questions (0-3 scale) directly to the 8 legacy fields for database compatibility
     const legacy_exp = {
-      exp_logical: Math.min(3, Math.round(((q.q1 + q.q2) / 2) * (3/4))),
-      exp_spatial: Math.min(3, Math.round(((q.q3 + q.q1) / 2) * (3/4))),
-      exp_creative: Math.min(3, Math.round(((q.q4 + q.q5) / 2) * (3/4))),
-      exp_kinesthetic: Math.min(3, Math.round(((q.q8 + q.q5) / 2) * (3/4))),
-      exp_language: Math.min(3, Math.round(((q.q11 + q.q6) / 2) * (3/4))),
-      exp_social: Math.min(3, Math.round(((q.q7 + q.q6) / 2) * (3/4))),
-      exp_naturalist: Math.min(3, Math.round((q.q9) * (3/4))),
-      exp_intrapersonal: Math.min(3, Math.round(((q.q11 + q.q12) / 2) * (3/4)))
+      exp_language: Math.min(3, Math.round((q.lang_1 + q.lang_2 + q.lang_3) / 3)),
+      exp_creative: Math.min(3, Math.round((q.creative_1 + q.creative_2 + q.creative_3) / 3)),
+      exp_logical: Math.min(3, Math.round((q.logical_1 + q.logical_2 + q.logical_3) / 3)),
+      exp_spatial: Math.min(3, Math.round((q.spatial_1 + q.spatial_2 + q.spatial_3) / 3)),
+      exp_kinesthetic: Math.min(3, Math.round((q.kinesthetic_1 + q.kinesthetic_2 + q.kinesthetic_3) / 3)),
+      exp_naturalist: Math.min(3, Math.round((q.naturalist_1 + q.naturalist_2 + q.naturalist_3) / 3)),
+      exp_social: Math.min(3, Math.round((q.social_1 + q.social_2 + q.social_3) / 3)),
+      exp_intrapersonal: Math.min(3, Math.round((q.intrapersonal_1 + q.intrapersonal_2 + q.intrapersonal_3) / 3))
     };
 
     try {
@@ -76,10 +102,7 @@ export default function Intake() {
     } finally { setSaving(false); }
   };
 
-  const isYounger = form.school_year === "Class 4" || form.school_year === "Class 5" || form.school_year === "Class 6" || (form.age && parseInt(form.age) <= 12);
-  const currentScale = isYounger
-    ? ["Never", "Heard Of It", "Tried It", "Sometimes", "Many Times"]
-    : ["Never Seen It", "Heard About It", "Tried Once", "Sometimes", "Regularly"];
+  const currentScale = ["Never", "Once", "A Few Times", "Many Times"];
 
   return (
     <div>

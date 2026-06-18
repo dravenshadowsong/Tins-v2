@@ -1,4 +1,4 @@
-// GOAT Assessment Questions
+// GOAT Assessment Questions for V4 Rebuild
 // Each question maps to a domain_component key scored 0-4.
 // Supports complete English and Hindi translations for child-friendly, visual/pattern assessment.
 
@@ -13,128 +13,6 @@ export const DOMAINS = {
   intrapersonal: { label: "Intrapersonal & Reflective", emoji: "🪞", color: "#5F5E5A", light: "#F1EFE8" },
 };
 
-export const DISCOVERY_QUESTIONS = [
-  {
-    id: "q_discovery_1",
-    question: "Your teacher gives your group a difficult challenge. What do you naturally do first?",
-    type: "choice",
-    options: [
-      { label: "Break the problem into smaller parts and look for patterns", emoji: "🧩", domains: ["logical"] },
-      { label: "Think of a unique or unusual solution", emoji: "🎨", domains: ["creative"] },
-      { label: "Explain ideas and help everyone understand", emoji: "🗣️", domains: ["language"] },
-      { label: "Organize the group and assign tasks", emoji: "🤝", domains: ["social"] }
-    ]
-  },
-  {
-    id: "q_discovery_2",
-    question: "You receive a box filled with cardboard, sticks, paper clips and rubber bands. What do you do first?",
-    type: "choice",
-    options: [
-      { label: "Build something useful", emoji: "🔨", domains: ["spatial"] },
-      { label: "Create something beautiful", emoji: "🎨", domains: ["creative"] },
-      { label: "Sort everything and understand how it works", emoji: "🧩", domains: ["logical"] },
-      { label: "Shake the box and feel the weight of the objects", emoji: "💃", domains: ["kinesthetic"] }
-    ]
-  },
-  {
-    id: "q_discovery_3",
-    question: "You discover an unusual insect. What is your first reaction?",
-    type: "choice",
-    options: [
-      { label: "Observe it carefully", emoji: "🦋", domains: ["naturalist"] },
-      { label: "Draw it", emoji: "🎨", domains: ["creative"] },
-      { label: "Reflect quietly on what its life is like in nature", emoji: "🤔", domains: ["intrapersonal"] },
-      { label: "Tell others about it", emoji: "🗣️", domains: ["language"] }
-    ]
-  },
-  {
-    id: "q_discovery_4",
-    question: "A friend feels left out. What do you naturally do?",
-    type: "choice",
-    options: [
-      { label: "Invite them to join", emoji: "🤝", domains: ["social"] },
-      { label: "Talk to them and listen", emoji: "🗣️", domains: ["language"] },
-      { label: "Think quietly about how they feel", emoji: "🤔", domains: ["intrapersonal"] },
-      { label: "Start a fun, active physical game together", emoji: "🏃", domains: ["kinesthetic"] }
-    ]
-  },
-  {
-    id: "q_discovery_5",
-    question: "You get a brand-new puzzle. What happens first?",
-    type: "choice",
-    options: [
-      { label: "Look for patterns", emoji: "🧩", domains: ["logical"] },
-      { label: "Take it apart and understand the structure", emoji: "🔨", domains: ["spatial"] },
-      { label: "Touch and move the pieces physically to see how they feel", emoji: "🏃", domains: ["kinesthetic"] },
-      { label: "Turn it into a game with friends", emoji: "🤝", domains: ["social"] }
-    ]
-  },
-  {
-    id: "q_discovery_6",
-    question: "Your school is holding a fair. Which role feels most natural?",
-    type: "choice",
-    options: [
-      { label: "Designing decorations", emoji: "🎨", domains: ["creative"] },
-      { label: "Managing teams", emoji: "🤝", domains: ["social"] },
-      { label: "Presenting ideas", emoji: "🗣️", domains: ["language"] },
-      { label: "Building displays and models", emoji: "🔨", domains: ["spatial"] }
-    ]
-  },
-];
-
-export const DEEP_QUESTIONS = {
-  kinesthetic: [
-    { key: "kinesthetic_rhythm_accuracy", q: "When you hear music, how easily can you clap or tap along to the beat?", type: "scale", low: "Very hard", high: "Perfectly natural" },
-    { key: "kinesthetic_movement_memory", q: "If someone shows you a dance move once, how quickly can you copy it?", type: "scale", low: "Need many tries", high: "Get it immediately" },
-    { key: "kinesthetic_fine_motor", q: "How are you at tasks needing careful hand control - like threading a needle or drawing a straight line?", type: "scale", low: "Struggle a lot", high: "Very precise" },
-    { key: "kinesthetic_body_coordination", q: "In sports or games, how well can you control your body to do what you want?", type: "scale", low: "Clumsy often", high: "Very coordinated" },
-    { key: "kinesthetic_physical_endurance", q: "How long can you keep going during physical activity without wanting to stop?", type: "scale", low: "Get tired quickly", high: "Could go for hours" },
-  ],
-  creative: [
-    { key: "creative_divergent_thinking", q: "If I give you a paper clip, how many different uses can you think of?", type: "scale", low: "1-2 ideas", high: "10+ ideas" },
-    { key: "creative_visual_imagination", q: "When you close your eyes and imagine a scene, how vivid and detailed is it?", type: "scale", low: "Blurry / vague", high: "Crystal clear" },
-    { key: "creative_originality", q: "Do your ideas usually feel different from what others think of?", type: "scale", low: "Similar to others", high: "Always unique" },
-    { key: "creative_colour_sense", q: "When you look at colours together, do you notice if they look good or bad?", type: "scale", low: "Not really", high: "Immediately notice" },
-    { key: "creative_pattern_creation", q: "If you have to decorate something, how naturally do patterns come to you?", type: "scale", low: "Hard to start", high: "Flows naturally" },
-  ],
-  logical: [
-    { key: "logical_pattern_recognition", q: "2, 4, 8, 16 - what comes next? How easily do you spot number patterns?", type: "scale", low: "Take a long time", high: "See it instantly" },
-    { key: "logical_number_reasoning", q: "How comfortable are you solving maths problems in your head?", type: "scale", low: "Uncomfortable", high: "Love it" },
-    { key: "logical_sequence_logic", q: "If A happens, then B happens, so C must happen - this kind of thinking feels:", type: "scale", low: "Very confusing", high: "Very natural" },
-    { key: "logical_spatial_logic", q: "If you fold a paper and cut a hole, can you picture what it looks like unfolded?", type: "scale", low: "No idea", high: "See it clearly" },
-  ],
-  spatial: [
-    { key: "spatial_mental_rotation", q: "Can you picture objects rotating in your head - like a cube turning around?", type: "scale", low: "Very hard", high: "Easy and clear" },
-    { key: "spatial_construction_sense", q: "When building something (LEGO, blocks, sticks), how naturally does it come?", type: "scale", low: "Frustrating", high: "Totally natural" },
-    { key: "spatial_mechanical_intuition", q: "When you see a machine or tool, do you naturally understand how it works?", type: "scale", low: "No clue", high: "Usually figure it out" },
-    { key: "spatial_design_thinking", q: "If you had to make something look better, do ideas come easily?", type: "scale", low: "Hard to start", high: "Many ideas fast" },
-  ],
-  social: [
-    { key: "social_empathy_recognition", q: "Can you tell how someone is feeling just by looking at their face?", type: "scale", low: "Rarely", high: "Almost always" },
-    { key: "social_peer_influence", q: "When you share your idea, do others usually listen and follow?", type: "scale", low: "Rarely", high: "Usually yes" },
-    { key: "social_conflict_resolution", q: "When two friends argue, how naturally do you help solve it?", type: "scale", low: "Avoid it", high: "Step in naturally" },
-    { key: "social_group_organising", q: "How comfortable are you organising people to do a task together?", type: "scale", low: "Very uncomfortable", high: "Enjoy it" },
-  ],
-  language: [
-    { key: "language_verbal_fluency", q: "When you talk about something you like, do words come easily and quickly?", type: "scale", low: "Often stuck", high: "Flow very easily" },
-    { key: "language_storytelling", q: "If you make up a story, how well does it have a beginning, middle, and end?", type: "scale", low: "All over the place", high: "Clear and gripping" },
-    { key: "language_expression_clarity", q: "Can people usually understand exactly what you mean when you explain something?", type: "scale", low: "Often confused", high: "Always understand" },
-    { key: "language_persuasion", q: "How often do you manage to change someone's mind with your words?", type: "scale", low: "Rarely", high: "Often" },
-  ],
-  naturalist: [
-    { key: "naturalist_living_systems", q: "Do you notice details about plants, animals, or nature that others miss?", type: "scale", low: "Not really", high: "All the time" },
-    { key: "naturalist_pattern_in_nature", q: "Can you see patterns in nature - like how leaves grow or clouds form?", type: "scale", low: "Never noticed", high: "Always see them" },
-    { key: "naturalist_animal_empathy", q: "Do you naturally understand what an animal is feeling or needing?", type: "scale", low: "Not usually", high: "Very naturally" },
-    { key: "naturalist_environment_awareness", q: "How aware are you of changes in your environment - weather, plants, seasons?", type: "scale", low: "Rarely notice", high: "Always aware" },
-  ],
-  intrapersonal: [
-    { key: "intrapersonal_self_awareness", q: "How well do you understand why you feel certain emotions?", type: "scale", low: "Rarely understand", high: "Always know why" },
-    { key: "intrapersonal_emotional_depth", q: "Do you feel things more deeply than most people around you seem to?", type: "scale", low: "Not really", high: "Much more deeply" },
-    { key: "intrapersonal_resilience_signal", q: "When something goes wrong, how quickly do you find a way to keep going?", type: "scale", low: "Takes a long time", high: "Bounce back fast" },
-    { key: "intrapersonal_reflective_thinking", q: "Do you often think carefully about your own actions and decisions?", type: "scale", low: "Rarely", high: "All the time" },
-  ],
-};
-
 export const EQ_QUESTIONS = [
   { key: "eq_overall", q: "Overall, how well do you understand and manage your own feelings?", type: "scale", low: "Struggle a lot", high: "Very well" },
 ];
@@ -143,1489 +21,1574 @@ export const VISUALIZER_QUESTIONS = [
   { key: "visualizer_overall", q: "When you imagine something in your mind - a room, a face, a place - how clearly can you see it?", type: "scale", low: "Very fuzzy", high: "Like a photograph" },
 ];
 
+export const DISCOVERY_QUESTIONS = [
+  {
+    id: "q_discovery_1",
+    question: "You get one free afternoon. What would you most like to do?",
+    type: "choice",
+    options: [
+      { label: "Tell or write a story", emoji: "🗣️", domains: ["language"] },
+      { label: "Draw, paint, or sketch", emoji: "🎨", domains: ["creative"] },
+      { label: "Solve a tricky math puzzle", emoji: "🧩", domains: ["logical"] },
+      { label: "Build a cardboard model", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_2",
+    question: "If you could join a school club, which one would you choose?",
+    type: "choice",
+    options: [
+      { label: "Running and sports club", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Plant and garden care club", emoji: "🌱", domains: ["naturalist"] },
+      { label: "Group game and planning club", emoji: "🤝", domains: ["social"] },
+      { label: "Quiet reading and thinking club", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_3",
+    question: "Your teacher asks you to help with a task. What sounds most fun?",
+    type: "choice",
+    options: [
+      { label: "Write a classroom newsletter", emoji: "🗣️", domains: ["language"] },
+      { label: "Decorate the classroom walls", emoji: "🎨", domains: ["creative"] },
+      { label: "Count and organize school books", emoji: "🧩", domains: ["logical"] },
+      { label: "Fix a broken pencil sharpener", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_4",
+    question: "What is your favorite way to spend a rainy day?",
+    type: "choice",
+    options: [
+      { label: "Practice indoor dance or exercises", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Watch rain fall and look for birds", emoji: "🌱", domains: ["naturalist"] },
+      { label: "Play board games with friends", emoji: "🤝", domains: ["social"] },
+      { label: "Write in a secret diary", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_5",
+    question: "If you could invent a new machine, what would it do?",
+    type: "choice",
+    options: [
+      { label: "Translate any language", emoji: "🗣️", domains: ["language"] },
+      { label: "Make beautiful color patterns", emoji: "🎨", domains: ["creative"] },
+      { label: "Sort items by size and weight", emoji: "🧩", domains: ["logical"] },
+      { label: "Build toy houses automatically", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_6",
+    question: "You are visiting a big park. What do you do first?",
+    type: "choice",
+    options: [
+      { label: "Climb a tree or race around", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Collect colorful leaves and stones", emoji: "🌱", domains: ["naturalist"] },
+      { label: "Meet new friends and play tag", emoji: "🤝", domains: ["social"] },
+      { label: "Sit under a tree and think", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_7",
+    question: "What kind of book would you pick from the library?",
+    type: "choice",
+    options: [
+      { label: "A book of fun stories", emoji: "🗣️", domains: ["language"] },
+      { label: "A book of art ideas and drawing", emoji: "🎨", domains: ["creative"] },
+      { label: "A book of riddles and brain teasers", emoji: "🧩", domains: ["logical"] },
+      { label: "A book on how buildings are made", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_8",
+    question: "If you could watch any show, what would it be about?",
+    type: "choice",
+    options: [
+      { label: "High-energy sports or stunts", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Animals living in the forest", emoji: "🌱", domains: ["naturalist"] },
+      { label: "How teams work together to win", emoji: "🤝", domains: ["social"] },
+      { label: "A person's quiet journey to success", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_9",
+    question: "What is your favorite school subject activity?",
+    type: "choice",
+    options: [
+      { label: "Giving a speech or reading aloud", emoji: "🗣️", domains: ["language"] },
+      { label: "Painting or making paper crafts", emoji: "🎨", domains: ["creative"] },
+      { label: "Solving math logic questions", emoji: "🧩", domains: ["logical"] },
+      { label: "Drawing maps or 3D boxes", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_10",
+    question: "Which of these gifts would you like to receive?",
+    type: "choice",
+    options: [
+      { label: "A football or skipping rope", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "A small plant or pet fish", emoji: "🌱", domains: ["naturalist"] },
+      { label: "A multiplayer board game", emoji: "🤝", domains: ["social"] },
+      { label: "A notebook with a lock", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_11",
+    question: "When working on a team project, what is your role?",
+    type: "choice",
+    options: [
+      { label: "Writing down and presenting the ideas", emoji: "🗣️", domains: ["language"] },
+      { label: "Designing unique logos and colors", emoji: "🎨", domains: ["creative"] },
+      { label: "Checking facts and finding errors", emoji: "🧩", domains: ["logical"] },
+      { label: "Assembling the project board", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_12",
+    question: "What would you like to learn in a workshop?",
+    type: "choice",
+    options: [
+      { label: "Karate blocks or gymnastics moves", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Identifying birds and insects", emoji: "🌱", domains: ["naturalist"] },
+      { label: "Leading groups and solving disputes", emoji: "🤝", domains: ["social"] },
+      { label: "Setting goals and planning time", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_13",
+    question: "You see an empty box in the classroom. What do you think?",
+    type: "choice",
+    options: [
+      { label: "Let's write stories to put inside", emoji: "🗣️", domains: ["language"] },
+      { label: "Let's paint it with bright colors", emoji: "🎨", domains: ["creative"] },
+      { label: "Let's see how many books it can hold", emoji: "🧩", domains: ["logical"] },
+      { label: "Let's build a toy castle with it", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_14",
+    question: "You hear music playing. What do you naturally do?",
+    type: "choice",
+    options: [
+      { label: "Start dancing or tapping your feet", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Listen to find sounds like birds or rain", emoji: "🌱", domains: ["naturalist"] },
+      { label: "Sing along with a group of friends", emoji: "🤝", domains: ["social"] },
+      { label: "Close your eyes and enjoy it quietly", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+  {
+    id: "q_discovery_15",
+    question: "If you had a magic wand, what would you make?",
+    type: "choice",
+    options: [
+      { label: "A book that writes itself", emoji: "🗣️", domains: ["language"] },
+      { label: "A picture that changes colors", emoji: "🎨", domains: ["creative"] },
+      { label: "A puzzle that never ends", emoji: "🧩", domains: ["logical"] },
+      { label: "A bridge that opens and closes", emoji: "🔨", domains: ["spatial"] },
+    ]
+  },
+  {
+    id: "q_discovery_16",
+    question: "What is the most exciting thing to do at a village fair?",
+    type: "choice",
+    options: [
+      { label: "Ride the giant wheel or run around", emoji: "🏃", domains: ["kinesthetic"] },
+      { label: "Look at the cows, goats, and birds", emoji: "🌱", domains: ["naturalist"] },
+      { label: "Help run a game stall for kids", emoji: "🤝", domains: ["social"] },
+      { label: "Find a quiet corner to watch the crowd", emoji: "🤔", domains: ["intrapersonal"] },
+    ]
+  },
+];
+
 export const ASSESSMENT_TASKS = [
   {
-    "key": "logical_lock",
-    "type": "choice",
-    "domain": "logical",
-    "component": "sequence_logic",
-    "title": {
-      "English": "The Magic Number Lock",
-      "Hindi": "The Magic Number Lock"
-    },
-    "prompt": {
-      "English": "A secret pattern is written to open a lock: 3, 6, 12, 24, ... What number comes next?",
-      "Hindi": "जादुई ताला: एक ताला खोलने के लिए एक गुप्त पैटर्न लिखा गया है: 3, 6, 12, 24, ... अगली संख्या क्या होगी?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "30",
-          "Hindi": "30"
-        },
-        "value": 0
+      "key": "language_race",
+      "type": "order_steps",
+      "domain": "language",
+      "component": "performance_1",
+      "title": {
+          "English": "Story Order",
+          "Hindi": "कहानी का क्रम"
       },
-      {
-        "label": {
-          "English": "48",
-          "Hindi": "48"
-        },
-        "value": 4
+      "prompt": {
+          "English": "Put these steps in the correct order to tell a story:",
+          "Hindi": "कहानी बताने के लिए इन चरणों को सही क्रम में रखें:"
       },
-      {
-        "label": {
-          "English": "36",
-          "Hindi": "36"
-        },
-        "value": 0
+      "steps": {
+          "English": [
+              "We lined up at the starting line.",
+              "The whistle blew and we ran fast.",
+              "I crossed the finish line third.",
+              "We clapped and cheered for the winner."
+          ],
+          "Hindi": [
+              "हम शुरुआती रेखा पर खड़े हुए।",
+              "सीटी बजी और हम तेजी से दौड़े।",
+              "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
+              "हमने विजेता के लिए तालियाँ बजाईं।"
+          ]
       },
-      {
-        "label": {
-          "English": "40",
-          "Hindi": "40"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "48",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Logical reasoning and sequence logic test."
+      "shuffled": {
+          "English": [
+              "We clapped and cheered for the winner.",
+              "We lined up at the starting line.",
+              "I crossed the finish line third.",
+              "The whistle blew and we ran fast."
+          ],
+          "Hindi": [
+              "हमने विजेता के लिए तालियाँ बजाईं।",
+              "हम शुरुआती रेखा पर खड़े हुए।",
+              "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
+              "सीटी बजी और हम तेजी से दौड़े।"
+          ]
+      },
+      "metric": "sequence_accuracy",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Story building sequencing task."
   },
   {
-    "key": "logical_legs",
-    "type": "choice",
-    "domain": "logical",
-    "component": "pattern_recognition",
-    "title": {
-      "English": "The Leg Code Riddle",
-      "Hindi": "The Leg Code Riddle"
-    },
-    "prompt": {
-      "English": "A secret code matches animals to numbers: Cat is 4, Spider is 8, Ant is 6. What represents a Snake?",
-      "Hindi": "जानवरों का कोड: एक गुप्त कोड जानवरों को नंबर देता है: बिल्ली (Cat) 4 है, मकड़ी (Spider) 8 है, चींटी (Ant) 6 है। सांप (Snake) का नंबर क्या होगा?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "4",
-          "Hindi": "4"
-        },
-        "value": 0
+      "key": "language_pic_interpret",
+      "type": "choice",
+      "domain": "language",
+      "component": "performance_2",
+      "title": {
+          "English": "Picture Clues",
+          "Hindi": "चित्र के सुराग"
       },
-      {
-        "label": {
-          "English": "0",
-          "Hindi": "0"
-        },
-        "value": 4
+      "prompt": {
+          "English": "A dog is barking at a cat stuck in a tall tree. A boy runs, gets a wooden ladder, and helps the cat climb down. What is this picture showing?",
+          "Hindi": "एक कुत्ता पेड़ पर फंसी बिल्ली पर भौंक रहा है। एक लड़का लकड़ी की सीढ़ी लाता है और बिल्ली को नीचे उतारने में मदद करता है। यह चित्र क्या दिखाता है?"
       },
-      {
-        "label": {
-          "English": "2",
-          "Hindi": "2"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "6",
-          "Hindi": "6"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "0",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Logical reasoning and sequence logic test."
-  },
-  {
-    "key": "spatial_clock",
-    "type": "choice",
-    "domain": "spatial",
-    "component": "mental_rotation",
-    "title": {
-      "English": "The Magic Clock Hand",
-      "Hindi": "The Magic Clock Hand"
-    },
-    "prompt": {
-      "English": "A pointer on a clock moves: first UP (12 o'clock), then RIGHT (3 o'clock), then DOWN (6 o'clock). Where will it point next?",
-      "Hindi": "जादुई सुई: एक घड़ी पर एक सुई घूमती है: पहले ऊपर (12 बजे), फिर दाएं (3 बजे), फिर नीचे (6 बजे)। इसके बाद यह किस दिशा में इशारा करेगी?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "UP",
-          "Hindi": "UP"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "RIGHT",
-          "Hindi": "RIGHT"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "DOWN",
-          "Hindi": "DOWN"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "LEFT",
-          "Hindi": "LEFT"
-        },
-        "value": 4
-      }
-    ],
-    "answer": "LEFT",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Spatial intelligence and visualization test."
-  },
-  {
-    "key": "spatial_shadow",
-    "type": "choice",
-    "domain": "spatial",
-    "component": "construction_sense",
-    "title": {
-      "English": "The Key Shadow",
-      "Hindi": "The Key Shadow"
-    },
-    "prompt": {
-      "English": "A 3D key shaped like a flat 'T' is held in front of a light. If the light shines from the LEFT, what shape shadow does it make on the wall?",
-      "Hindi": "चाबी की परछाई: एक 'T' आकार की 3D चाबी को टॉर्च के सामने रखा गया है। यदि टॉर्च की रोशनी सीधे बाईं (LEFT) ओर से पड़ती है, तो दीवार पर कैसी छाया बनेगी?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "A vertical rectangle",
-          "Hindi": "A vertical rectangle"
-        },
-        "value": 4
-      },
-      {
-        "label": {
-          "English": "A cross shape",
-          "Hindi": "A cross shape"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "A perfect square",
-          "Hindi": "A perfect square"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "A round circle",
-          "Hindi": "A round circle"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "A vertical rectangle",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Spatial intelligence and visualization test."
-  },
-  {
-    "key": "visualizer_memory_grid",
-    "type": "memory_grid",
-    "domain": "creative",
-    "component": "visual_imagination",
-    "title": {
-      "English": "The Constellation Map",
-      "Hindi": "तारामंडल का नक्शा"
-    },
-    "prompt": {
-      "English": "Look closely at the glowing stars in the magic night sky grid, and click them exactly as you remember them!",
-      "Hindi": "जादुई रात के आसमान के ग्रिड में चमकते सितारों को ध्यान से देखें, और ठीक वैसे ही उन पर क्लिक करें जैसे वे आपको याद हैं!"
-    },
-    "gridSize": 9,
-    "highlights": [
-      1,
-      3,
-      5,
-      7
-    ],
-    "revealMs": 2500,
-    "metric": "memory_span",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Measures visual and spatial short-term working memory span."
-  },
-  {
-    "key": "creative_box",
-    "type": "idea_list",
-    "domain": "creative",
-    "component": "divergent_thinking",
-    "title": {
-      "English": "The Cardboard Box Challenge",
-      "Hindi": "The Cardboard Box Challenge"
-    },
-    "prompt": {
-      "English": "Imagine you are given a large, empty cardboard box. Write down 3 completely different and creative things you could build or play with it!",
-      "Hindi": "गत्ते के डिब्बे की चुनौती: कल्पना कीजिए कि आपको एक बड़ा, खाली गत्ते का डिब्बा (cardboard box) दिया गया है। 3 बिल्कुल अलग और रचनात्मक चीजें लिखें जो आप इससे बना सकते हैं या खेल सकते हैं!"
-    },
-    "minIdeas": 3,
-    "metric": "fluency",
-    "difficulty": "adaptive",
-    "ai_interpretation_notes": "Measures divergent fluency and visual creativity."
-  },
-  {
-    "key": "language_race",
-    "type": "order_steps",
-    "domain": "language",
-    "component": "storytelling",
-    "title": {
-      "English": "School Race Story",
-      "Hindi": "School Race Story"
-    },
-    "prompt": {
-      "English": "Put these steps in the correct order to tell the story of a fun school race:",
-      "Hindi": "स्कूल की दौड़: स्कूल की एक मजेदार दौड़ की कहानी बताने के लिए इन चरणों को सही क्रम में व्यवस्थित करें:"
-    },
-    "steps": {
-      "English": [
-        "We lined up at the starting line.",
-        "The whistle blew and we ran fast.",
-        "I crossed the finish line third.",
-        "We clapped and cheered for the winner."
+      "options": [
+          {
+              "label": {
+                  "English": "A boy helping an animal in trouble",
+                  "Hindi": "एक लड़का मुसीबत में फंसे जानवर की मदद कर रहा है"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "A cat playing on a tree branch",
+                  "Hindi": "एक बिल्ली पेड़ की शाखा पर खेल रही है"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "A dog chasing a boy with a ladder",
+                  "Hindi": "एक कुत्ता सीढ़ी वाले लड़के का पीछा कर रहा है"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "A boy building a wooden ladder",
+                  "Hindi": "एक लड़का लकड़ी की सीढ़ी बना रहा है"
+              },
+              "value": 0
+          }
       ],
-      "Hindi": [
-        "हम शुरुआती रेखा पर खड़े हुए।",
-        "सीटी बजी और हम तेजी से दौड़े।",
-        "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
-        "हमने विजेता के लिए तालियाँ बजाईं।"
-      ]
-    },
-    "shuffled": {
-      "English": [
-        "We clapped and cheered for the winner.",
-        "We lined up at the starting line.",
-        "I crossed the finish line third.",
-        "The whistle blew and we ran fast."
+      "answer": "A boy helping an animal in trouble",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Picture interpretation and comprehension task."
+  },
+  {
+      "key": "language_explain_game",
+      "type": "choice",
+      "domain": "language",
+      "component": "situational",
+      "title": {
+          "English": "Teaching a Game",
+          "Hindi": "खेल सिखाना"
+      },
+      "prompt": {
+          "English": "You want to teach a new Class 1 student how to play your favorite playground game. What is the best way to explain it?",
+          "Hindi": "आप पहली कक्षा के एक नए छात्र को अपना पसंदीदा खेल सिखाना चाहते हैं। इसे समझाने का सबसे अच्छा तरीका क्या है?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Show them the actions slowly and play a practice round together",
+                  "Hindi": "उन्हें धीरे-धीरे इशारों से समझाएं और साथ में एक अभ्यास खेल खेलें"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Read the full rulebook to them very quickly",
+                  "Hindi": "नियमों की पूरी किताब उन्हें बहुत तेजी से पढ़कर सुनाएं"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Tell them to watch other students play from far away",
+                  "Hindi": "उन्हें दूर से अन्य छात्रों को खेलते हुए देखने के लिए कहें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Write down a list of rules and give it to them to read",
+                  "Hindi": "नियमों की एक सूची लिखकर उन्हें पढ़ने के लिए दे दें"
+              },
+              "value": 0
+          }
       ],
-      "Hindi": [
-        "हमने विजेता के लिए तालियाँ बजाईं।",
-        "हम शुरुआती रेखा पर खड़े हुए।",
-        "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
-        "सीटी बजी और हम तेजी से दौड़े।"
-      ]
-    },
-    "metric": "sequence_accuracy",
-    "difficulty": "easy",
-    "ai_interpretation_notes": "Measures logical sequence reconstruction in language."
+      "answer": "Show them the actions slowly and play a practice round together",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Situational logic measuring empathetic communication."
   },
   {
-    "key": "language_game_explain",
-    "type": "choice",
-    "domain": "language",
-    "component": "expression_clarity",
-    "title": {
-      "English": "Explaining a Game",
-      "Hindi": "Explaining a Game"
-    },
-    "prompt": {
-      "English": "You want to teach a new friend how to play a game you love, but they do not speak your language well. What is the best way to explain the game?",
-      "Hindi": "खेल समझाना: आप एक नए दोस्त को एक खेल सिखाना चाहते हैं जो आपको पसंद है, लेकिन वे आपकी भाषा अच्छी तरह से नहीं बोलते हैं। खेल को समझाने का सबसे अच्छा तरीका क्या है?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Show them the actions slowly with hands and play a practice round together",
-          "Hindi": "हाथों के इशारों से धीरे-धीरे समझाएं और साथ में एक अभ्यास दौर खेलें"
-        },
-        "value": 4
+      "key": "language_story_words",
+      "type": "open_ended",
+      "domain": "language",
+      "component": "open_response",
+      "title": {
+          "English": "Three Words Story",
+          "Hindi": "तीन शब्दों की कहानी"
       },
-      {
-        "label": {
-          "English": "Speak very fast in English to save time",
-          "Hindi": "समय बचाने के लिए अंग्रेजी में बहुत तेजी से बोलें"
-        },
-        "value": 0
+      "prompt": {
+          "English": "Use these 3 words to write a short, fun story: dog, box, balloon.",
+          "Hindi": "इन 3 शब्दों का उपयोग करके एक छोटी और मजेदार कहानी लिखें: कुत्ता (dog), डिब्बा (box), गुब्बारा (balloon)।"
       },
-      {
-        "label": {
-          "English": "Give them a rulebook to read by themselves",
-          "Hindi": "उन्हें अपने आप पढ़ने के लिए एक नियम पुस्तिका दें"
-        },
-        "value": 1
-      },
-      {
-        "label": {
-          "English": "Tell them to watch you play for an hour",
-          "Hindi": "उन्हें एक घंटे तक आपको खेलते हुए देखने के लिए कहें"
-        },
-        "value": 0
-      }
-    ],
-    "metric": "judgement",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Measures communication clarity and adaptive explanation capability."
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures story fluency, word usage, and imagination."
   },
   {
-    "key": "kinesthetic_catch",
-    "type": "choice",
-    "domain": "kinesthetic",
-    "component": "body_coordination",
-    "title": {
-      "English": "Catching the Ball",
-      "Hindi": "Catching the Ball"
-    },
-    "prompt": {
-      "English": "A teammate throws a ball high in the air towards you. What is the best way to catch it safely without dropping it?",
-      "Hindi": "गेंद पकड़ना: आपका एक साथी हवा में ऊंची गेंद आपकी तरफ फेंकता है। बिना गिराए उसे सुरक्षित रूप से पकड़ने का सबसे अच्छा तरीका क्या है?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Move under the ball, make a cup with your hands, and bring your hands down slightly as it lands",
-          "Hindi": "Move under the ball, make a cup with your hands, and bring your hands down slightly as it lands"
-        },
-        "value": 4
+      "key": "creative_circles",
+      "type": "idea_list",
+      "domain": "creative",
+      "component": "performance_1",
+      "title": {
+          "English": "Circles Challenge",
+          "Hindi": "गोला चुनौती"
       },
-      {
-        "label": {
-          "English": "Keep your arms completely stiff and let the ball hit your chest",
-          "Hindi": "Keep your arms completely stiff and let the ball hit your chest"
-        },
-        "value": 0
+      "prompt": {
+          "English": "Imagine 3 empty circles. Write down 3 different and unique things you could draw by adding lines to these circles!",
+          "Hindi": "3 खाली गोलों (circles) की कल्पना करें। कुछ लाइनें जोड़कर आप उनसे 3 अलग और अनोखी चीजें क्या बना सकते हैं, लिखें!"
       },
-      {
-        "label": {
-          "English": "Close your eyes and cross your arms over your face",
-          "Hindi": "Close your eyes and cross your arms over your face"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "Try to catch it with only one hand while looking away",
-          "Hindi": "Try to catch it with only one hand while looking away"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "Move under the ball, make a cup with your hands, and bring your hands down slightly as it lands",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Kinesthetic coordination and physical execution strategy."
+      "minIdeas": 3,
+      "metric": "fluency",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Visual circle transformation test."
   },
   {
-    "key": "kinesthetic_turn",
-    "type": "choice",
-    "domain": "kinesthetic",
-    "component": "body_coordination",
-    "title": {
-      "English": "The Sharp Turn",
-      "Hindi": "The Sharp Turn"
-    },
-    "prompt": {
-      "English": "You are running fast in a tag game at school. To turn left quickly to avoid being caught without falling, what should you do?",
-      "Hindi": "तेज़ मोड़: आप स्कूल के मैदान में पकड़म-पकड़ाई खेल में बहुत तेज़ दौड़ रहे हैं। बिना गिरे, पकड़े जाने से बचने के लिए तुरंत बाईं (left) ओर मुड़ने का सबसे अच्छा तरीका क्या है?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Bend your knees, lean your body slightly to the left, and take shorter, quick steps",
-          "Hindi": "Bend your knees, lean your body slightly to the left, and take shorter, quick steps"
-        },
-        "value": 4
+      "key": "creative_cloud",
+      "type": "idea_list",
+      "domain": "creative",
+      "component": "performance_2",
+      "title": {
+          "English": "Teacup Cloud",
+          "Hindi": "कप जैसा बादल"
       },
-      {
-        "label": {
-          "English": "Keep your body completely straight and jump as high as you can",
-          "Hindi": "Keep your body completely straight and jump as high as you can"
-        },
-        "value": 0
+      "prompt": {
+          "English": "You see a cloud shaped like a giant teacup. Write down 3 unusual or magical things that could pour out of it!",
+          "Hindi": "आप एक बड़े चाय के कप के आकार का बादल देखते हैं। कल्पना करें और 3 अनोखी या जादुई चीजें लिखें जो इसमें से गिर सकती हैं!"
       },
-      {
-        "label": {
-          "English": "Stop running completely, turn around, and walk backwards",
-          "Hindi": "Stop running completely, turn around, and walk backwards"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "Lean your weight backwards and slide on your heels",
-          "Hindi": "Lean your weight backwards and slide on your heels"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "Bend your knees, lean your body slightly to the left, and take shorter, quick steps",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Kinesthetic coordination and physical execution strategy."
+      "minIdeas": 3,
+      "metric": "fluency",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Divergent thinking and semantic flexibility."
   },
   {
-    "key": "social_sandcastle",
-    "type": "choice",
-    "domain": "intrapersonal",
-    "component": "resilience_signal",
-    "title": {
-      "English": "The Broken Clay Castle",
-      "Hindi": "The Broken Clay Castle"
-    },
-    "prompt": {
-      "English": "You spent an hour building a clay castle, but a classmate accidentally trips and crushes it. What do you do?",
-      "Hindi": "टूटा हुआ किला: आपने मिट्टी का किला बनाने में एक घंटा लगाया, लेकिन एक सहपाठी गलती से फिसल कर उसे तोड़ देता है। आप क्या करेंगे?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Acknowledge it, clean the area, and plan a better version using what you learned.",
-          "Hindi": "इसे स्वीकार करें, जगह साफ करें और सीखी हुई बातों का उपयोग करके एक बेहतर संस्करण की योजना बनाएं।"
-        },
-        "value": 4,
-        "mapping": {
-          "intrapersonal": 4
-        },
-        "riasec": "Investigative"
+      "key": "creative_box_situational",
+      "type": "choice",
+      "domain": "creative",
+      "component": "situational",
+      "title": {
+          "English": "Cardboard Box Use",
+          "Hindi": "गत्ते के डिब्बे का उपयोग"
       },
-      {
-        "label": {
-          "English": "Try to fix it gently using available tools or helpers.",
-          "Hindi": "उपलब्ध उपकरणों या सहायकों की मदद से इसे धीरे से ठीक करने का प्रयास करें।"
-        },
-        "value": 4,
-        "mapping": {
-          "social": 3
-        },
-        "riasec": "Social"
+      "prompt": {
+          "English": "You find a large, empty cardboard box. What is the most creative way to use it?",
+          "Hindi": "आपको एक बड़ा, खाली गत्ते का डिब्बा मिलता है। इसका उपयोग करने का सबसे रचनात्मक तरीका क्या है?"
       },
-      {
-        "label": {
-          "English": "Collaborate with friends to find a fun alternative activity indoors.",
-          "Hindi": "घर के अंदर एक मजेदार वैकल्पिक गतिविधि खोजने के लिए दोस्तों के साथ मिलकर काम करें।"
-        },
-        "value": 3,
-        "mapping": {
-          "logical": 4
-        },
-        "riasec": "Realistic"
-      },
-      {
-        "label": {
-          "English": "Feel angry, drop the activity completely, and walk away.",
-          "Hindi": "गुस्सा महसूस करें, गतिविधि को पूरी तरह से छोड़ दें और चले जाएं।"
-        },
-        "value": 1,
-        "mapping": {
-          "intrapersonal": 1
-        },
-        "riasec": "Conventional"
-      }
-    ],
-    "metric": "grit_resilience",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Measures coping strategies and persistence."
+      "options": [
+          {
+              "label": {
+                  "English": "Turn it into a puppet theater with cut-out windows for a show",
+                  "Hindi": "इसे एक पपेट थियेटर (कटपुतली थियेटर) में बदलें और नाटक दिखाएं"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Use it to store old school notebooks neatly",
+                  "Hindi": "पुरानी स्कूल नोटबुक्स को रखने के लिए इसका उपयोग करें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Flatten it and throw it in the dustbin",
+                  "Hindi": "इसे मोड़कर कचरे के डिब्बे में फेंक दें"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Keep it in the corner of the room empty",
+                  "Hindi": "कमरे के कोने में इसे खाली रख दें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Turn it into a puppet theater with cut-out windows for a show",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Situational creative divergent thinking."
   },
   {
-    "key": "social_conflict_resolution",
-    "type": "choice",
-    "domain": "social",
-    "component": "empathy_recognition",
-    "title": {
-      "English": "Group Project Dispute",
-      "Hindi": "Group Project Dispute"
-    },
-    "prompt": {
-      "English": "During a class group activity, two friends start arguing loudly about a drawing layout. What do you do?",
-      "Hindi": "समूह परियोजना विवाद: कक्षा की एक समूह गतिविधि के दौरान, दो दोस्त एक चित्र के लेआउट को लेकर आपस में बहस करने लगते हैं। आप क्या करेंगे?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Approach them gently, speak kindly, and check how to help.",
-          "Hindi": "उनके पास धीरे से जाएं, प्यार से बात करें और देखें कि कैसे मदद की जा सकती है।"
-        },
-        "value": 4,
-        "mapping": {
-          "social": 4
-        },
-        "riasec": "Social"
+      "key": "creative_toy_invent",
+      "type": "open_ended",
+      "domain": "creative",
+      "component": "open_response",
+      "title": {
+          "English": "Invent a Toy",
+          "Hindi": "एक खिलौना बनाएं"
       },
-      {
-        "label": {
-          "English": "Invite them to join immediately or share my spot with them.",
-          "Hindi": "उन्हें तुरंत शामिल होने के लिए आमंत्रित करें या उनके साथ अपनी जगह साझा करें।"
-        },
-        "value": 4,
-        "mapping": {
-          "social": 3
-        },
-        "riasec": "Social"
+      "prompt": {
+          "English": "Describe an entirely new toy you would invent. What does it look like and how do children play with it?",
+          "Hindi": "एक बिल्कुल नए खिलौने के बारे में बताएं जिसे आप बनाना चाहते हैं। वह कैसा दिखता है और बच्चे उससे कैसे खेलते हैं?"
       },
-      {
-        "label": {
-          "English": "Suggest a fair compromise or try to calm both sides down.",
-          "Hindi": "एक निष्पक्ष समझौता सुझाएं या दोनों पक्षों को शांत करने का प्रयास करें।"
-        },
-        "value": 3,
-        "mapping": {
-          "intrapersonal": 3
-        },
-        "riasec": "Investigative"
-      },
-      {
-        "label": {
-          "English": "Keep playing with my friends and let them resolve it themselves.",
-          "Hindi": "अपने दोस्तों के साथ खेलते रहें और उन्हें खुद इसे सुलझाने दें।"
-        },
-        "value": 1,
-        "mapping": {
-          "social": 1
-        },
-        "riasec": "Conventional"
-      }
-    ],
-    "metric": "social_intelligence",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Measures prosocial empathy and conflict resolution strategies."
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures product concept fluency and visual imagination."
   },
   {
-    "key": "naturalist_weather",
-    "type": "choice",
-    "domain": "naturalist",
-    "component": "pattern_in_nature",
-    "title": {
-      "English": "The Rain Clouds",
-      "Hindi": "The Rain Clouds"
-    },
-    "prompt": {
-      "English": "You are playing outside. You notice the wind turns cold, swallows fly low, and the sky becomes dark grey. What is nature telling you?",
-      "Hindi": "बारिश के बादल: आप बाहर खेल रहे हैं। आप देखते हैं कि हवा ठंडी हो जाती है, चिड़ियाँ नीचे उड़ती हैं, और आसमान गहरा भूरा हो जाता है। प्रकृति आपको क्या बता रही है?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "A heavy rain shower is coming soon",
-          "Hindi": "A heavy rain shower is coming soon"
-        },
-        "value": 4
+      "key": "logical_lock",
+      "type": "choice",
+      "domain": "logical",
+      "component": "performance_1",
+      "title": {
+          "English": "Number Lock",
+          "Hindi": "संख्या का ताला"
       },
-      {
-        "label": {
-          "English": "The sun is going to shine brighter",
-          "Hindi": "The sun is going to shine brighter"
-        },
-        "value": 0
+      "prompt": {
+          "English": "A number pattern goes: 3, 6, 12, 24, ... What number comes next?",
+          "Hindi": "एक संख्या पैटर्न इस प्रकार है: 3, 6, 12, 24, ... अगला नंबर क्या होगा?"
       },
-      {
-        "label": {
-          "English": "An earthquake is starting",
-          "Hindi": "An earthquake is starting"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "A hot day is beginning",
-          "Hindi": "A hot day is beginning"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "A heavy rain shower is coming soon",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Naturalist and biological observation test."
+      "options": [
+          {
+              "label": {
+                  "English": "30",
+                  "Hindi": "30"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "48",
+                  "Hindi": "48"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "36",
+                  "Hindi": "36"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "40",
+                  "Hindi": "40"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "48",
+      "metric": "correctness",
+      "difficulty": "medium",
+      "ai_interpretation_notes": "Logical sequencing correctness."
   },
   {
-    "key": "naturalist_butterfly",
-    "type": "choice",
-    "domain": "naturalist",
-    "component": "living_systems",
-    "title": {
-      "English": "Attracting Butterflies",
-      "Hindi": "Attracting Butterflies"
-    },
-    "prompt": {
-      "English": "You want to attract colorful butterflies to live in your school garden. Which action helps the MOST?",
-      "Hindi": "तितलियों को आकर्षित करना: आप अपने स्कूल के बगीचे में रंग-बिरंगी तितलियों को आकर्षित करना चाहते हैं। कौन सा काम सबसे ज्यादा मदद करता है?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Plant native flowering plants with sweet nectar and keep shallow water trays nearby",
-          "Hindi": "Plant native flowering plants with sweet nectar and keep shallow water trays nearby"
-        },
-        "value": 4
+      "key": "logical_legs",
+      "type": "choice",
+      "domain": "logical",
+      "component": "performance_2",
+      "title": {
+          "English": "Animal Leg Riddle",
+          "Hindi": "जानवरों के पैरों की पहेली"
       },
-      {
-        "label": {
-          "English": "Spray chemical insect spray to clear other bugs",
-          "Hindi": "Spray chemical insect spray to clear other bugs"
-        },
-        "value": 0
+      "prompt": {
+          "English": "A logic game matches animals to numbers: Cat is 4, Spider is 8, Ant is 6. What represents a Snake?",
+          "Hindi": "एक तर्क खेल में बिल्ली (Cat) 4 है, मकड़ी (Spider) 8 है, चींटी (Ant) 6 है। सांप (Snake) का नंबर क्या होगा?"
       },
-      {
-        "label": {
-          "English": "Cover all flowers with plastic sheets",
-          "Hindi": "Cover all flowers with plastic sheets"
-        },
-        "value": 0
-      },
-      {
-        "label": {
-          "English": "Catch butterflies from other parks and release them",
-          "Hindi": "Catch butterflies from other parks and release them"
-        },
-        "value": 0
-      }
-    ],
-    "answer": "Plant native flowering plants with sweet nectar and keep shallow water trays nearby",
-    "metric": "correctness",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Naturalist and biological observation test."
+      "options": [
+          {
+              "label": {
+                  "English": "4",
+                  "Hindi": "4"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "0",
+                  "Hindi": "0"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "2",
+                  "Hindi": "2"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "6",
+                  "Hindi": "6"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "0",
+      "metric": "correctness",
+      "difficulty": "medium",
+      "ai_interpretation_notes": "Visual inductive classification reasoning."
   },
   {
-    "key": "intrapersonal_reflection",
-    "type": "choice",
-    "domain": "intrapersonal",
-    "component": "self_awareness",
-    "title": {
-      "English": "Frustration in Drawing",
-      "Hindi": "Frustration in Drawing"
-    },
-    "prompt": {
-      "English": "You feel frustrated because your drawing is not turning out as good as you expected. How do you handle it?",
-      "Hindi": "चित्र बनाने में निराशा: आप निराश महसूस करते हैं क्योंकि आपका चित्र वैसा नहीं बन रहा है जैसा आपने उम्मीद की थी। आप इसे कैसे संभालेंगे?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Stop, take deep breaths, and understand exactly why I feel this way.",
-          "Hindi": "रुकें, गहरी सांसें लें और समझें कि मैं ऐसा क्यों महसूस कर रहा हूँ।"
-        },
-        "value": 4,
-        "mapping": {
-          "intrapersonal": 4
-        },
-        "riasec": "Investigative"
+      "key": "logical_bottles_situational",
+      "type": "choice",
+      "domain": "logical",
+      "component": "situational",
+      "title": {
+          "English": "Lost Bottles",
+          "Hindi": "खोई हुई बोतलें"
       },
-      {
-        "label": {
-          "English": "Write down my thoughts briefly to calm down, then talk to the team.",
-          "Hindi": "शांत होने के लिए अपने विचारों को संक्षेप में लिखें, फिर टीम से बात करें।"
-        },
-        "value": 4,
-        "mapping": {
-          "intrapersonal": 3
-        },
-        "riasec": "Artistic"
+      "prompt": {
+          "English": "Students at school keep losing their water bottles on the playground. What is the most effective way to solve this?",
+          "Hindi": "स्कूल के मैदान में छात्र अपनी पानी की बोतलें भूल जाते हैं। इसे हल करने का सबसे कारगर तरीका क्या है?"
       },
-      {
-        "label": {
-          "English": "Focus purely on working on the next steps to keep moving forward.",
-          "Hindi": "आगे बढ़ते रहने के लिए पूरी तरह से अगले कदमों पर काम करने पर ध्यान केंद्रित करें।"
-        },
-        "value": 2,
-        "mapping": {
-          "kinesthetic": 3
-        },
-        "riasec": "Realistic"
-      },
-      {
-        "label": {
-          "English": "Express my frustration loudly so the group knows I am upset.",
-          "Hindi": "अपनी निराशा जोर से व्यक्त करें ताकि समूह जान सके कि मैं परेशान हूँ।"
-        },
-        "value": 1,
-        "mapping": {
-          "intrapersonal": 1
-        },
-        "riasec": "Enterprising"
-      }
-    ],
-    "metric": "self_regulation",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Measures emotional self-regulation and coping mechanisms."
+      "options": [
+          {
+              "label": {
+                  "English": "Make a designated wooden bottle stand near the playground entrance",
+                  "Hindi": "खेल के मैदान के प्रवेश द्वार के पास एक लकड़ी का बोतल स्टैंड बनाएं"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Tell children to stop drinking water during school hours",
+                  "Hindi": "बच्चों से कहें कि वे स्कूल के समय पानी पीना बंद कर दें"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Fine students who lose their bottles",
+                  "Hindi": "बोतल खोने वाले छात्रों पर जुर्माना लगाएं"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Do nothing and let parents buy new bottles",
+                  "Hindi": "कुछ न करें और माता-पिता को नई बोतलें खरीदने दें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Make a designated wooden bottle stand near the playground entrance",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Measures practical logic and systematic problem solving."
   },
   {
-    "key": "intrapersonal_frustration",
-    "type": "choice",
-    "domain": "intrapersonal",
-    "component": "self_awareness",
-    "title": {
-      "English": "Anger in Teamwork",
-      "Hindi": "Anger in Teamwork"
-    },
-    "prompt": {
-      "English": "A classmate in your project group ignores your idea, and you feel very angry. What do you do?",
-      "Hindi": "टीम वर्क में गुस्सा: आपके प्रोजेक्ट ग्रुप का एक सहपाठी आपके विचार की अनदेखी करता है, और आपको बहुत गुस्सा आता है। आप क्या करेंगे?"
-    },
-    "options": [
-      {
-        "label": {
-          "English": "Stop, take deep breaths, and understand exactly why I feel this way.",
-          "Hindi": "रुकें, गहरी सांसें लें और समझें कि मैं ऐसा क्यों महसूस कर रहा हूँ।"
-        },
-        "value": 4,
-        "mapping": {
-          "intrapersonal": 4
-        },
-        "riasec": "Investigative"
+      "key": "logical_queue_solution",
+      "type": "open_ended",
+      "domain": "logical",
+      "component": "open_response",
+      "title": {
+          "English": "Water Tap Queue",
+          "Hindi": "पानी की कतार"
       },
-      {
-        "label": {
-          "English": "Write down my thoughts briefly to calm down, then talk to the team.",
-          "Hindi": "शांत होने के लिए अपने विचारों को संक्षेप में लिखें, फिर टीम से बात करें।"
-        },
-        "value": 4,
-        "mapping": {
-          "intrapersonal": 3
-        },
-        "riasec": "Artistic"
+      "prompt": {
+          "English": "During lunch break, there is a very long, messy queue at the school water tap. How would you solve this problem so everyone gets water quickly?",
+          "Hindi": "लंच ब्रेक के दौरान स्कूल के नल पर पानी के लिए बहुत लंबी और अस्त-व्यस्त कतार लग जाती है। आप इस समस्या को कैसे हल करेंगे ताकि सभी को जल्दी पानी मिल सके?"
       },
-      {
-        "label": {
-          "English": "Focus purely on working on the next steps to keep moving forward.",
-          "Hindi": "आगे बढ़ते रहने के लिए पूरी तरह से अगले कदमों पर काम करने पर ध्यान केंद्रित करें।"
-        },
-        "value": 2,
-        "mapping": {
-          "kinesthetic": 3
-        },
-        "riasec": "Realistic"
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures structural planning and systematic logical thinking."
+  },
+  {
+      "key": "spatial_shape_match",
+      "type": "choice",
+      "domain": "spatial",
+      "component": "performance_1",
+      "title": {
+          "English": "Missing Corner Piece",
+          "Hindi": "गायब कोना"
       },
-      {
-        "label": {
-          "English": "Express my frustration loudly so the group knows I am upset.",
-          "Hindi": "अपनी निराशा जोर से व्यक्त करें ताकि समूह जान सके कि मैं परेशान हूँ।"
-        },
-        "value": 1,
-        "mapping": {
-          "intrapersonal": 1
-        },
-        "riasec": "Enterprising"
-      }
-    ],
-    "metric": "self_regulation",
-    "difficulty": "medium",
-    "ai_interpretation_notes": "Measures emotional self-regulation and coping mechanisms."
+      "prompt": {
+          "English": "A square wooden board is missing a L-shaped corner piece. Which piece will fit perfectly to make it a square again?",
+          "Hindi": "एक चौकोर लकड़ी के बोर्ड में एक L-आकार का कोना गायब है। इसे फिर से पूरा वर्ग बनाने के लिए कौन सा टुकड़ा बिल्कुल फिट होगा?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "A small L-shaped block matching the size of the corner",
+                  "Hindi": "एक छोटा L-आकार का ब्लॉक जो कोने के आकार का हो"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "A long straight thin block",
+                  "Hindi": "एक लंबा सीधा पतला ब्लॉक"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "A round circle block",
+                  "Hindi": "एक गोल वृत्त ब्लॉक"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "A large triangle block",
+                  "Hindi": "एक बड़ा त्रिकोण ब्लॉक"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "A small L-shaped block matching the size of the corner",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Mental geometry and spatial matching."
   },
   {
-    "key": "deep_discovery_flow",
-    "type": "open_ended",
-    "domain": "intrapersonal",
-    "component": "reflective_thinking",
-    "title": {
-      "English": "AI Reflection 1",
-      "Hindi": "AI Reflection 1"
-    },
-    "prompt": {
-      "English": "What activity makes you completely lose track of time? Describe it simply.",
-      "Hindi": "कौन सी गतिविधि आपको समय का ध्यान पूरी तरह से भुला देती है? इसके बारे में संक्षेप में लिखें।"
-    },
-    "metric": "narrative_expression",
-    "difficulty": "adaptive",
-    "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
+      "key": "spatial_clock",
+      "type": "choice",
+      "domain": "spatial",
+      "component": "performance_2",
+      "title": {
+          "English": "Clock Hand Rotation",
+          "Hindi": "सुई का घूमना"
+      },
+      "prompt": {
+          "English": "A pointer moves: first UP, then RIGHT, then DOWN. Where will it point next?",
+          "Hindi": "एक सुई घूमती है: पहले ऊपर, फिर दाएं, फिर नीचे। इसके बाद यह किस दिशा में होगी?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "UP",
+                  "Hindi": "ऊपर"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "RIGHT",
+                  "Hindi": "दाएं"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "DOWN",
+                  "Hindi": "नीचे"
+              },
+              "value": 0
+          },
+          {
+              "label": {
+                  "English": "LEFT",
+                  "Hindi": "बाएं"
+              },
+              "value": 4
+          }
+      ],
+      "answer": "LEFT",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Mental rotation tracking."
   },
   {
-    "key": "deep_discovery_curiosity",
-    "type": "open_ended",
-    "domain": "intrapersonal",
-    "component": "reflective_thinking",
-    "title": {
-      "English": "AI Reflection 2",
-      "Hindi": "AI Reflection 2"
-    },
-    "prompt": {
-      "English": "If you could spend one year learning absolutely anything without tests, what would it be?",
-      "Hindi": "यदि आप बिना किसी परीक्षा के एक पूरा वर्ष किसी भी चीज को सीखने में बिता सकते हैं, तो वह क्या होगी?"
-    },
-    "metric": "narrative_expression",
-    "difficulty": "adaptive",
-    "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
+      "key": "spatial_room_situational",
+      "type": "choice",
+      "domain": "spatial",
+      "component": "situational",
+      "title": {
+          "English": "Small Room Plan",
+          "Hindi": "छोटे कमरे की योजना"
+      },
+      "prompt": {
+          "English": "You have a very small room and need to fit a bed, a desk, and a bookshelf. How should you arrange them?",
+          "Hindi": "आपके पास एक बहुत छोटा कमरा है और उसमें एक बिस्तर, एक मेज और एक बुकशेल्फ़ रखना है। आपको उन्हें कैसे व्यवस्थित करना चाहिए?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Place the bed along the wall and place the desk under a high bookshelf",
+                  "Hindi": "बिस्तर को दीवार के साथ लगाएं और मेज को ऊंचे बुकशेल्फ़ के नीचे रखें"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Put the bed in the middle of the room so no other furniture fits",
+                  "Hindi": "बिस्तर को कमरे के बीच में रखें ताकि कोई अन्य फर्नीचर फिट न हो सके"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Leave the desk outside the room on the corridor",
+                  "Hindi": "मेज को कमरे के बाहर कॉरिडोर में छोड़ दें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Stack the bed on top of the desk directly",
+                  "Hindi": "बिस्तर को सीधे मेज के ऊपर रख दें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Place the bed along the wall and place the desk under a high bookshelf",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Measures 3D spatial arranging and structural design logic."
   },
   {
-    "key": "deep_discovery_vision",
-    "type": "open_ended",
-    "domain": "social",
-    "component": "expression_clarity",
-    "title": {
-      "English": "AI Reflection 3",
-      "Hindi": "AI Reflection 3"
-    },
-    "prompt": {
-      "English": "What is one big problem in your school or neighborhood that you would love to solve?",
-      "Hindi": "आपके स्कूल या पड़ोस में ऐसी कौन सी बड़ी समस्या है जिसे आप हल करना चाहेंगे?"
-    },
-    "metric": "narrative_expression",
-    "difficulty": "adaptive",
-    "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
+      "key": "spatial_treehouse_design",
+      "type": "open_ended",
+      "domain": "spatial",
+      "component": "open_response",
+      "title": {
+          "English": "Treehouse Design",
+          "Hindi": "ट्रीहाउस डिजाइन"
+      },
+      "prompt": {
+          "English": "You want to design a strong wooden treehouse. Describe what shape it will be, and how you will secure it to the tree so it does not fall.",
+          "Hindi": "आप एक मजबूत लकड़ी का ट्रीहाउस (पेड़ पर घर) बनाना चाहते हैं। बताएं कि इसका आकार कैसा होगा, और आप इसे पेड़ से कैसे सुरक्षित बांधेंगे ताकि यह गिरे नहीं।"
+      },
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures 3D visualization, physical balance, and construction reasoning."
   },
   {
-    "key": "deep_discovery_pride",
-    "type": "open_ended",
-    "domain": "intrapersonal",
-    "component": "reflective_thinking",
-    "title": {
-      "English": "AI Reflection 4",
-      "Hindi": "AI Reflection 4"
-    },
-    "prompt": {
-      "English": "Describe a toy, project, or model you built that made you feel proud.",
-      "Hindi": "आपके द्वारा बनाए गए किसी खिलौने, प्रोजेक्ट या मॉडल के बारे में लिखें जिसे बनाकर आपको गर्व महसूस हुआ।"
-    },
-    "metric": "narrative_expression",
-    "difficulty": "adaptive",
-    "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
-  }
+      "key": "visualizer_memory_grid",
+      "type": "memory_grid",
+      "domain": "kinesthetic",
+      "component": "performance_1",
+      "title": {
+          "English": "Flashing Stars",
+          "Hindi": "चमकते सितारे"
+      },
+      "prompt": {
+          "English": "Watch the flashing pattern on the grid, then tap the same squares in order.",
+          "Hindi": "ग्रिड पर चमकते पैटर्न को देखें, फिर उसी क्रम में उन खानों को छुएं।"
+      },
+      "gridSize": 9,
+      "highlights": [
+          0,
+          2,
+          6,
+          8
+      ],
+      "revealMs": 2000,
+      "metric": "memory_span",
+      "difficulty": "medium",
+      "ai_interpretation_notes": "Motor sequencing and spatial visual working memory."
+  },
+  {
+      "key": "kinesthetic_catch",
+      "type": "choice",
+      "domain": "kinesthetic",
+      "component": "performance_2",
+      "title": {
+          "English": "Catching a Ball",
+          "Hindi": "गेंद पकड़ना"
+      },
+      "prompt": {
+          "English": "A high leather ball is falling fast toward you. What is the safest way to catch it without hurting your hands?",
+          "Hindi": "एक ऊंची चमड़े की गेंद आपकी ओर तेजी से गिर रही है। हाथों को चोट पहुंचाए बिना इसे पकड़ने का सबसे सुरक्षित तरीका क्या है?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Cup your hands together and pull them back slightly as you catch the ball",
+                  "Hindi": "दोनों हाथों को एक साथ कप के आकार में लाएं और गेंद पकड़ते समय उन्हें थोड़ा पीछे खींचें"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Keep your hands stiff and straight and block the ball",
+                  "Hindi": "हाथों को सीधा और सख्त रखें और गेंद को रोकें"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Try to catch it with only one hand stretched out high",
+                  "Hindi": "केवल एक हाथ को ऊपर फैलाकर इसे पकड़ने का प्रयास करें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Close your eyes and let the ball hit your chest",
+                  "Hindi": "अपनी आंखें बंद करें और गेंद को अपनी छाती से टकराने दें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Cup your hands together and pull them back slightly as you catch the ball",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Biomechanical coordination and impact absorption logic."
+  },
+  {
+      "key": "kinesthetic_team_losing",
+      "type": "choice",
+      "domain": "kinesthetic",
+      "component": "situational",
+      "title": {
+          "English": "Tired Teammate",
+          "Hindi": "थका हुआ साथी"
+      },
+      "prompt": {
+          "English": "During a match, your teammate is running very slowly because they are tired. What do you do?",
+          "Hindi": "एक मैच के दौरान, आपका साथी खिलाड़ी थक जाने के कारण बहुत धीरे दौड़ रहा है। आप क्या करेंगे?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Pass the ball to another open player and adjust your running path to support them",
+                  "Hindi": "गेंद को दूसरे खाली खिलाड़ी को पास करें और उनकी मदद के लिए अपने दौड़ने का रास्ता बदलें"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Shout at them to run faster and get angry",
+                  "Hindi": "उन पर तेजी से दौड़ने के लिए चिल्लाएं और गुस्सा करें"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Stop running yourself and watch the match",
+                  "Hindi": "खुद दौड़ना बंद कर दें और मैच देखें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Ask the referee to stop the match immediately",
+                  "Hindi": "रेफरी से मैच को तुरंत रोकने के लिए कहें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Pass the ball to another open player and adjust your running path to support them",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Situational physical play tactics and sportsmanship."
+  },
+  {
+      "key": "kinesthetic_learn_sport",
+      "type": "open_ended",
+      "domain": "kinesthetic",
+      "component": "open_response",
+      "title": {
+          "English": "Learn a Sport",
+          "Hindi": "नया खेल सीखना"
+      },
+      "prompt": {
+          "English": "Imagine a new physical game or sport you have never played before. Describe step-by-step how you would practice to learn and master it.",
+          "Hindi": "कल्पना कीजिए कि एक नया खेल या स्पोर्ट्स है जिसे आपने पहले कभी नहीं खेला है। इसे सीखने और माहिर होने के लिए आप कदम-दर-कदम कैसे अभ्यास करेंगे, लिखें।"
+      },
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures physical learning planning, muscle memory awareness, and motor regulation."
+  },
+  {
+      "key": "naturalist_weather",
+      "type": "choice",
+      "domain": "naturalist",
+      "component": "performance_1",
+      "title": {
+          "English": "Rain Signs",
+          "Hindi": "बारिश के संकेत"
+      },
+      "prompt": {
+          "English": "You notice that the wind is blowing very cold, dark clouds are covering the sun, and swallow birds are flying low to the ground. What is most likely to happen next?",
+          "Hindi": "आप देखते हैं कि हवा बहुत ठंडी चल रही है, काले बादल सूरज को ढक रहे हैं, और पक्षी जमीन के बहुत करीब उड़ रहे हैं। इसके बाद क्या होने की सबसे अधिक संभावना है?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "It will rain heavily soon",
+                  "Hindi": "जल्द ही भारी बारिश होगी"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "It will become a very hot and sunny day",
+                  "Hindi": "बहुत गर्म और धूप वाला दिन हो जाएगा"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "A sandstorm will clear all the clouds",
+                  "Hindi": "धूल भरी आंधी सभी बादलों को साफ कर देगी"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Nothing will change",
+                  "Hindi": "कुछ नहीं बदलेगा"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "It will rain heavily soon",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Nature pattern deduction."
+  },
+  {
+      "key": "naturalist_plants",
+      "type": "choice",
+      "domain": "naturalist",
+      "component": "performance_2",
+      "title": {
+          "English": "Dry Plant Care",
+          "Hindi": "सूखे पौधे की देखभाल"
+      },
+      "prompt": {
+          "English": "Two identical green potted plants are placed in different spots. Plant A has dry soil and drooping yellow leaves. Plant B has moist soil and bright green leaves. What does Plant A need?",
+          "Hindi": "दो समान गमले वाले पौधे अलग स्थानों पर रखे हैं। पौधे A की मिट्टी सूखी और पत्तियां पीली हैं। पौधे B की मिट्टी नम और पत्तियां हरी हैं। पौधे A को क्या चाहिए?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Water and a moderate amount of sunlight",
+                  "Hindi": "पानी और मध्यम मात्रा में धूप"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "More dry fertilizer only",
+                  "Hindi": "केवल अधिक सूखा उर्वरक"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Moving to a dark closed cupboard",
+                  "Hindi": "अंधेरे बंद अलमारी में ले जाना"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Plucking all its yellow leaves off",
+                  "Hindi": "उसकी सभी पीली पत्तियों को तोड़ देना"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Water and a moderate amount of sunlight",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Living systems observation and care diagnosis."
+  },
+  {
+      "key": "naturalist_sick_plant",
+      "type": "choice",
+      "domain": "naturalist",
+      "component": "situational",
+      "title": {
+          "English": "Sick Classroom Plant",
+          "Hindi": "बीमार पौधा"
+      },
+      "prompt": {
+          "English": "A vegetable plant in the school garden is looking sick with small insects on its stems. What is the best organic action to take?",
+          "Hindi": "स्कूल के बगीचे में एक सब्जी का पौधा बीमार दिख रहा है और उसके तनों पर छोटे कीड़े लगे हैं। सबसे अच्छा जैविक (organic) कदम क्या होगा?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Spray it gently with mild neem-soap water and remove the pests",
+                  "Hindi": "नीम और साबुन के हल्के पानी का छिड़काव करें और कीड़ों को हटा दें"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Cut the entire plant from the roots and throw it away",
+                  "Hindi": "पूरे पौधे को जड़ से काटकर फेंक दें"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Pour strong chemical insect killer on the soil",
+                  "Hindi": "मिट्टी पर तेज रासायनिक कीटनाशक डालें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Do nothing and let the insects eat it",
+                  "Hindi": "कुछ न करें और कीड़ों को उसे खाने दें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Spray it gently with mild neem-soap water and remove the pests",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Measures naturalist diagnostic action and environmental care."
+  },
+  {
+      "key": "naturalist_notice_nature",
+      "type": "open_ended",
+      "domain": "naturalist",
+      "component": "open_response",
+      "title": {
+          "English": "Notice Nature",
+          "Hindi": "प्रकृति में ध्यान देना"
+      },
+      "prompt": {
+          "English": "Describe something interesting you noticed recently about an animal, bird, insect, or plant in nature. What did you observe?",
+          "Hindi": "प्रकृति में किसी जानवर, पक्षी, कीड़े या पौधे के बारे में कुछ दिलचस्प बताएं जो आपने हाल ही में देखा हो। आपने क्या नोटिस किया?"
+      },
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures naturalist sensory observation details and curiosity."
+  },
+  {
+      "key": "social_planning",
+      "type": "choice",
+      "domain": "social",
+      "component": "performance_1",
+      "title": {
+          "English": "Quick Cleanup Plan",
+          "Hindi": "त्वरित सफाई योजना"
+      },
+      "prompt": {
+          "English": "Your group needs to clean the classroom, make banners, and arrange chairs in 10 minutes. How do you plan to finish?",
+          "Hindi": "आपके ग्रुप को 10 मिनट में कक्षा की सफाई करनी है, बैनर बनाने हैं और कुर्सियां व्यवस्थित करनी हैं। आप इसे कैसे पूरा करेंगे?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Assign different tasks to small teams based on what they like and do well",
+                  "Hindi": "छोटे समूहों को उनकी पसंद और ताकत के अनुसार अलग-अलग काम सौंपेंगे"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Try to do all tasks yourself while everyone else watches",
+                  "Hindi": "सभी काम खुद करने की कोशिश करेंगे जबकि बाकी सब देखते रहेंगे"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Let everyone do whatever they want without any plan",
+                  "Hindi": "बिना किसी योजना के सभी को जो मन करे करने देंगे"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Wait for the teacher to come and tell you what to do",
+                  "Hindi": "शिक्षिका के आने और बताने का इंतजार करेंगे"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Assign different tasks to small teams based on what they like and do well",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Group task organization and delegation."
+  },
+  {
+      "key": "social_decision",
+      "type": "choice",
+      "domain": "social",
+      "component": "performance_2",
+      "title": {
+          "English": "Getting Lost",
+          "Hindi": "रास्ता भटकना"
+      },
+      "prompt": {
+          "English": "Your group takes a wrong turn during a school walk in a park. Some students start crying. What is your first action?",
+          "Hindi": "पार्क में स्कूल की सैर के दौरान आपका ग्रुप गलत रास्ते पर चला जाता है। कुछ बच्चे रोने लगते हैं। आपका पहला कदम क्या होगा?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Calm everyone down, ask them to stay together, and look for a familiar path or call the teacher",
+                  "Hindi": "सभी को शांत करेंगे, एक साथ रहने को कहेंगे और किसी परिचित रास्ते की तलाश करेंगे या शिक्षिका को बुलाएंगे"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Start crying yourself so others know it is serious",
+                  "Hindi": "खुद भी रोना शुरू कर देंगे ताकि दूसरों को पता चले कि यह गंभीर है"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Run away quickly to find the path alone",
+                  "Hindi": "अकेले रास्ते की तलाश में तेजी से भाग जाएंगे"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Sit down on the ground and do nothing",
+                  "Hindi": "जमीन पर बैठ जाएंगे और कुछ नहीं करेंगे"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Calm everyone down, ask them to stay together, and look for a familiar path or call the teacher",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Situational peer reassurance and group control."
+  },
+  {
+      "key": "social_conflict_resolution",
+      "type": "choice",
+      "domain": "social",
+      "component": "situational",
+      "title": {
+          "English": "Batting Argument",
+          "Hindi": "बल्लेबाजी पर विवाद"
+      },
+      "prompt": {
+          "English": "Two friends are arguing loudly on the playground about whose turn it is to bat. How would you solve this dispute fairly?",
+          "Hindi": "खेल के मैदान में दो दोस्त आपस में इस बात पर बहस कर रहे हैं कि बल्लेबाजी की किसकी बारी है। आप इस विवाद को निष्पक्ष रूप से कैसे सुलझाएंगे?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Suggest a quick toss or game-point rule to decide, then continue playing",
+                  "Hindi": "तय करने के लिए एक त्वरित टॉस या गेम-पॉइंट नियम का सुझाव देंगे, फिर खेल जारी रखेंगे"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Take the bat away and stop the game for everyone",
+                  "Hindi": "बल्ला छीन लेंगे और सभी के लिए खेल बंद कर देंगे"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Support the friend you like more and ignore the other",
+                  "Hindi": "अपने पसंदीदा दोस्त का समर्थन करेंगे और दूसरे की अनदेखी करेंगे"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Shout at both of them to go back to class",
+                  "Hindi": "दोनों पर चिल्लाकर उन्हें वापस कक्षा में जाने के लिए कहेंगे"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Suggest a quick toss or game-point rule to decide, then continue playing",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Measures conflict resolution and democratic playground mediation."
+  },
+  {
+      "key": "social_helped_others",
+      "type": "open_ended",
+      "domain": "social",
+      "component": "open_response",
+      "title": {
+          "English": "Helping a Friend",
+          "Hindi": "दोस्त की मदद"
+      },
+      "prompt": {
+          "English": "Describe a time when you helped others solve a problem or settle an argument. What was the problem and what did you do?",
+          "Hindi": "कोई ऐसा समय बताएं जब आपने दूसरों को किसी समस्या को हल करने या किसी बहस को सुलझाने में मदद की हो। समस्या क्या थी और आपने क्या किया?"
+      },
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures interpersonal empathy, helpful initiative, and relational intelligence."
+  },
+  {
+      "key": "intrapersonal_goals",
+      "type": "choice",
+      "domain": "intrapersonal",
+      "component": "performance_1",
+      "title": {
+          "English": "Learning a Skill",
+          "Hindi": "कौशल सीखना"
+      },
+      "prompt": {
+          "English": "You want to learn a difficult new skill, like sketching or a sport, in one month. What is the best way to practice?",
+          "Hindi": "आप एक महीने में स्केचिंग या कोई खेल जैसा कठिन नया कौशल सीखना चाहते हैं। अभ्यास करने का सबसे अच्छा तरीका क्या है?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Practice for 15 minutes every single day and track your progress",
+                  "Hindi": "हर दिन 15 मिनट अभ्यास करें और अपनी प्रगति को ट्रैक करें"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Practice for 5 hours on the last day of the month only",
+                  "Hindi": "महीने के केवल अंतिम दिन 5 घंटे अभ्यास करें"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Only practice when you feel very happy or excited",
+                  "Hindi": "केवल तभी अभ्यास करें जब आप बहुत खुश या उत्साहित महसूस करें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Wait for someone to force you to practice",
+                  "Hindi": "किसी के द्वारा अभ्यास के लिए मजबूर करने का इंतजार करें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Practice for 15 minutes every single day and track your progress",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Self-regulation and systematic planning logic."
+  },
+  {
+      "key": "intrapersonal_reflection",
+      "type": "choice",
+      "domain": "intrapersonal",
+      "component": "performance_2",
+      "title": {
+          "English": "Unsolved Puzzle",
+          "Hindi": "अनसुलझी पहेली"
+      },
+      "prompt": {
+          "English": "You fail to solve a very hard puzzle after trying for a long time. What is your thought?",
+          "Hindi": "लंबे समय तक कोशिश करने के बाद भी आप एक बहुत कठिन पहेली को हल करने में विफल रहते हैं। आपका विचार क्या है?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "This is a good challenge, let me look at it differently and try again",
+                  "Hindi": "यह एक अच्छी चुनौती है, मुझे इसे अलग तरीके से देखना चाहिए और फिर से प्रयास करना चाहिए"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "I am not smart enough to solve puzzles",
+                  "Hindi": "मैं पहेलियाँ हल करने के लिए पर्याप्त स्मार्ट नहीं हूँ"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "This puzzle has a wrong question and is broken",
+                  "Hindi": "यह पहेली गलत प्रश्न है और खराब है"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "I will never try a puzzle again",
+                  "Hindi": "मैं फिर कभी पहेली का प्रयास नहीं करूँगा"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "This is a good challenge, let me look at it differently and try again",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Growth mindset and cognitive resilience indicator."
+  },
+  {
+      "key": "intrapersonal_frustration",
+      "type": "choice",
+      "domain": "intrapersonal",
+      "component": "situational",
+      "title": {
+          "English": "Stuck Kite",
+          "Hindi": "फंसी पतंग"
+      },
+      "prompt": {
+          "English": "You spent an hour making a paper kite, but it immediately gets stuck in a tall thorny tree and tears. What do you do?",
+          "Hindi": "आपने कागज़ का पतंग बनाने में एक घंटा लगाया, लेकिन वह तुरंत एक बड़े कांटेदार पेड़ में फंसकर फट जाती है। आप क्या करेंगे?"
+      },
+      "options": [
+          {
+              "label": {
+                  "English": "Acknowledge the mistake, clean up, and build a stronger version using what you learned",
+                  "Hindi": "गलती को स्वीकार करें, सफाई करें, और सीखी हुई बातों का उपयोग करके एक मजबूत पतंग बनाएं"
+              },
+              "value": 4
+          },
+          {
+              "label": {
+                  "English": "Get angry and scream at the tree",
+                  "Hindi": "गुस्सा हो जाएं और पेड़ पर चिल्लाएं"
+              },
+              "value": 1
+          },
+          {
+              "label": {
+                  "English": "Ask your friend to climb the thorny tree even if it is dangerous",
+                  "Hindi": "खतरनाक होने पर भी अपने दोस्त से उस कांटेदार पेड़ पर चढ़ने के लिए कहें"
+              },
+              "value": 2
+          },
+          {
+              "label": {
+                  "English": "Throw all your remaining paper sheets in the mud",
+                  "Hindi": "अपने बचे हुए सभी कागज़ के टुकड़ों को कीचड़ में फेंक दें"
+              },
+              "value": 0
+          }
+      ],
+      "answer": "Acknowledge the mistake, clean up, and build a stronger version using what you learned",
+      "metric": "correctness",
+      "difficulty": "easy",
+      "ai_interpretation_notes": "Measures emotional regulation and resilience under disappointment."
+  },
+  {
+      "key": "intrapersonal_difficult_moment",
+      "type": "open_ended",
+      "domain": "intrapersonal",
+      "component": "open_response",
+      "title": {
+          "English": "Difficult Moment",
+          "Hindi": "कठिन समय"
+      },
+      "prompt": {
+          "English": "Describe a difficult situation you faced at school or home, how you felt, and what you learned from it.",
+          "Hindi": "स्कूल या घर पर सामना की गई किसी कठिन परिस्थिति के बारे में बताएं, आपको कैसा लगा, और आपने उससे क्या सीखा।"
+      },
+      "metric": "narrative_expression",
+      "difficulty": "adaptive",
+      "ai_interpretation_notes": "Measures self-reflection depth, emotional awareness, and resilience learning."
+  },
 ];
-function getComplexityLevel(schoolYear, age) {
-  const sy = String(schoolYear || "").toLowerCase();
-  if (sy.includes("class 4") || sy.includes("class 5") || sy.includes("class 6") || sy.includes("grade 4") || sy.includes("grade 5") || sy.includes("grade 6")) {
-    return "PRIMARY";
-  }
-  if (sy.includes("class 7") || sy.includes("class 8") || sy.includes("grade 7") || sy.includes("grade 8")) {
-    return "MIDDLE";
-  }
-  if (sy.includes("class 9") || sy.includes("class 10") || sy.includes("grade 9") || sy.includes("grade 10")) {
-    return "SECONDARY";
-  }
-  if (sy.includes("class 11") || sy.includes("class 12") || sy.includes("grade 11") || sy.includes("grade 12")) {
-    return "SENIOR";
-  }
-  const numericAge = Number(age);
-  if (!isNaN(numericAge) && numericAge > 0) {
-    if (numericAge <= 11) return "PRIMARY";
-    if (numericAge <= 13) return "MIDDLE";
-    if (numericAge <= 15) return "SECONDARY";
-    return "SENIOR";
-  }
-  return "MIDDLE"; // Default fallback
-}
 
 export function getAdaptedDiscoveryQuestions(schoolYear, age, language) {
-  const level = getComplexityLevel(schoolYear, age);
   const isHindi = language === "Hindi";
-
+  
   return [
     {
       id: "q_discovery_1",
-      question: {
-        PRIMARY: isHindi
-          ? "आपके पांच दोस्त खेल रहे हैं पर उन्हें नहीं पता क्या खेलना है। 🎮 आप पहले क्या करेंगे?"
-          : "Five friends want to play but don't know what game to play. 🎮 What do you do first?",
-        MIDDLE: isHindi
-          ? "आपकी टीम किसी प्रोजेक्ट के विचार पर सहमत नहीं हो पा रही है। 💡 आप क्या करते हैं?"
-          : "Your team cannot agree on a project idea. 💡 What do you do?",
-        SECONDARY: isHindi
-          ? "आप स्कूल में एक नया क्लब शुरू करना चाहते हैं। 🚀 आपका पहला कदम क्या है?"
-          : "You want to start a new school club. 🚀 What is your first step?",
-        SENIOR: isHindi
-          ? "आपकी प्रोजेक्ट टीम समय सीमा (deadlines) को पूरा नहीं कर पा रही है। ⏳ आप इसे कैसे संभालेंगे?"
-          : "Your project team is missing deadlines. ⏳ How would you handle it?"
-      }[level],
+      question: isHindi ? "तुम्हें एक खाली दोपहर मिलती है। तुम सबसे ज़्यादा क्या करना चाहोगे?" : "You get one free afternoon. What would you most like to do?",
       type: "choice",
-      options: {
-        PRIMARY: [
-          { label: isHindi ? "खिलाड़ियों को गिनकर खिलौनों को बांटूंगा" : "Count the players and divide the toys", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "एक नया खेल बनाने का चित्र बनाऊंगा" : "Draw a picture of a new game we can make", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "एक खेल का सुझाव दूंगा और नियम समझाऊंगा" : "Suggest a game and explain the rules", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "उन्हें दो टीमों में बांटकर शुरू करूंगा" : "Split them into two teams and get started", emoji: "🤝", domains: ["social"] }
-        ],
-        MIDDLE: [
-          { label: isHindi ? "प्रत्येक विचार के फायदे और नुकसान की सूची बनाएं" : "List the pros and cons of each project idea", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "दो विचारों को मिलाकर एक नया रचनात्मक विचार बनाएं" : "Combine two different ideas into a new creative one", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "सभी विचारों का सारांश लिखकर चर्चा करें" : "Write a summary of all ideas to discuss with the team", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "जल्दी निर्णय लेने के लिए वोट कराने का सुझाव दें" : "Propose a vote to decide quickly and move forward", emoji: "🤝", domains: ["social"] }
-        ],
-        SECONDARY: [
-          { label: isHindi ? "गतिविधियों की सूची और एक विस्तृत समय-सारणी बनाएं" : "Create a detailed schedule and list of learning activities", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "एक आकर्षक लोगो और क्लब की थीम डिजाइन करें" : "Design a stylish logo and branding theme for the club", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "छात्रों को शामिल होने के लिए मनाने हेतु एक भाषण दें" : "Give an inspiring presentation to convince students to join", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "काम बांटने के लिए एक नेतृत्व टीम तैयार करें" : "Recruit a core leadership team to share responsibilities", emoji: "🤝", domains: ["social"] }
-        ],
-        SENIOR: [
-          { label: isHindi ? "समय-सीमा की समीक्षा करें, बाधाओं को पहचानें और कार्यों को फिर से सौंपें" : "Review the timeline, identify bottlenecks, and re-allocate tasks", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "परियोजना को सरल बनाने के लिए एक रचनात्मक बदलाव का सुझाव दें" : "Pitch a creative pivot to simplify the project requirements", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "विस्तृत स्थिति रिपोर्ट लिखें और समय बढ़ाने के लिए बातचीत करें" : "Write a detailed status report and negotiate a deadline extension", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "बैठक आयोजित कर विवादों को सुलझाएं और टीम को प्रेरित करें" : "Facilitate a team meeting to resolve conflicts and motivate members", emoji: "🤝", domains: ["social"] }
-        ]
-      }[level]
+      options: [
+        { label: isHindi ? "कहानी सुनाना या लिखना" : "Tell or write a story", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "चित्र बनाना, रंग भरना या स्केच बनाना" : "Draw, paint, or sketch", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "गणित की पहेली हल करना" : "Solve a tricky math puzzle", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "गत्ते का मॉडल बनाना" : "Build a cardboard model", emoji: "🔨", domains: ["spatial"] },
+      ]
     },
     {
       id: "q_discovery_2",
-      question: {
-        PRIMARY: isHindi
-          ? "आपको कार्डबोर्ड, डंडियाँ और धागे का एक डिब्बा मिलता है। 📦 आप पहले क्या करेंगे?"
-          : "You get a box of cardboard, sticks, and strings. 📦 What do you do first?",
-        MIDDLE: isHindi
-          ? "आप विज्ञान की कक्षा में एक नया मॉडल बना रहे हैं। 🔬 आप पहले क्या करते हैं?"
-          : "You are designing a prototype in science class. 🔬 What do you do first?",
-        SECONDARY: isHindi
-          ? "आप स्कूल की प्रदर्शनी के लिए एक उत्पाद बनाना चाहते हैं। 🛍️ आप पहले क्या करते हैं?"
-          : "You want to create a product for a school exhibition. 🛍️ What do you do first?",
-        SENIOR: isHindi
-          ? "आप एक नया स्टार्टअप उत्पाद विकसित कर रहे हैं। 💼 आपका पहला कदम क्या है?"
-          : "You are developing a startup product. 💼 What is your first step?"
-      }[level],
+      question: isHindi ? "यदि तुम किसी स्कूल क्लब में शामिल हो सकते, तो तुम किसे चुनते?" : "If you could join a school club, which one would you choose?",
       type: "choice",
-      options: {
-        PRIMARY: [
-          { label: isHindi ? "खिलौना घर या मीनार बनाऊंगा" : "Build a toy house or a tall tower", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "उसे सुंदर रंगों से सजाऊंगा" : "Decorate it with bright colors", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "उन्हें आकार के हिसाब से अलग करूंगा" : "Sort them by size and shape", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "डंडी को अपनी उंगली पर संतुलित करूंगा" : "Balance a stick on your finger", emoji: "💃", domains: ["kinesthetic"] }
-        ],
-        MIDDLE: [
-          { label: isHindi ? "कार्डबोर्ड का उपयोग करके एक मॉडल बनाएं" : "Build a physical model using cardboard", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "उसका एक सुंदर, कलात्मक चित्र (sketch) बनाएं" : "Sketch a beautiful, artistic blueprint", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "जांचें कि उसकी मशीनरी कैसे काम करती है" : "Analyze how the mechanics work step-by-step", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "सामग्री को उठाकर देखें कि वह कितनी भारी और मजबूत है" : "Test how heavy and sturdy the materials feel physically", emoji: "💃", domains: ["kinesthetic"] }
-        ],
-        SECONDARY: [
-          { label: isHindi ? "उस उपकरण का एक कार्यशील प्रोटोटाइप तैयार करें" : "Construct a working prototype of the device", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "एक आकर्षक ब्रांड लोगो और पैकेजिंग डिज़ाइन करें" : "Design a stylish brand logo and packaging", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "लागत और बजट का हिसाब लगाएं" : "Calculate the material costs and budget", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "ग्राहकों को दिखाएं कि उत्पाद कैसे काम करता है" : "Demonstrate the product's physical movement to users", emoji: "💃", domains: ["kinesthetic"] }
-        ],
-        SENIOR: [
-          { label: isHindi ? "भौतिक/स्थानिक ब्लूप्रिंट और असेंबली प्रक्रिया तैयार करें" : "Engineer the physical/spatial blueprint and assembly process", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "सौंदर्य डिजाइन और रचनात्मक ब्रांडिंग का निर्देश दें" : "Direct the aesthetic design and creative branding strategy", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "सिस्टम आर्किटेक्चर और डेटा मॉडल को अनुकूलित करें" : "Optimize the functional architecture and database layout", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "उपयोगकर्ता अनुभव, सुविधा और शारीरिक संपर्क का परीक्षण करें" : "Test usability, ergonomic comfort, and physical interaction", emoji: "💃", domains: ["kinesthetic"] }
-        ]
-      }[level]
+      options: [
+        { label: isHindi ? "दौड़-भाग और खेल क्लब" : "Running and sports club", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "पौधों और बगीचे की देखभाल क्लब" : "Plant and garden care club", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "समूह खेल और योजना क्लब" : "Group game and planning club", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "शांत पढ़ने और सोचने का क्लब" : "Quiet reading and thinking club", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
     },
     {
       id: "q_discovery_3",
-      question: {
-        PRIMARY: isHindi
-          ? "आपको घास में एक सुंदर हरा कीड़ा मिलता है। 🐜 आप पहले क्या करेंगे?"
-          : "You find a cool green bug in the grass. 🐜 What do you do first?",
-        MIDDLE: isHindi
-          ? "आपको स्कूल के मैदान में एक सुंदर पक्षी दिखाई देता है। 🦅 आप क्या करते हैं?"
-          : "You notice a beautiful bird in the schoolyard. 🦅 What do you do?",
-        SECONDARY: isHindi
-          ? "आप प्रकृति की सैर (nature trail) पर हैं। 🌲 आपको सबसे ज्यादा क्या आकर्षित करता है?"
-          : "You are on a nature trail. 🌲 What attracts you most?",
-        SENIOR: isHindi
-          ? "आप पर्यावरण संरक्षण का अध्ययन कर रहे हैं। 🌍 आपका ध्यान किस पर है?"
-          : "You are studying environmental conservation. 🌍 What is your focus?"
-      }[level],
+      question: isHindi ? "तुम्हारी शिक्षिका तुम्हें किसी काम में मदद करने के लिए कहती हैं। तुम्हें क्या करने में सबसे ज़्यादा मज़ा आएगा?" : "Your teacher asks you to help with a task. What sounds most fun?",
       type: "choice",
-      options: {
-        PRIMARY: [
-          { label: isHindi ? "देखूंगा कि वह कैसे चलता है और क्या खाता है" : "Watch it crawl and see what it eats", emoji: "🦋", domains: ["naturalist"] },
-          { label: isHindi ? "अपनी कॉपी में उसका चित्र बनाऊंगा" : "Draw a picture of it in my notebook", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "बिना छुए चुपचाप उसे देखता रहूंगा" : "Sit quietly and watch it without touching", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "अपने दोस्तों को बुलाकर उसके बारे में बताऊंगा" : "Call my friends to tell them all about it", emoji: "🗣️", domains: ["language"] }
-        ],
-        MIDDLE: [
-          { label: isHindi ? "उसकी प्रजाति और रहने की जगह पहचानने की कोशिश करें" : "Try to identify its species and habitat", emoji: "🦋", domains: ["naturalist"] },
-          { label: isHindi ? "उस पर एक कविता लिखें या उसका चित्र बनाएं" : "Write a poem or sketch its feathers", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "प्रकृति के उस शांत क्षण का आनंद लें" : "Enjoy the peaceful, quiet moment in nature", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "अपने सहपाठी को उसके व्यवहार के बारे में समझाएं" : "Explain its behavior to your classmate", emoji: "🗣️", domains: ["language"] }
-        ],
-        SECONDARY: [
-          { label: isHindi ? "यह अध्ययन करना कि स्थानीय पर्यावरण कैसे काम करता है" : "Studying how the local ecosystem functions", emoji: "🦋", domains: ["naturalist"] },
-          { label: isHindi ? "सुंदर दृश्यों की तस्वीरें खींचना" : "Photographing the scenic nature views", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "शांत जंगल में अपने लक्ष्यों के बारे में सोचना" : "Reflecting on your goals in the quiet woods", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "समूह का मार्गदर्शन करना और रास्ते के बारे में बताना" : "Guiding the group and explaining the route details", emoji: "🗣️", domains: ["language"] }
-        ],
-        SENIOR: [
-          { label: isHindi ? "मिट्टी की जैव विविधता और पौधों के अनुकूलन का विश्लेषण करना" : "Analyzing soil biodiversity and plant adaptations", emoji: "🦋", domains: ["naturalist"] },
-          { label: isHindi ? "प्रकृति की सुंदरता पर एक वृत्तचित्र (documentary) बनाना" : "Creating a visual documentary about nature's ecosystem", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "प्रकृति के प्रति मानवता के नैतिक संबंधों पर चिंतन करना" : "Reflecting on humanity's ethical relationship with nature", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "स्थानीय अधिकारियों के समक्ष नीति प्रस्ताव प्रस्तुत करना" : "Presenting a policy proposal to local authorities", emoji: "🗣️", domains: ["language"] }
-        ]
-      }[level]
+      options: [
+        { label: isHindi ? "कक्षा का समाचार पत्र लिखना" : "Write a classroom newsletter", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "कक्षा की दीवारों को सजाना" : "Decorate the classroom walls", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "स्कूल की किताबों को गिनना और व्यवस्थित करना" : "Count and organize school books", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "टूटे हुए पेंसिल शार्पनर को ठीक करना" : "Fix a broken pencil sharpener", emoji: "🔨", domains: ["spatial"] },
+      ]
     },
     {
       id: "q_discovery_4",
-      question: {
-        PRIMARY: isHindi
-          ? "एक नया सहपाठी उदास और अकेला बैठा है। 😔 आप पहले क्या करेंगे?"
-          : "A new classmate looks sad and lonely. 😔 What do you do first?",
-        MIDDLE: isHindi
-          ? "एक सहपाठी को स्कूल में तालमेल बिठाने में परेशानी हो रही है। 🤝 आप क्या करते हैं?"
-          : "A classmate is struggling to fit in at school. 🤝 What do you do?",
-        SECONDARY: isHindi
-          ? "आप स्कूल में सबको शामिल करने की भावना को बढ़ाना चाहते हैं। 🏫 आप क्या करते हैं?"
-          : "You want to improve school community inclusion. 🏫 What do you do?",
-        SENIOR: isHindi
-          ? "आप सामुदायिक अलगाव की समस्या को दूर कर रहे हैं। 👥 आपका दृष्टिकोण क्या है?"
-          : "You are addressing community isolation. 👥 What is your approach?"
-      }[level],
+      question: isHindi ? "बारिश के दिन समय बिताने का तुम्हारा पसंदीदा तरीका क्या है?" : "What is your favorite way to spend a rainy day?",
       type: "choice",
-      options: {
-        PRIMARY: [
-          { label: isHindi ? "उन्हें अपने दोस्तों के समूह में शामिल होने के लिए कहूंगा" : "Invite them to join your group of friends", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "नमस्ते कहूंगा और उनसे बातचीत शुरू करूंगा" : "Say hello and start a friendly chat", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "चुपचाप सोचूंगा कि वे कैसा महसूस कर रहे होंगे" : "Wonder quietly how they are feeling inside", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "उन्हें पकड़म-पकड़ाई या दौड़ने वाले खेल के लिए कहूंगा" : "Ask them to play tag or run with you", emoji: "🏃", domains: ["kinesthetic"] }
-        ],
-        MIDDLE: [
-          { label: isHindi ? "उन्हें अलग-अलग क्लबों और अध्ययन समूहों से परिचित कराएं" : "Introduce them to different clubs and study groups", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "उन्हें सहज महसूस कराने के लिए एक अच्छी बातचीत करें" : "Have a warm conversation to make them feel welcome", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "सोचें कि उनके स्थान पर होने पर कैसा महसूस होता है" : "Think about how it feels to be in their place", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "उन्हें फुटबॉल या किसी खेल के मैच में खेलने के लिए आमंत्रित करें" : "Invite them to play in a football or sports match", emoji: "🏃", domains: ["kinesthetic"] }
-        ],
-        SECONDARY: [
-          { label: isHindi ? "नए छात्रों के लिए एक स्वागत समिति बनाएं" : "Form a welcoming committee for new students", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "सभी का स्वागत करने पर एक लेख या पोस्ट लिखें" : "Write an article or post about welcoming everyone", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "चिंतन करें कि आप अपने व्यवहार को और अधिक समावेशी कैसे बना सकते हैं" : "Reflect on how to make your own actions more inclusive", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "एक दोस्ताना खेलकूद प्रतियोगिता (sports tournament) आयोजित करें" : "Organize a friendly sports tournament", emoji: "🏃", domains: ["kinesthetic"] }
-        ],
-        SENIOR: [
-          { label: isHindi ? "सहकर्मी परामर्श नेटवर्क (peer mentorship network) स्थापित करना" : "Establishing a peer mentorship network", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "सहानुभूति और संचार पर एक प्रभावशाली भाषण लिखना" : "Writing a persuasive speech on empathy and communication", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "पूर्वाग्रह और समावेश पर एक आत्म-चिंतन मार्गदर्शिका विकसित करना" : "Developing a self-reflection guide on bias and inclusion", emoji: "🤔", domains: ["intrapersonal"] },
-          { label: isHindi ? "एक शारीरिक टीम-निर्माण गतिविधि या कार्यशाला का संचालन करना" : "Coaching a physical team-building activity or workshop", emoji: "🏃", domains: ["kinesthetic"] }
-        ]
-      }[level]
+      options: [
+        { label: isHindi ? "घर के अंदर नृत्य या व्यायाम का अभ्यास करना" : "Practice indoor dance or exercises", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "बारिश गिरते देखना और पक्षियों को खोजना" : "Watch rain fall and look for birds", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "दोस्तों के साथ बोर्ड गेम खेलना" : "Play board games with friends", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "एक गुप्त डायरी में लिखना" : "Write in a secret diary", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
     },
     {
       id: "q_discovery_5",
-      question: {
-        PRIMARY: isHindi
-          ? "आपका बनाया हुआ खिलौना मीनार गिर जाता है। 🧱 आप इसके बाद क्या करेंगे?"
-          : "Your toy tower falls down. 🧱 What do you do next?",
-        MIDDLE: isHindi
-          ? "एक प्रतियोगिता में आपकी टीम का पुल का मॉडल ढह जाता है। 🌉 आप क्या करते हैं?"
-          : "Your team's bridge model collapses in a contest. 🌉 What do you do?",
-        SECONDARY: isHindi
-          ? "आपका कोई सॉफ्टवेयर प्रोग्राम या उपकरण काम करना बंद कर देता है। 💻 आपकी क्या प्रतिक्रिया होती है?"
-          : "Your software program or device stops working. 💻 What is your reaction?",
-        SENIOR: isHindi
-          ? "आपके नए स्टार्टअप उत्पाद का लॉन्च विफल हो जाता है। 📉 आप क्या करते हैं?"
-          : "Your entrepreneurial venture's product launch fails. 📉 What do you do?"
-      }[level],
+      question: isHindi ? "यदि तुम एक नई मशीन का आविष्कार कर सकते, तो वह क्या करती?" : "If you could invent a new machine, what would it do?",
       type: "choice",
-      options: {
-        PRIMARY: [
-          { label: isHindi ? "सोचूंगा कि वह क्यों गिरा और उसका डिजाइन बदलूंगा" : "Think why it fell and change the design", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "नीचे चौड़े ब्लॉक लगाकर उसे दोबारा बनाऊंगा" : "Build it again with wider blocks at the bottom", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "इस बार उसे और तेज़ी से बनाने की कोशिश करूंगा" : "Try to build it faster this time", emoji: "🏃", domains: ["kinesthetic"] },
-          { label: isHindi ? "अपने दोस्त को साथ मिलकर बनाने के लिए कहूंगा" : "Ask a friend to build it with you", emoji: "🤝", domains: ["social"] }
-        ],
-        MIDDLE: [
-          { label: isHindi ? "उन कमजोर हिस्सों का विश्लेषण करें जो विफल रहे" : "Analyze the stress points that failed", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "ढांचे की मजबूती के लिए नए सिरे से डिजाइन बनाएं" : "Redesign the structural support layout", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "पूरी ऊर्जा के साथ तुरंत दोबारा बनाने का काम शुरू करें" : "Start rebuild work immediately with high energy", emoji: "🏃", domains: ["kinesthetic"] },
-          { label: isHindi ? "दोबारा काम करने के लिए टीम के साथियों में काम बांटें" : "Coordinate the team to split the rebuild tasks", emoji: "🤝", domains: ["social"] }
-        ],
-        SECONDARY: [
-          { label: isHindi ? "गलती ढूंढने के लिए कोड की कदम-दर-कदम जांच (debug) करें" : "Debug the code step-by-step to find the error", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "उपकरण के भौतिक या इंटरफेस लेआउट को फिर से तैयार करें" : "Redesign the physical or interface layout", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "घटकों (components) को जल्दी से रीसेट या दोबारा जोड़ें" : "Quickly rebuild or reset the hardware components", emoji: "🏃", domains: ["kinesthetic"] },
-          { label: isHindi ? "समाधान खोजने के लिए अपने समूह के साथ चर्चा करें" : "Consult with your group to brainstorm fixes", emoji: "🤝", domains: ["social"] }
-        ],
-        SENIOR: [
-          { label: isHindi ? "विस्तृत डेटा विश्लेषण करें ताकि विफलता के कारणों का पता चले" : "Perform a root-cause data analysis on the failure", emoji: "🧩", domains: ["logical"] },
-          { label: isHindi ? "उत्पाद की मुख्य वास्तुकला (architecture) और डिजाइन को फिर से तैयार करें" : "Re-engineer the core product architecture and design", emoji: "🔨", domains: ["spatial"] },
-          { label: isHindi ? "परिचालन सुधार योजना (recovery plan) को तेजी से लागू करें" : "Execute the operational recovery plan quickly", emoji: "🏃", domains: ["kinesthetic"] },
-          { label: isHindi ? "हितधारकों और टीम के सदस्यों को प्रेरित करें और काम में लगाएं" : "Re-align and motivate stakeholders and team members", emoji: "🤝", domains: ["social"] }
-        ]
-      }[level]
+      options: [
+        { label: isHindi ? "किसी भी भाषा का अनुवाद करना" : "Translate any language", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "सुंदर रंगीन पैटर्न बनाना" : "Make beautiful color patterns", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "वस्तुओं को आकार और वजन के अनुसार छांटना" : "Sort items by size and weight", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "खिलौना घर अपने आप बनाना" : "Build toy houses automatically", emoji: "🔨", domains: ["spatial"] },
+      ]
     },
     {
       id: "q_discovery_6",
-      question: {
-        PRIMARY: isHindi
-          ? "आपके स्कूल में एक बड़ा मेला लग रहा है। 🎪 आपका पसंदीदा काम कौन सा होगा?"
-          : "Your school is having a big fun fair. 🎪 What is your favorite job?",
-        MIDDLE: isHindi
-          ? "आपकी कक्षा स्कूल प्रदर्शनी की तैयारी कर रही है। 🎨 आप कौन सी भूमिका चुनते हैं?"
-          : "Your class is preparing a school exhibition. 🎨 What role do you choose?",
-        SECONDARY: isHindi
-          ? "आप एक सामुदायिक कार्यक्रम का आयोजन कर रहे हैं। 📣 आपकी क्या भूमिका है?"
-          : "You are organizing a community event. 📣 What is your role?",
-        SENIOR: isHindi
-          ? "आप एक नया मार्केटिंग अभियान शुरू कर रहे हैं। 🚀 आपका मुख्य ध्यान कहाँ है?"
-          : "You are launching a marketing campaign. 🚀 Where do you focus?"
-      }[level],
+      question: isHindi ? "तुम एक बड़े पार्क में जा रहे हो। तुम सबसे पहले क्या करते हो?" : "You are visiting a big park. What do you do first?",
       type: "choice",
-      options: {
-        PRIMARY: [
-          { label: isHindi ? "सुंदर पोस्टर और बोर्ड पेंट करना" : "Painting the posters and signs", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "दुकान लगाने में अपने दोस्तों की मदद करना" : "Helping friends set up their stalls", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "लोगों को खेलने के लिए जोर-जोर से बुलाना" : "Calling out to invite people to play", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "लकड़ी से खेल के बूथ (stalls) बनाना" : "Building the game booths out of wood", emoji: "🔨", domains: ["spatial"] }
-        ],
-        MIDDLE: [
-          { label: isHindi ? "प्रदर्शनी की सजावट और विजुअल लेआउट का निर्देश देना" : "Directing the visual layout and decorations", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "छात्रों की समन्वय टीम (coordination team) का प्रबंधन करना" : "Managing the student coordination team", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "प्रोजेक्ट के बारे में लिखना और प्रस्तुति देना" : "Writing and presenting the explanations", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "प्रदर्शनी स्टैंड और मॉडल का निर्माण करना" : "Constructing the display stands and models", emoji: "🔨", domains: ["spatial"] }
-        ],
-        SECONDARY: [
-          { label: isHindi ? "प्रचार वीडियो और ग्राफिक डिजाइन तैयार करना" : "Creating the promotional videos and graphic designs", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "स्वयंसेवक टीमों और उनके समय का प्रबंधन करना" : "Directing volunteer teams and schedules", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "प्रायोजकों (sponsors) से बात करना और मंच का संचालन करना" : "Speaking to sponsors and hosting the stage", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "मुख्य मंच और उपकरणों की भौतिक व्यवस्था करना" : "Setting up the physical stage and equipment", emoji: "🔨", domains: ["spatial"] }
-        ],
-        SENIOR: [
-          { label: isHindi ? "रचनात्मक ब्रांडिंग और डिजाइन भाषा का निर्देशन करना" : "Directing the creative branding and design language", emoji: "🎨", domains: ["creative"] },
-          { label: isHindi ? "ग्राहक संबंधों और टीम के संचालन का प्रबंधन करना" : "Managing client relationships and team operations", emoji: "🤝", domains: ["social"] },
-          { label: isHindi ? "संचार रणनीति तैयार करना और विज्ञापन लेखन (copywriting) करना" : "Drafting the communications strategy and copywriting", emoji: "🗣️", domains: ["language"] },
-          { label: isHindi ? "भौतिक बूथ स्पेस या यूजर इंटरफेस लेआउट डिजाइन करना" : "Designing the physical booth space or user interface layout", emoji: "🔨", domains: ["spatial"] }
-        ]
-      }[level]
-    }
+      options: [
+        { label: isHindi ? "पेड़ पर चढ़ना या दौड़ लगाना" : "Climb a tree or race around", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "रंगीन पत्तियां और पत्थर इकट्ठा करना" : "Collect colorful leaves and stones", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "नए दोस्तों से मिलना और पकड़म-पकड़ाई खेलना" : "Meet new friends and play tag", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "पेड़ के नीचे बैठना और सोचना" : "Sit under a tree and think", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
+    },
+    {
+      id: "q_discovery_7",
+      question: isHindi ? "तुम पुस्तकालय से किस तरह की किताब चुनोगे?" : "What kind of book would you pick from the library?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "मजेदार कहानियों की किताब" : "A book of fun stories", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "कला के विचारों और ड्राइंग की किताब" : "A book of art ideas and drawing", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "पहेलियों और दिमाग के खेलों की किताब" : "A book of riddles and brain teasers", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "इमारतें कैसे बनती हैं, इस पर किताब" : "A book on how buildings are made", emoji: "🔨", domains: ["spatial"] },
+      ]
+    },
+    {
+      id: "q_discovery_8",
+      question: isHindi ? "यदि तुम कोई शो देख सकते, तो वह किसके बारे में होता?" : "If you could watch any show, what would it be about?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "ऊर्जा से भरपूर खेल या स्टंट" : "High-energy sports or stunts", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "जंगल में रहने वाले जानवर" : "Animals living in the forest", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "जीतने के लिए टीमें मिलकर कैसे काम करती हैं" : "How teams work together to win", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "सफलता के लिए किसी व्यक्ति की शांत यात्रा" : "A person's quiet journey to success", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
+    },
+    {
+      id: "q_discovery_9",
+      question: isHindi ? "तुम्हारी पसंदीदा स्कूल विषय गतिविधि कौन सी है?" : "What is your favorite school subject activity?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "भाषण देना या ज़ोर से पढ़ना" : "Giving a speech or reading aloud", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "पेंटिंग करना या कागज़ के शिल्प बनाना" : "Painting or making paper crafts", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "गणित के तर्क वाले प्रश्नों को हल करना" : "Solving math logic questions", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "नक्शे या 3D बक्से बनाना" : "Drawing maps or 3D boxes", emoji: "🔨", domains: ["spatial"] },
+      ]
+    },
+    {
+      id: "q_discovery_10",
+      question: isHindi ? "तुम इनमें से कौन सा उपहार प्राप्त करना चाहोगे?" : "Which of these gifts would you like to receive?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "एक फुटबॉल या कूदने वाली रस्सी" : "A football or skipping rope", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "एक छोटा पौधा या पालतू मछली" : "A small plant or pet fish", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "कई खिलाड़ियों वाला बोर्ड गेम" : "A multiplayer board game", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "ताले वाली एक नोटबुक" : "A notebook with a lock", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
+    },
+    {
+      id: "q_discovery_11",
+      question: isHindi ? "जब आप एक टीम प्रोजेक्ट पर काम करते हैं, तो आपकी भूमिका क्या होती है?" : "When working on a team project, what is your role?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "विचारों को लिखना और प्रस्तुत करना" : "Writing down and presenting the ideas", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "अनोखे लोगो और रंग डिजाइन करना" : "Designing unique logos and colors", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "तथ्यों की जांच करना और गलतियां खोजना" : "Checking facts and finding errors", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "प्रोजेक्ट बोर्ड को जोड़ना" : "Assembling the project board", emoji: "🔨", domains: ["spatial"] },
+      ]
+    },
+    {
+      id: "q_discovery_12",
+      question: isHindi ? "तुम एक कार्यशाला में क्या सीखना चाहोगे?" : "What would you like to learn in a workshop?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "कराटे ब्लॉक या जिम्नास्टिक मूव्स" : "Karate blocks or gymnastics moves", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "पक्षियों और कीड़ों की पहचान करना" : "Identifying birds and insects", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "समूहों का नेतृत्व करना और विवादों को सुलझाना" : "Leading groups and solving disputes", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "लक्ष्य निर्धारित करना और समय की योजना बनाना" : "Setting goals and planning time", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
+    },
+    {
+      id: "q_discovery_13",
+      question: isHindi ? "तुम कक्षा में एक खाली डिब्बा देखते हो। तुम क्या सोचते हो?" : "You see an empty box in the classroom. What do you think?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "चलो इसके अंदर रखने के लिए कहानियां लिखते हैं" : "Let's write stories to put inside", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "चलो इसे चमकीले रंगों से पेंट करते हैं" : "Let's paint it with bright colors", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "चलो देखते हैं कि इसमें कितनी किताबें आ सकती हैं" : "Let's see how many books it can hold", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "चलो इससे एक खिलौना किला बनाते हैं" : "Let's build a toy castle with it", emoji: "🔨", domains: ["spatial"] },
+      ]
+    },
+    {
+      id: "q_discovery_14",
+      question: isHindi ? "तुम संगीत बजता हुआ सुनते हो। तुम स्वाभाविक रूप से क्या करते हो?" : "You hear music playing. What do you naturally do?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "नाचना या पैर थपथपाना शुरू करना" : "Start dancing or tapping your feet", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "पक्षी या बारिश जैसी आवाजें खोजना" : "Listen to find sounds like birds or rain", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "दोस्तों के समूह के साथ मिलकर गाना" : "Sing along with a group of friends", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "अपनी आँखें बंद करना और शांति से इसका आनंद लेना" : "Close your eyes and enjoy it quietly", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
+    },
+    {
+      id: "q_discovery_15",
+      question: isHindi ? "यदि तुम्हारे पास एक जादुई छड़ी होती, तो तुम क्या बनाते?" : "If you had a magic wand, what would you make?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "एक किताब जो अपने आप लिखती है" : "A book that writes itself", emoji: "🗣️", domains: ["language"] },
+        { label: isHindi ? "एक चित्र जो रंग बदलता है" : "A picture that changes colors", emoji: "🎨", domains: ["creative"] },
+        { label: isHindi ? "एक पहेली जो कभी खत्म नहीं होती" : "A puzzle that never ends", emoji: "🧩", domains: ["logical"] },
+        { label: isHindi ? "एक पुल जो खुलता और बंद होता है" : "A bridge that opens and closes", emoji: "🔨", domains: ["spatial"] },
+      ]
+    },
+    {
+      id: "q_discovery_16",
+      question: isHindi ? "गांव के मेले में करने के लिए सबसे रोमांचक काम क्या है?" : "What is the most exciting thing to do at a village fair?",
+      type: "choice",
+      options: [
+        { label: isHindi ? "विशाल झूले की सवारी करना या चारों ओर दौड़ना" : "Ride the giant wheel or run around", emoji: "🏃", domains: ["kinesthetic"] },
+        { label: isHindi ? "गायों, बकरियों और पक्षियों को देखना" : "Look at the cows, goats, and birds", emoji: "🌱", domains: ["naturalist"] },
+        { label: isHindi ? "बच्चों के लिए गेम स्टॉल चलाने में मदद करना" : "Help run a game stall for kids", emoji: "🤝", domains: ["social"] },
+        { label: isHindi ? "भीड़ को देखने के लिए एक शांत कोना खोजना" : "Find a quiet corner to watch the crowd", emoji: "🤔", domains: ["intrapersonal"] },
+      ]
+    },
   ];
 }
 
 export function getAdaptedDeepTasks(tasks, schoolYear, age, language) {
-  const level = getComplexityLevel(schoolYear, age);
-  if (level === "MIDDLE") return tasks; // Middle uses standard content directly
-
-  const isHindi = language === "Hindi";
-
-  // Let's define Primary adaptations for core tasks:
-  const primaryOverrides = {
-    logical_pattern_matrix: {
-      title: { English: "The Magic Lock", Hindi: "जादू की संख्या" },
-      prompt: {
-        English: "Add numbers to open the lock. The bottom row has 3 and 5 (= 8). Next are 5 and 9 (= 14). What belongs at the top? (3+5=8, 5+9=14, 8+14=?)",
-        Hindi: "ताला खोलने के लिए संख्याओं को जोड़ें। सबसे नीचे 3 और 5 हैं, जो 8 बनते हैं। 5 और 9 मिलकर 14 बनते हैं। सबसे ऊपर क्या आएगा? (3+5=8, 5+9=14, 8+14=?)"
-      }
-    },
-    logical_riddle: {
-      title: { English: "The Leg Code", Hindi: "पैरों का खेल" },
-      prompt: {
-        English: "A cat is 4, a spider is 8, and an ant is 6. What number represents a snake? 🐍",
-        Hindi: "बिल्ली 4 है, मकड़ी 8 है, चींटी 6 है। सांप का नंबर क्या होगा? 🐍"
-      }
-    },
-    spatial_rotation: {
-      prompt: {
-        English: "A star pointer turns: first UP ↑, then RIGHT →, then DOWN ↓. Where will it point next?",
-        Hindi: "तारे की सुई घूमती है: पहले ऊपर इशारा करती है ↑, फिर दाएं →, फिर नीचे ↓। आगे कहाँ इशारा करेगी?"
-      }
-    },
-    spatial_perspective: {
-      title: { English: "Shadow Match", Hindi: "परछाई का खेल" },
-      prompt: {
-        English: "A T-shaped toy has light shining from the LEFT. What shape of shadow does it make on the wall?",
-        Hindi: "एक 'T' आकार के खिलौने पर बाईं (LEFT) ओर से टॉर्च की रोशनी पड़ने पर दीवार पर कैसी छाया बनेगी?"
-      }
-    },
-language_story_order: {
-      title: { English: "Story Order", Hindi: "कहानी जमाएं" },
-      prompt: {
-        English: "Put these secret agent message pieces in the correct order to tell the exciting escape story!",
-        Hindi: "इन वाक्यों को सही क्रम में लगाएं ताकि एक मजेदार भागने की कहानी बन सके!"
-      }
-    },
-    language_analogy: {
-      title: { English: "Word Connection", Hindi: "शब्दों का मेल" },
-      prompt: {
-        English: "Complete this word connection: A FEATHER is to a BIRD as a SCALE is to...?",
-        Hindi: "शब्दों का संबंध पूरा करें: एक पंख (FEATHER) चिड़िया (BIRD) के लिए है, तो एक शल्क (SCALE) किसके लिए है...?"
-      }
-    },
-    kinesthetic_motor_planning: {
-      title: { English: "The Rope Bridge", Hindi: "रस्सी का पुल" },
-      prompt: {
-        English: "You are on a wobbling rope bridge. Strong wind blows from the right! What is the best way to balance?",
-        Hindi: "आप एक हिलते हुए रस्सी के पुल पर हैं। दाईं ओर से तेज हवा चलती है! सुरक्षित रहने के लिए आप क्या करेंगे?"
-      },
-      options: [
-        { label: { English: "Bend knees, spread arms, and lean slightly right", Hindi: "घुटनों को मोड़ें, हाथ फैलाएं और थोड़ा दाईं ओर झुकें" }, value: 4 },
-        { label: { English: "Stand straight and close eyes", Hindi: "बिल्कुल सीधे खड़े रहें और आंखें बंद करें" }, value: 0 },
-        { label: { English: "Run fast to the other side", Hindi: "जितनी तेजी से हो सके दूसरी तरफ दौड़ें" }, value: 1 },
-        { label: { English: "Sit down and shout for help", Hindi: "रस्सी के पुल पर बैठ जाएं और मदद के लिए चिल्लाएं" }, value: 2 }
-      ]
-    },
-    social_response: {
-      title: { English: "Helping a Teammate", Hindi: "साथी की मदद" },
-      prompt: {
-        English: "10 minutes left for a group project. A friend is upset because their drawing was left out. What do you do?",
-        Hindi: "प्रोजेक्ट जमा करने में 10 मिनट बचे हैं। एक दोस्त रो रहा है क्योंकि उसका चित्र भूल गए। बाकी जमा करना चाहते हैं। आप क्या करेंगे?"
-      },
-      options: [
-        { label: { English: "Submit now and highlight their drawing later", Hindi: "प्रोजेक्ट जमा कर दें, फिर प्रेजेंटेशन में दोस्त के चित्र की बात करें" }, value: 4 },
-        { label: { English: "Delay to add the drawing because friendship matters most", Hindi: "देर हो जाए तो भी चित्र चिपकाएं क्योंकि दोस्त की खुशी जरूरी है" }, value: 4 },
-        { label: { English: "Tape the drawing to the back quickly to save time", Hindi: "चित्र को पोस्टर के पीछे चिपका दें ताकि समय बच सके" }, value: 4 },
-        { label: { English: "Do nothing and let others decide", Hindi: "चुप रहें और दूसरों को फैसला करने दें" }, value: 1 }
-      ]
-    },
-    social_conflict_resolution: {
-      title: { English: "Playground Argument", Hindi: "मैदान का झगड़ा" },
-      prompt: {
-        English: "Two friends argue about a football goal. The game stops. How do you help them play again?",
-        Hindi: "फुटबॉल मैच में दो दोस्त गोल को लेकर झगड़ रहे हैं। खेल रुक गया है। आप झगड़ा कैसे सुलझाएंगे?"
-      },
-      options: [
-        { label: { English: "Flip a coin to decide and continue having fun", Hindi: "सिक्का उछालकर फैसला करें और खेल जारी रखें" }, value: 4 },
-        { label: { English: "Shout louder than them to make them stop", Hindi: "उन दोनों से भी ज़्यादा ज़ोर से चिल्लाएँ ताकि वे चुप हो जाएँ" }, value: 0 },
-        { label: { English: "Take the ball and walk home", Hindi: "फुटबॉल लेकर अपने घर चले जाएं" }, value: 1 },
-        { label: { English: "Blame one friend to end it quickly", Hindi: "बहस को जल्दी खत्म करने के लिए तुरंत एक सहपाठी को दोषी ठहराएं" }, value: 0 }
-      ]
-    },
-    naturalist_weather_pattern: {
-      prompt: {
-        English: "Cold wind blows, birds fly low, and the sky turns dark grey. What is nature telling you?",
-        Hindi: "अचानक ठंडी हवा चलने लगती है, पक्षी नीचे उड़ते हैं और आसमान काला हो जाता है। प्रकृति क्या बता रही है?"
-      },
-      options: [
-        { label: { English: "Heavy rain is coming soon", Hindi: "बहुत जल्द तेज बारिश होने वाली है" }, value: 4 },
-        { label: { English: "The sun will shine brighter", Hindi: "सूरज और तेज चमकेगा" }, value: 0 },
-        { label: { English: "An earthquake is coming", Hindi: "भूकंप आने वाला है" }, value: 0 },
-        { label: { English: "A cold winter night has started", Hindi: "ठंड की रात शुरू हो गई है" }, value: 1 }
-      ]
-    },
-    naturalist_wind_disperse: {
-      title: { English: "Butterfly Garden", Hindi: "तितलियों का बगीचा" },
-      prompt: {
-        English: "You want to attract butterflies to your garden. What is the best thing to do?",
-        Hindi: "आप अपने बगीचे में सुंदर तितलियों को बुलाना चाहते हैं। कौन सा काम सबसे अच्छा होगा?"
-      },
-      options: [
-        { label: { English: "Plant sweet flowers and keep water nearby", Hindi: "मीठे फूलों के पौधे लगाएं और उथले बर्तन में पानी रखें" }, value: 4 },
-        { label: { English: "Spray insect spray", Hindi: "पौधों से दूसरे कीड़ों को दूर रखने के लिए तेज़ कीटनाशक का छिड़काव करें" }, value: 0 },
-        { label: { English: "Cover flowers with plastic bags", Hindi: "सभी फूलों को प्लास्टिक की शीट से ढक दें" }, value: 0 },
-        { label: { English: "Catch butterflies elsewhere and release them", Hindi: "दूसरे पार्कों से तितलियों को पकड़ें और उन्हें अपने बगीचे में छोड़ दें" }, value: 1 }
-      ]
-    },
-    intrapersonal_reflection: {
-      title: { English: "Hard Work", Hindi: "कठिन काम" },
-      prompt: {
-        English: "When something is hard, do you tell yourself you can do it with practice?",
-        Hindi: "जब आप किसी बहुत कठिन चुनौती का सामना करते हैं, तो क्या आप खुद से कहते हैं कि अभ्यास करने से आप इसमें बेहतर हो सकते हैं?"
-      },
-      low: { English: "No, I get discouraged", Hindi: "नहीं, मैं हिम्मत हार जाता हूँ" },
-      high: { English: "Yes, I love to learn!", Hindi: "हाँ, मुझे सीखना पसंद है!" }
-    },
-    intrapersonal_frustration: {
-      title: { English: "The Stuck Kite", Hindi: "फंसी पतंग" },
-      prompt: {
-        English: "Your handmade kite gets stuck in a tree. You cannot reach it. What do you do?",
-        Hindi: "आपकी बनाई पतंग पेड़ पर फंस गई है। आप वहां तक नहीं पहुंच सकते। आप क्या करेंगे?"
-      },
-      options: [
-        { label: { English: "Accept it and design a new, better kite", Hindi: "मान लें कि वह गई, और नई पतंग बनाने की सोचें" }, value: 4 },
-        { label: { English: "Find a long stick to try to get it down", Hindi: "एक लंबा डंडा ढूंढकर उसे निकालने की कोशिश करें" }, value: 4 },
-        { label: { English: "Ask friends for ideas to build a hook tool", Hindi: "दोस्तों से कहें कि धागा खींचने की मशीन बनाएं" }, value: 4 },
-        { label: { English: "Go home angry and give up entirely", Hindi: "गुस्सा होकर घर चले जाएं और पतंग उड़ाना छोड़ दें" }, value: 1 }
-      ]
-    },
-    deep_discovery_flow: {
-      prompt: {
-        English: "Tell us about a game or drawing that makes you forget about lunchtime! 🎨 What are you doing and why is it so much fun?",
-        Hindi: "हमें किसी ऐसे खेल या चित्रकारी के बारे में बताएं जिसमें आप दोपहर के खाने का समय भी भूल जाते हैं! 🎨 आप क्या कर रहे होते हैं और यह इतना मजेदार क्यों है?"
-      }
-    },
-    deep_discovery_pride: {
-      prompt: {
-        English: "What is one thing you built or made that you love showing to everyone? 🌟 Describe what you did.",
-        Hindi: "आपने कौन सी एक ऐसी चीज़ बनाई है जो आप सबको दिखाना चाहते हैं? 🌟 बताएं कि आपने उसे कैसे बनाया।"
-      }
-    },
-    deep_discovery_curiosity: {
-      prompt: {
-        English: "If you could spend a whole day learning anything you want (like magic, space, or building robots), what would it be?",
-        Hindi: "यदि आप अपनी पसंद की कोई भी चीज़ सीखने (जैसे जादू, अंतरिक्ष, या रोबोट बनाना) में एक पूरा दिन बिता सकते हैं, तो आप क्या चुनेंगे?"
-      }
-    },
-    deep_discovery_vision: {
-      prompt: {
-        English: "If you had a magic wand to fix one big problem in your school or village, what would you fix first?",
-        Hindi: "यदि आपके पास अपने स्कूल या गाँव की किसी एक बड़ी समस्या को ठीक करने के लिए एक जादुई छड़ी हो, तो आप पहले क्या ठीक करेंगे?"
-      }
-    }
-  };
-
-  // Secondary & Senior adaptations (elevating language and scenario complexity):
-  const advancedOverrides = {
-    logical_pattern_matrix: {
-      title: { English: "The Numerical Matrix Crypt", Hindi: "संख्यात्मक मैट्रिक्स" },
-      prompt: {
-        English: "Analyze the sequence hierarchy in a numerical matrix where base inputs of 3 and 5 sum to 8, adjacent inputs 5 and 9 sum to 14, and mid-tier outputs sum to the apex. Calculate the missing value at the apex of the structure. (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)",
-        Hindi: "संख्यात्मक मैट्रिक्स में अनुक्रम पदानुक्रम का विश्लेषण करें जहां 3 और 5 का योग 8 है, 5 और 9 का योग 14 है, और मध्य-स्तरीय योग शीर्ष की ओर बढ़ते हैं। शीर्ष पर अज्ञात मान की गणना करें। (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)"
-      }
-    },
-    logical_riddle: {
-      title: { English: "The Taxonomic Leg-Count Cipher", Hindi: "वर्गीकरण कोड" },
-      prompt: {
-        English: "An abstract cipher maps biological entities to indices based on their appendages: Feline represents 4, Arachnid represents 8, Formicidae represents 6. Determine the numerical value mapping to Serpentes.",
-        Hindi: "एक अमूर्त सिफर जीवों को उनके अंगों के आधार पर अनुक्रमित करता है: बिल्ली (Feline) 4 को दर्शाती है, मकड़ी (Arachnid) 8 को, और चींटी (Formicidae) 6 को। सर्प (Serpentes) के लिए सही संख्या निर्धारित करें।"
-      }
-    },
-    spatial_rotation: {
-      prompt: {
-        English: "A vector indicator on a coordinate system rotates sequentially: pointing 90 degrees (North), 0 degrees (East), then 270 degrees (South). Compute the next heading in the cycle.",
-        Hindi: "एक समन्वय प्रणाली (coordinate system) में एक वेक्टर संकेतक क्रमिक रूप से घूमता है: पहले 90 डिग्री (उत्तर), फिर 0 डिग्री (पूर्व), और फिर 270 डिग्री (दक्षिण)। चक्र में अगले हेडिंग की गणना करें।"
-      }
-    },
-    spatial_perspective: {
-      title: { English: "Orthographic Projection Shadow", Hindi: "ऑर्थोग्राफिक प्रोजेक्शन शैडो" },
-      prompt: {
-        English: "A three-dimensional planar T-shaped structure is cast under a light source from the direct lateral left axis. What two-dimensional orthographic silhouette is projected onto the wall?",
-        Hindi: "एक त्रि-आयामी (3D) समतलीय T-आकार की संरचना को बाईं ओर (lateral left) से प्रकाश स्रोत के नीचे रखा गया है। दीवार पर कौन सी द्वि-आयामी (2D) ऑर्थोग्राफिक परछाई दिखाई देगी?"
-      }
-    },
-language_story_order: {
-      title: { English: "Narrative Reconstruction Sequence", Hindi: "कथा पुनर्निर्माण क्रम" },
-      prompt: {
-        English: "Reconstruct the chronological order of these compound narrative segments to establish a coherent, logically flowing adventure sequence.",
-        Hindi: "एक सुसंगत और तार्किक कहानी स्थापित करने के लिए इन मिश्रित कथा खंडों के कालानुक्रमिक (chronological) क्रम को पुनर्गठित करें।"
-      }
-    },
-    language_analogy: {
-      title: { English: "Semantic Analogy Bridge", Hindi: "सिमेंटिक सादृश्य पुल" },
-      prompt: {
-        English: "Determine the semantic correlation to complete the analogical bridge: FEATHER is to BIRD as SCALE is to...?",
-        Hindi: "सादृश्य संबंध को पूरा करने के लिए सही अर्थपूर्ण शब्द का चयन करें: पंख (FEATHER) का जो संबंध पक्षी (BIRD) से है, वही शल्क (SCALE) का किससे है...?"
-      }
-    },
-    kinesthetic_motor_planning: {
-      title: { English: "Biomechanical Stabilization", Hindi: "बायोमैकेनिकल स्थिरता" },
-      prompt: {
-        English: "While traversing an unstable, high rope bridge, you encounter a sudden, high-velocity wind force from the right lateral axis. What physical stabilization strategy best maintains equilibrium?",
-        Hindi: "एक अस्थिर, ऊंचे रस्सी के पुल को पार करते समय, आपको दाईं ओर से अचानक तेज गति से हवा के झोंके का सामना करना पड़ता है। संतुलन बनाए रखने के लिए सबसे प्रभावी शारीरिक स्थिरीकरण (stabilization) रणनीति क्या है?"
-      },
-      options: [
-        { label: { English: "Lower your center of gravity by flexing knees, extend arms for counterbalance, and lean slightly into the wind", Hindi: "घुटनों को मोड़कर अपने गुरुत्वाकर्षण केंद्र को कम करें, संतुलन के लिए हाथ फैलाएं, और थोड़ा दाईं ओर (हवा की तरफ) झुकें" }, value: 4 },
-        { label: { English: "Align body posture fully vertical, close eyes, and stiffen muscle groups", Hindi: "शरीर की मुद्रा को पूरी तरह से सीधा संरेखित करें, आंखें बंद करें और अपनी मांसपेशियों को कड़ा करें" }, value: 0 },
-        { label: { English: "Increase linear velocity to minimize exposure time on the bridge", Hindi: "पुल पर समय कम करने के लिए जितनी जल्दी हो सके दौड़ें" }, value: 1 },
-        { label: { English: "Decline posture to seated, minimizing wind profile, and signal for external assistance", Hindi: "हवा के प्रभाव को कम करने के लिए पुल पर बैठ जाएं और बाहरी सहायता का संकेत दें" }, value: 2 }
-      ]
-    },
-    social_response: {
-      title: { English: "Collaborative Milestone Conflict", Hindi: "सहयोगात्मक कार्य संघर्ष" },
-      prompt: {
-        English: "Your team faces an imminent 10-minute project submission deadline. The display is functional, but a teammate is distressed because their contributions were omitted. Other members insist on immediate submission. How do you resolve this?",
-        Hindi: "आपकी टीम के पास प्रोजेक्ट जमा करने के लिए केवल 10 मिनट बचे हैं। प्रोजेक्ट तैयार है, लेकिन एक टीम का सदस्य परेशान है क्योंकि उसका काम शामिल नहीं किया गया है। अन्य सदस्य तुरंत जमा करने पर जोर दे रहे हैं। आप इसे कैसे हल करेंगे?"
-      },
-      options: [
-        { label: { English: "Submit immediately to secure victory, promising to emphasize their role during the oral presentation", Hindi: "जीत सुनिश्चित करने के लिए तुरंत जमा करें, और मौखिक प्रस्तुति के दौरान उनकी भूमिका पर प्रकाश डालने का वादा करें" }, value: 4 },
-        { label: { English: "Delay submission to integrate their contribution, prioritizing group cohesion over strict adherence to deadlines", Hindi: "उनके योगदान को शामिल करने के लिए जमा करने में देरी करें, समय सीमा के बजाय समूह एकता को प्राथमिकता दें" }, value: 4 },
-        { label: { English: "Execute a rapid compromise, attaching the drawing to the reverse side as a visual appendix to satisfy both interests", Hindi: "एक त्वरित समझौता खोजें, चित्र को पोस्टर के पीछे 'परिशिष्ट' (Appendix) के रूप में चिपका दें ताकि समय बच सके" }, value: 4 },
-        { label: { English: "Maintain neutrality and defer the final decision to the collective group vote", Hindi: "तटस्थ रहें और अंतिम निर्णय को सामूहिक समूह वोट पर छोड़ दें" }, value: 1 }
-      ]
-    },
-    social_conflict_resolution: {
-      title: { English: "Peer Dispute Resolution", Hindi: "सहकर्मी विवाद समाधान" },
-      prompt: {
-        English: "During a competitive activity, an intense dispute arises between two peers regarding whether a scoring event occurred. Tensions escalate and progress halts. How do you intervene?",
-        Hindi: "एक प्रतिस्पर्धी गतिविधि के दौरान, दो सहपाठियों के बीच स्कोरिंग को लेकर तीव्र विवाद उत्पन्न हो जाता है। तनाव बढ़ता है और खेल रुक जाता है। आप कैसे हस्तक्षेप करेंगे?"
-      },
-      options: [
-        { label: { English: "Implement a randomized determination (e.g. coin flip) to restore activity, emphasizing that mutual enjoyment supersedes the score", Hindi: "गतिविधि को फिर से शुरू करने के लिए एक यादृच्छिक तरीका (जैसे सिक्का उछालना) अपनाएं, और याद दिलाएं कि आपसी मज़ा जीत से बड़ा है" }, value: 4 },
-        { label: { English: "Raise your vocal volume to command attention and demand compliance", Hindi: "उनका ध्यान आकर्षित करने के लिए अपनी आवाज़ उठाएं और शांत होने की मांग करें" }, value: 0 },
-        { label: { English: "Withdraw from the group and remove the central equipment to end the activity", Hindi: "गतिविधि को समाप्त करने के लिए समूह से हट जाएं और खेल का मुख्य सामान अपने साथ ले जाएं" }, value: 1 },
-        { label: { English: "Assign fault immediately to one individual to expedite resolution", Hindi: "विवाद को जल्दी सुलझाने के लिए तुरंत एक व्यक्ति को दोषी ठहराएं" }, value: 0 }
-      ]
-    },
-    naturalist_weather_pattern: {
-      prompt: {
-        English: "You observe a sudden decrease in air temperature, low-altitude avian flight paths, and dense cumulonimbus cloud formations. What meteorological transition is indicated?",
-        Hindi: "आप हवा के तापमान में अचानक गिरावट, पक्षियों की कम ऊंचाई पर उड़ान, और आसमान में घने बादलों के निर्माण को देखते हैं। यह कौन सा मौसमी परिवर्तन दर्शाता है?"
-      },
-      options: [
-        { label: { English: "An imminent heavy precipitation event", Hindi: "बहुत जल्द होने वाली भारी वर्षा (precipitation)" }, value: 4 },
-        { label: { English: "Increased solar radiation and clearing conditions", Hindi: "सौर विकिरण में वृद्धि और मौसम का साफ होना" }, value: 0 },
-        { label: { English: "Seismic instability", Hindi: "भूकंपीय अस्थिरता" }, value: 0 },
-        { label: { English: "Onset of a cold anticyclonic front", Hindi: "शीत हवा के फ्रंट (cold anticyclonic front) की शुरुआत" }, value: 1 }
-      ]
-    },
-    naturalist_wind_disperse: {
-      title: { English: "Ecological Restoration", Hindi: "पारिस्थितिकी बहाली" },
-      prompt: {
-        English: "You intend to optimize the local insect population in a micro-habitat. Which ecological intervention will support native lepidoptera (butterflies) the most?",
-        Hindi: "आप एक छोटे बगीचे में स्थानीय कीटों की आबादी बढ़ाना चाहते हैं। कौन सा उपाय स्थानीय तितलियों (lepidoptera) की सबसे अधिक मदद करेगा?"
-      },
-      options: [
-        { label: { English: "Cultivate native nectar-producing angiosperms and provide accessible hydration stations", Hindi: "मीठे मकरंद वाले चमकदार स्थानीय फूलों के पौधे लगाएं और पास में उथले बर्तनों में ताजा पानी रखें" }, value: 4 },
-        { label: { English: "Apply synthetic chemical insecticides to eliminate competing arthropods", Hindi: "प्रतिस्पर्धी कीड़ों को समाप्त करने के लिए रासायनिक कीटनाशकों का छिड़काव करें" }, value: 0 },
-        { label: { English: "Enclose the flora fully in protective polyethylene sheets to prevent contamination", Hindi: "प्रदूषण से बचाने के लिए पौधों को पूरी तरह से पॉलीथीन शीट से ढक दें" }, value: 0 },
-        { label: { English: "Introduce non-native species captured from distant ecosystems", Hindi: "दूर के पारिस्थितिकी तंत्र (ecosystems) से पकड़ी गई गैर-स्थानीय प्रजातियों को शामिल करें" }, value: 1 }
-      ]
-    },
-    intrapersonal_reflection: {
-      title: { English: "Cognitive Agility & Growth", Hindi: "संज्ञानात्मक विकास" },
-      prompt: {
-        English: "When confronted with highly challenging cognitive tasks, do you maintain that your abilities in this domain are malleable and improve with systematic effort?",
-        Hindi: "जब आपका सामना किसी कठिन चुनौती से होता है, तो क्या आप मानते हैं कि अभ्यास और योजनाबद्ध प्रयास के माध्यम से आपकी क्षमताएं विकसित हो सकती हैं?"
-      },
-      low: { English: "No, I believe my capacity is fixed and feel discouraged", Hindi: "नहीं, मेरा मानना है कि मेरी क्षमताएं निश्चित हैं और मैं हतोत्साहित महसूस करता हूँ" },
-      high: { English: "Yes, I view challenges as opportunities for skill acquisition", Hindi: "हाँ, मैं चुनौतियों को नए कौशल सीखने के अवसर के रूप में देखता हूँ" }
-    },
-    intrapersonal_frustration: {
-      title: { English: "Resilience Strategy", Hindi: "लचीलापन रणनीति" },
-      prompt: {
-        English: "You spent significant effort constructing a complex device, but on its initial test it becomes trapped in an inaccessible location. How do you respond?",
-        Hindi: "आपने एक जटिल उपकरण के निर्माण में काफी समय बिताया, लेकिन परीक्षण के दौरान वह एक दुर्गम स्थान पर फंस गया। आपकी प्रतिक्रिया क्या होगी?"
-      },
-      options: [
-        { label: { English: "Acknowledge the loss, analyze the design failures, and initiate construction of an optimized version", Hindi: "नुकसान को स्वीकार करें, डिजाइन की विफलताओं का विश्लेषण करें और एक बेहतर संस्करण का निर्माण शुरू करें" }, value: 4 },
-        { label: { English: "Acquire specialized tools to attempt recovery, accepting the risk of physical damage to the device", Hindi: "उपकरण को निकालने के लिए विशेष उपकरणों की व्यवस्था करें, भले ही इसमें समय लगे और उपकरण क्षतिग्रस्त हो" }, value: 4 },
-        { label: { English: "Collaborate with peers to engineer a mechanical extraction or pulley apparatus", Hindi: "उपकरण को निकालने के लिए एक सरल यांत्रिक चरखी (pulley) बनाने के लिए दोस्तों से चर्चा करें" }, value: 4 },
-        { label: { English: "Abandon the project, experiencing frustration, and cease activities in this domain", Hindi: "क्रोधित होकर परियोजना को छोड़ दें और इस क्षेत्र में काम करना पूरी तरह बंद कर दें" }, value: 1 }
-      ]
-    },
-    deep_discovery_flow: {
-      prompt: {
-        English: "Tell us about a complex project, design, or research activity that engages you so deeply that you completely lose track of time. Describe your operational focus.",
-        Hindi: "हमें किसी ऐसे जटिल प्रोजेक्ट, डिजाइन, या शोध गतिविधि के बारे में बताएं जिसमें आप समय का ध्यान भूल जाते हैं। अपनी परिचालन एकाग्रता (operational focus) का वर्णन करें।"
-      }
-    },
-    deep_discovery_pride: {
-      prompt: {
-        English: "Describe a complex creation, engineered solution, or milestone achievement that you are proud of. What specific problems did you solve?",
-        Hindi: "अपनी किसी ऐसी जटिल रचना, इंजीनियरिंग समाधान या महत्वपूर्ण उपलब्धि का वर्णन करें जिस पर आपको गर्व है। आपने किन विशिष्ट समस्याओं का समाधान किया?"
-      }
-    },
-    deep_discovery_curiosity: {
-      prompt: {
-        English: "If you could spend one year investigating a single scientific field, technology, or creative domain without academic constraints, what would it be and why?",
-        Hindi: "यदि आप बिना किसी शैक्षणिक प्रतिबंध के एक पूरा वर्ष किसी एकल वैज्ञानिक क्षेत्र, तकनीक या रचनात्मक डोमेन की जांच करने में बिता सकते हैं, तो वह क्या होगा और क्यों?"
-      }
-    },
-    deep_discovery_vision: {
-      prompt: {
-        English: "Identify a systemic challenge in your community, school, or industry. If you were granted resources, how would you design and implement a solution?",
-        Hindi: "अपने स्कूल, समुदाय या उद्योग में एक प्रणालीगत चुनौती (systemic challenge) की पहचान करें। यदि आपको संसाधन दिए जाएं, तो आप समाधान कैसे तैयार और लागू करेंगे?"
-      }
-    }
-  };
-
-  const overrides = level === "PRIMARY" ? primaryOverrides : advancedOverrides;
-
-  return tasks.map(task => {
-    const override = overrides[task.key];
-    if (!override) return task;
-
-    const updated = { ...task };
-    if (override.title) {
-      updated.title = isHindi ? override.title.Hindi : override.title.English;
-    }
-    if (override.prompt) {
-      updated.prompt = isHindi ? override.prompt.Hindi : override.prompt.English;
-    }
-    if (override.low) {
-      updated.low = isHindi ? override.low.Hindi : override.low.English;
-    }
-    if (override.high) {
-      updated.high = isHindi ? override.high.Hindi : override.high.English;
-    }
-    if (override.options && Array.isArray(updated.options)) {
-      updated.options = updated.options.map((opt, idx) => {
-        const oOverride = override.options[idx];
-        if (!oOverride) return opt;
-        return {
-          ...opt,
-          label: isHindi ? oOverride.label.Hindi : oOverride.label.English
-        };
-      });
-    }
-    return updated;
-  });
+  // All tasks are pre-adapted for V4 and directly readable by Class 4 students
+  return tasks;
 }
-
