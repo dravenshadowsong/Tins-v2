@@ -496,59 +496,96 @@ function IdeaList({ task, answer, startedAt, setAnswer, selectedLanguage }) {
     }
   };
 
+  const isCreativeTask = ["creative_box", "creative_circles", "creative_cloud"].includes(task.key);
+  const emoji = task.key === "creative_box" ? "📦🎨🎁" : task.key === "creative_circles" ? "⭕🎨📐" : "☁️☕🥤";
+
   const strings = {
     English: {
       labels: [
-        "First funny or amazing idea:",
-        "Second funny or amazing idea:",
-        "Third funny or amazing idea:"
+        "First creative idea:",
+        "Second creative idea:",
+        "Third creative idea:"
       ],
-      placeholders: [
-        "e.g. Desks and chairs will slide to the wall!",
-        "e.g. Walking sideways to the blackboard",
-        "e.g. Homework flying sideways out the window!"
+      placeholders: task.key === "creative_box" ? [
+        "e.g. Build a toy spaceship to fly to Mars",
+        "e.g. Turn it into a puppet theater and put on a show",
+        "e.g. Cut holes in it to make a secret fort"
+      ] : task.key === "creative_circles" ? [
+        "e.g. A smiling yellow sun",
+        "e.g. A round wall clock pointing to lunch time",
+        "e.g. A delicious pepperoni pizza"
+      ] : task.key === "creative_cloud" ? [
+        "e.g. Liquid gold that turns objects into treasure",
+        "e.g. Melted chocolate rain that makes children happy",
+        "e.g. Magic invisibility juice"
+      ] : [
+        "e.g. Write your first idea here",
+        "e.g. Write your second idea here",
+        "e.g. Write your third idea here"
       ],
-      alertTitle: "Sideways Gravity Alert!",
-      alertDesc: "Everything falls sideways towards the wall instead of the floor! Imagine walking horizontally on walls and books sliding sideways."
+      alertTitle: task.key === "creative_box" ? "Box Challenge Alert!" : task.key === "creative_circles" ? "Circles Challenge Alert!" : "Cloud Challenge Alert!",
+      alertDesc: task.key === "creative_box" 
+        ? "Imagine all the fun things you can make from a simple cardboard box. Think of completely different uses!"
+        : task.key === "creative_circles" 
+          ? "Think of how simple circles can be transformed into real objects by drawing around them."
+          : "Think of what creative and unusual liquids could fall from a teacup-shaped cloud!"
     },
     Hindi: {
       labels: [
-        "पहला मजेदार या अनोखा विचार:",
-        "दूसरा मजेदार या अनोखा विचार:",
-        "तीसरा मजेदार या अनोखा विचार:"
+        "पहला विचार:",
+        "दूसरा विचार:",
+        "तीसरा विचार:"
       ],
-      placeholders: [
-        "उदा. डेस्क और कुर्सियां दीवार से चिपक जाएंगी!",
-        "उदा. ब्लैकबोर्ड पर लिखने के लिए तिरछा चलना पड़ेगा",
-        "उदा. कॉपियां खिड़की से बाहर उड़ जाएंगी!"
+      placeholders: task.key === "creative_box" ? [
+        "उदा. मंगल ग्रह पर जाने के लिए एक खिलौना स्पेसशिप बनाएं",
+        "उदा. इसे एक पपेट थिएटर (कटपुतली थियेटर) में बदलें",
+        "उदा. एक गुप्त किला (secret fort) बनाने के लिए इसमें छेद काटें"
+      ] : task.key === "creative_circles" ? [
+        "उदा. मुस्कुराता हुआ पीला सूरज",
+        "उदा. एक गोल दीवार घड़ी जो लंच के समय की ओर इशारा करती हो",
+        "उदा. एक स्वादिष्ट गोल पिज्जा"
+      ] : task.key === "creative_cloud" ? [
+        "उदा. तरल सोना (liquid gold) जो वस्तुओं को खजाने में बदल देता है",
+        "उदा. पिघली हुई चॉकलेट की बारिश जो बच्चों को खुश करती है",
+        "उदा. जादुई अदृश्य होने का रस (magic invisibility juice)"
+      ] : [
+        "अपना पहला विचार लिखें",
+        "अपना दूसरा विचार लिखें",
+        "अपना तीसरा विचार लिखें"
       ],
-      alertTitle: "तिरछा गुरुत्वाकर्षण (Sideways Gravity)",
-      alertDesc: "सोचें कि सब कुछ फर्श (floor) के बजाय दाईं या बाईं दीवार (sideways wall) की तरफ गिरने लगा है! लोग, बैग और डेस्क दीवार पर टिके हैं।"
+      alertTitle: task.key === "creative_box" ? "डिब्बा चुनौती!" : task.key === "creative_circles" ? "गोला चुनौती!" : "बादल चुनौती!",
+      alertDesc: task.key === "creative_box"
+        ? "कल्पना कीजिए कि आप एक साधारण गत्ते के डिब्बे से क्या-क्या बना सकते हैं। बिल्कुल अलग-अलग उपयोग सोचें!"
+        : task.key === "creative_circles"
+          ? "सोचें कि आप गोलों (circles) के ऊपर या आस-पास चित्र बनाकर उन्हें किन अलग चीजों में बदल सकते हैं।"
+          : "सोचें कि एक चाय के कप के आकार के बादल से कौन से अनोखे तरल पदार्थ गिर सकते हैं!"
     }
   }[selectedLanguage] || strings.English;
 
   return (
     <div className="task-stack" style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "16px" }}>
-      <div style={{
-        background: "linear-gradient(135deg, #f5f3ff 0%, #e879f915 100%)",
-        padding: "16px",
-        borderRadius: "16px",
-        border: "1.5px dashed #c084fc",
-        display: "flex",
-        alignItems: "center",
-        gap: "16px",
-        textAlign: "left"
-      }}>
-        <div style={{ fontSize: "40px", transform: "rotate(-90deg)", display: "inline-block" }}>🏫🎒🚶💨</div>
-        <div style={{ flex: 1 }}>
-          <strong style={{ color: "#7c3aed", fontSize: "14.5px", display: "block", marginBottom: "4px" }}>
-            {strings.alertTitle}
-          </strong>
-          <span style={{ fontSize: "13px", lineHeight: "1.4", color: "#5b21b6", display: "block" }}>
-            {strings.alertDesc}
-          </span>
+      {isCreativeTask && (
+        <div style={{
+          background: "linear-gradient(135deg, #f5f3ff 0%, #e879f915 100%)",
+          padding: "16px",
+          borderRadius: "16px",
+          border: "1.5px dashed #c084fc",
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          textAlign: "left"
+        }}>
+          <div style={{ fontSize: "40px", display: "inline-block" }}>{emoji}</div>
+          <div style={{ flex: 1 }}>
+            <strong style={{ color: "#7c3aed", fontSize: "14.5px", display: "block", marginBottom: "4px" }}>
+              {strings.alertTitle}
+            </strong>
+            <span style={{ fontSize: "13px", lineHeight: "1.4", color: "#5b21b6", display: "block" }}>
+              {strings.alertDesc}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {ideas.map((idea, idx) => (
         <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "6px", textAlign: "left" }}>

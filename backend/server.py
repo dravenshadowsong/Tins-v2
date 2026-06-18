@@ -1563,707 +1563,846 @@ def get_session(sid):
 # ── Dynamic AI Custom Puzzle Generator ────────────────────────────────────────
 
 DEFAULT_AI_PUZZLES = [
-    # ── LOGICAL & ANALYTICAL (6 puzzles) ──
     {
-        "key": "logical_pattern_matrix",
-        "type": "pattern_choice",
-        "domain": "logical",
-        "component": "pattern_recognition",
-        "title": {"English": "The Wizard's Door Pyramid", },
-        "prompt": {"English": "At the bottom of a stone tower, numbers are added together to open the lock. The bottom rows are 3 and 5, which add up to 8. Next to them are 5 and 9, which add up to 14. What number belongs at the very top of the pyramid? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)", },
-        "sequence": ["3", "5", "9", "8", "14", "?"],
-        "options": ["18", "20", "22", "24"],
-        "answer": "22",
-        "metric": "correctness"
-    },
-    {
-        "key": "logical_riddle",
+        "key": "logical_lock",
         "type": "choice",
         "domain": "logical",
         "component": "sequence_logic",
-        "title": {"English": "The Secret Cipher of Animals", },
-        "prompt": {"English": "A secret code matches animals to numbers based on their legs: Cat is 4, Spider is 8, Ant is 6. What number represents a Snake?", },
+        "title": {
+            "English": "The Magic Number Lock",
+            "Hindi": "The Magic Number Lock"
+        },
+        "prompt": {
+            "English": "A secret pattern is written to open a lock: 3, 6, 12, 24, ... What number comes next?",
+            "Hindi": "जादुई ताला: एक ताला खोलने के लिए एक गुप्त पैटर्न लिखा गया है: 3, 6, 12, 24, ... अगली संख्या क्या होगी?"
+        },
         "options": [
-            {"label": {"English": "4", }, "value": 0},
-            {"label": {"English": "0", }, "value": 4},
-            {"label": {"English": "2", }, "value": 0},
-            {"label": {"English": "6", }, "value": 0}
+            {
+                "label": {
+                    "English": "30",
+                    "Hindi": "30"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "48",
+                    "Hindi": "48"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "36",
+                    "Hindi": "36"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "40",
+                    "Hindi": "40"
+                },
+                "value": 0
+            }
         ],
-        "metric": "judgement"
+        "answer": "48",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Logical reasoning and sequence logic test."
     },
     {
-        "key": "logical_pattern_3",
-        "type": "pattern_choice",
-        "domain": "logical",
-        "component": "pattern_recognition",
-        "title": {"English": "The Magic Number Train", },
-        "prompt": {"English": "A magic train has carriages with numbers: 1, 3, 6, 10, 15, ?. What number is on the next carriage?", },
-        "sequence": ["1", "3", "6", "10", "15", "?"],
-        "options": ["18", "20", "21", "25"],
-        "answer": "21",
-        "metric": "correctness"
-    },
-    {
-        "key": "logical_riddle_4",
+        "key": "logical_legs",
         "type": "choice",
         "domain": "logical",
-        "component": "number_reasoning",
-        "title": {"English": "The Weighing Scale Puzzle", },
-        "prompt": {"English": "One heavy golden block balances exactly with three small silver balls. Two silver balls balance exactly with four light feathers. How many feathers are needed to balance one golden block?", },
-        "options": [
-            {"label": {"English": "6", }, "value": 4},
-            {"label": {"English": "4", }, "value": 0},
-            {"label": {"English": "8", }, "value": 0},
-            {"label": {"English": "12", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "logical_pattern_5",
-        "type": "pattern_choice",
-        "domain": "logical",
         "component": "pattern_recognition",
-        "title": {"English": "The Repeating Symbol Grid", },
-        "prompt": {"English": "Find the missing symbol in this repeating pattern: ★, ●, ▲, ★, ●, ?, ★", },
-        "sequence": ["★", "●", "▲", "★", "●", "?", "★"],
-        "options": ["★", "●", "▲", "♦"],
-        "answer": "▲",
-        "metric": "correctness"
-    },
-    {
-        "key": "logical_riddle_6",
-        "type": "choice",
-        "domain": "logical",
-        "component": "sequence_logic",
-        "title": {"English": "The Secret Locker Code", },
-        "prompt": {"English": "A chest has a three-digit code. The first digit is double the second digit. The third digit is 3. The sum of all digits is 9. What is the code?", },
+        "title": {
+            "English": "The Leg Code Riddle",
+            "Hindi": "The Leg Code Riddle"
+        },
+        "prompt": {
+            "English": "A secret code matches animals to numbers: Cat is 4, Spider is 8, Ant is 6. What represents a Snake?",
+            "Hindi": "जानवरों का कोड: एक गुप्त कोड जानवरों को नंबर देता है: बिल्ली (Cat) 4 है, मकड़ी (Spider) 8 है, चींटी (Ant) 6 है। सांप (Snake) का नंबर क्या होगा?"
+        },
         "options": [
-            {"label": {"English": "423", }, "value": 4},
-            {"label": {"English": "630", }, "value": 0},
-            {"label": {"English": "243", }, "value": 0},
-            {"label": {"English": "513", }, "value": 1}
+            {
+                "label": {
+                    "English": "4",
+                    "Hindi": "4"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "0",
+                    "Hindi": "0"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "2",
+                    "Hindi": "2"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "6",
+                    "Hindi": "6"
+                },
+                "value": 0
+            }
         ],
-        "metric": "judgement"
+        "answer": "0",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Logical reasoning and sequence logic test."
     },
-
-    # ── SPATIAL & MAKING (6 puzzles) ──
     {
-        "key": "spatial_rotation",
-        "type": "pattern_choice",
+        "key": "spatial_clock",
+        "type": "choice",
         "domain": "spatial",
         "component": "mental_rotation",
-        "title": {"English": "The Magic Clock Hand", },
-        "prompt": {"English": "A glowing star on a clock moves around: First it points UP (12 o'clock), then RIGHT (3 o'clock), then DOWN (6 o'clock). Where will the star point next?", },
-        "sequence": ["↑", "→", "↓", "?"],
-        "options": ["↑", "→", "↓", "←"],
-        "answer": "←",
-        "metric": "correctness"
-    },
-    {
-        "key": "spatial_perspective",
-        "type": "choice",
-        "domain": "spatial",
-        "component": "mechanical_intuition",
-        "title": {"English": "The Golden Key Shadow", },
-        "prompt": {"English": "A 3D key shaped like a flat 'T' is held in front of a flashlight. If the flashlight shines directly from the LEFT side, what shape of shadow does the T-key make on the wall?", },
+        "title": {
+            "English": "The Magic Clock Hand",
+            "Hindi": "The Magic Clock Hand"
+        },
+        "prompt": {
+            "English": "A pointer on a clock moves: first UP (12 o'clock), then RIGHT (3 o'clock), then DOWN (6 o'clock). Where will it point next?",
+            "Hindi": "जादुई सुई: एक घड़ी पर एक सुई घूमती है: पहले ऊपर (12 बजे), फिर दाएं (3 बजे), फिर नीचे (6 बजे)। इसके बाद यह किस दिशा में इशारा करेगी?"
+        },
         "options": [
-            {"label": {"English": "A long vertical rectangle", }, "value": 4},
-            {"label": {"English": "A perfect square", }, "value": 0},
-            {"label": {"English": "A cross shape", }, "value": 1},
-            {"label": {"English": "A round circle", }, "value": 0}
+            {
+                "label": {
+                    "English": "UP",
+                    "Hindi": "UP"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "RIGHT",
+                    "Hindi": "RIGHT"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "DOWN",
+                    "Hindi": "DOWN"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "LEFT",
+                    "Hindi": "LEFT"
+                },
+                "value": 4
+            }
         ],
-        "metric": "judgement"
+        "answer": "LEFT",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Spatial intelligence and visualization test."
     },
     {
-        "key": "spatial_origami",
-        "type": "choice",
-        "domain": "spatial",
-        "component": "design_thinking",
-        "title": {"English": "The Unfolded Box", },
-        "prompt": {"English": "If you unfold a small cardboard cube with a blue star drawn on its top face, how many flat squares will you have in total?", },
-        "options": [
-            {"label": {"English": "6", }, "value": 4},
-            {"label": {"English": "4", }, "value": 0},
-            {"label": {"English": "8", }, "value": 0},
-            {"label": {"English": "5", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "spatial_block_count",
+        "key": "spatial_shadow",
         "type": "choice",
         "domain": "spatial",
         "component": "construction_sense",
-        "title": {"English": "The Secret Tower Blocks", },
-        "prompt": {"English": "A small tower is built with blocks: a base of 4 blocks, a middle layer of 2 blocks, and 1 block on the top. How many blocks are used in total?", },
+        "title": {
+            "English": "The Key Shadow",
+            "Hindi": "The Key Shadow"
+        },
+        "prompt": {
+            "English": "A 3D key shaped like a flat 'T' is held in front of a light. If the light shines from the LEFT, what shape shadow does it make on the wall?",
+            "Hindi": "चाबी की परछाई: एक 'T' आकार की 3D चाबी को टॉर्च के सामने रखा गया है। यदि टॉर्च की रोशनी सीधे बाईं (LEFT) ओर से पड़ती है, तो दीवार पर कैसी छाया बनेगी?"
+        },
         "options": [
-            {"label": {"English": "7", }, "value": 4},
-            {"label": {"English": "6", }, "value": 0},
-            {"label": {"English": "8", }, "value": 0},
-            {"label": {"English": "5", }, "value": 0}
+            {
+                "label": {
+                    "English": "A vertical rectangle",
+                    "Hindi": "A vertical rectangle"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "A cross shape",
+                    "Hindi": "A cross shape"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "A perfect square",
+                    "Hindi": "A perfect square"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "A round circle",
+                    "Hindi": "A round circle"
+                },
+                "value": 0
+            }
         ],
-        "metric": "judgement"
+        "answer": "A vertical rectangle",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Spatial intelligence and visualization test."
     },
-    {
-        "key": "spatial_maze_logic",
-        "type": "choice",
-        "domain": "spatial",
-        "component": "mental_rotation",
-        "title": {"English": "The Hidden Path", },
-        "prompt": {"English": "To reach the treasure, you must take a path. It goes: 2 steps forward, 1 step right, 3 steps forward, 2 steps left. Compared to where you started, are you now further to the left or right?", },
-        "options": [
-            {"label": {"English": "Left", }, "value": 4},
-            {"label": {"English": "Right", }, "value": 0},
-            {"label": {"English": "Same line", }, "value": 1},
-            {"label": {"English": "Behind", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "spatial_shape_match",
-        "type": "choice",
-        "domain": "spatial",
-        "component": "design_thinking",
-        "title": {"English": "The Puzzle Cutout", },
-        "prompt": {"English": "A large square has a small triangle cut out of it. If you slide the triangle back into the cutout, how many corners (vertices) will the shape have in total?", },
-        "options": [
-            {"label": {"English": "4 corners", }, "value": 4},
-            {"label": {"English": "3 corners", }, "value": 0},
-            {"label": {"English": "5 corners", }, "value": 1},
-            {"label": {"English": "6 corners", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-
-    # ── CREATIVE & ARTISTIC (6 puzzles) ──
     {
         "key": "visualizer_memory_grid",
         "type": "memory_grid",
         "domain": "creative",
         "component": "visual_imagination",
-        "title": {"English": "The Constellation Map", },
-        "prompt": {"English": "Look closely at the glowing stars in the magic night sky grid, and click them exactly as you remember them!", },
+        "title": {
+            "English": "The Constellation Map",
+            "Hindi": "तारामंडल का नक्शा"
+        },
+        "prompt": {
+            "English": "Look closely at the glowing stars in the magic night sky grid, and click them exactly as you remember them!",
+            "Hindi": "जादुई रात के आसमान के ग्रिड में चमकते सितारों को ध्यान से देखें, और ठीक वैसे ही उन पर क्लिक करें जैसे वे आपको याद हैं!"
+        },
         "gridSize": 9,
-        "highlights": [1, 3, 5, 7],
+        "highlights": [
+            1,
+            3,
+            5,
+            7
+        ],
         "revealMs": 2500,
-        "metric": "memory_span"
+        "metric": "memory_span",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Measures visual and spatial short-term working memory span."
     },
     {
-        "key": "creative_uses",
+        "key": "creative_box",
         "type": "idea_list",
         "domain": "creative",
         "component": "divergent_thinking",
-        "title": {"English": "Sideways Gravity School", },
-        "prompt": {"English": "Imagine that gravity suddenly starts working SIDEWAYS at your school instead of pulling you down! Write down at least 3 super funny or amazing things that would happen to you and your friends!", },
+        "title": {
+            "English": "The Cardboard Box Challenge",
+            "Hindi": "The Cardboard Box Challenge"
+        },
+        "prompt": {
+            "English": "Imagine you are given a large, empty cardboard box. Write down 3 completely different and creative things you could build or play with it!",
+            "Hindi": "गत्ते के डिब्बे की चुनौती: कल्पना कीजिए कि आपको एक बड़ा, खाली गत्ते का डिब्बा (cardboard box) दिया गया है। 3 बिल्कुल अलग और रचनात्मक चीजें लिखें जो आप इससे बना सकते हैं या खेल सकते हैं!"
+        },
         "minIdeas": 3,
-        "metric": "fluency"
+        "metric": "fluency",
+        "difficulty": "adaptive",
+        "ai_interpretation_notes": "Measures divergent fluency and visual creativity."
     },
     {
-        "key": "creative_story_spark",
-        "type": "idea_list",
-        "domain": "creative",
-        "component": "divergent_thinking",
-        "title": {"English": "The Cloud Shapes", },
-        "prompt": {"English": "Look up at the sky. A giant cloud shaped like a flying teacup is pouring shiny liquid. Write down 3 different creative things this liquid could be (not water or tea)!", },
-        "minIdeas": 3,
-        "metric": "fluency"
-    },
-    {
-        "key": "creative_color_harmony",
-        "type": "choice",
-        "domain": "creative",
-        "component": "colour_sense",
-        "title": {"English": "The Painter's Secret", },
-        "prompt": {"English": "You want to paint a beautiful, energetic sun. Which combination of colors feels most warm and full of happy energy?", },
-        "options": [
-            {"label": {"English": "Yellow, Orange, and Red", }, "value": 4},
-            {"label": {"English": "Blue, Purple, and Green", }, "value": 0},
-            {"label": {"English": "Black, Grey, and White", }, "value": 0},
-            {"label": {"English": "Brown and Dark Green", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "creative_instrument",
-        "type": "choice",
-        "domain": "creative",
-        "component": "pattern_creation",
-        "title": {"English": "The Kitchen Band", },
-        "prompt": {"English": "You want to make a brand-new musical instrument using only kitchen items. What would you build to create a nice, soft shaking sound?", },
-        "options": [
-            {"label": {"English": "A plastic bottle filled with dry lentils and rice", }, "value": 4},
-            {"label": {"English": "Striking two metal spoons together", }, "value": 1},
-            {"label": {"English": "Blowing across a glass cup", }, "value": 2},
-            {"label": {"English": "Banging a wooden table with a heavy pan", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "creative_divergent_shapes",
-        "type": "idea_list",
-        "domain": "creative",
-        "component": "divergent_thinking",
-        "title": {"English": "Drawing on Circles", },
-        "prompt": {"English": "If you are given a sheet of paper with 5 empty circles printed on it, how many completely different objects can you turn these circles into? Write down at least 3 unique things you would draw (e.g. clock, wheel, face, coin, etc.)!", },
-        "minIdeas": 3,
-        "metric": "fluency"
-    },
-
-    # ── LANGUAGE & COMMUNICATION (6 puzzles) ──
-    {
-        "key": "language_story_order",
+        "key": "language_race",
         "type": "order_steps",
         "domain": "language",
         "component": "storytelling",
-        "title": {"English": "The Robot Escape Adventure", },
-        "prompt": {"English": "Put these secret agent message pieces in the order that tells the exciting escape story!", },
+        "title": {
+            "English": "School Race Story",
+            "Hindi": "School Race Story"
+        },
+        "prompt": {
+            "English": "Put these steps in the correct order to tell the story of a fun school race:",
+            "Hindi": "स्कूल की दौड़: स्कूल की एक मजेदार दौड़ की कहानी बताने के लिए इन चरणों को सही क्रम में व्यवस्थित करें:"
+        },
         "steps": {
             "English": [
-                "We saw a giant iron gate guarded by two sleeping robots.",
-                "I whispered the secret code word to open the gate.",
-                "We ran through the dark jungle and found a hidden sailboat.",
-                "We sailed away under the beautiful starry night sky."
+                "We lined up at the starting line.",
+                "The whistle blew and we ran fast.",
+                "I crossed the finish line third.",
+                "We clapped and cheered for the winner."
             ],
-            },
+            "Hindi": [
+                "हम शुरुआती रेखा पर खड़े हुए।",
+                "सीटी बजी और हम तेजी से दौड़े।",
+                "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
+                "हमने विजेता के लिए तालियाँ बजाईं।"
+            ]
+        },
         "shuffled": {
             "English": [
-                "We ran through the dark jungle and found a hidden sailboat.",
-                "We saw a giant iron gate guarded by two sleeping robots.",
-                "We sailed away under the beautiful starry night sky.",
-                "I whispered the secret code word to open the gate."
+                "We clapped and cheered for the winner.",
+                "We lined up at the starting line.",
+                "I crossed the finish line third.",
+                "The whistle blew and we ran fast."
             ],
-            },
-        "metric": "sequence_accuracy"
+            "Hindi": [
+                "हमने विजेता के लिए तालियाँ बजाईं।",
+                "हम शुरुआती रेखा पर खड़े हुए।",
+                "मैंने तीसरे स्थान पर फिनिश लाइन पार की।",
+                "सीटी बजी और हम तेजी से दौड़े।"
+            ]
+        },
+        "metric": "sequence_accuracy",
+        "difficulty": "easy",
+        "ai_interpretation_notes": "Measures logical sequence reconstruction in language."
     },
     {
-        "key": "language_analogy",
+        "key": "language_game_explain",
         "type": "choice",
         "domain": "language",
         "component": "expression_clarity",
-        "title": {"English": "The Secret Word Bridges", },
-        "prompt": {"English": "Complete this word connection bridge: A FEATHER is to a BIRD as a SCALE is to...?", },
-        "options": [
-            {"label": {"English": "A Fish", }, "value": 4},
-            {"label": {"English": "A Dog", }, "value": 0},
-            {"label": {"English": "A Tree", }, "value": 0},
-            {"label": {"English": "A River", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "language_unscramble",
-        "type": "choice",
-        "domain": "language",
-        "component": "verbal_fluency",
-        "title": {"English": "The Secret Code Word", },
-        "prompt": {"English": "Put these letters in order to make a happy word representing a beautiful place with trees and swings: G, R, N, D, A, E. What is the word?", },
-        "options": [
-            {"label": {"English": "GARDEN", }, "value": 4},
-            {"label": {"English": "DANGER", }, "value": 0},
-            {"label": {"English": "GRAND", }, "value": 0},
-            {"label": {"English": "GEARED", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "language_opposite",
-        "type": "choice",
-        "domain": "language",
-        "component": "expression_clarity",
-        "title": {"English": "The Word Opposite", },
-        "prompt": {"English": "A brave knight goes to face a challenge. The opposite of being BRAVE is being...?", },
-        "options": [
-            {"label": {"English": "Fearful or Cowardly", }, "value": 4},
-            {"label": {"English": "Strong", }, "value": 0},
-            {"label": {"English": "Quiet", }, "value": 0},
-            {"label": {"English": "Smart", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "language_rhyme_scheme",
-        "type": "choice",
-        "domain": "language",
-        "component": "storytelling",
-        "title": {"English": "The Rhyming Poem", },
-        "prompt": {"English": "A small bird sings in a tree so high, flapping its wings as it flies in the ?. Which word completes the poem with a perfect rhyme?", },
-        "options": [
-            {"label": {"English": "Sky", }, "value": 4},
-            {"label": {"English": "Nest", }, "value": 0},
-            {"label": {"English": "Wind", }, "value": 0},
-            {"label": {"English": "Sun", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "language_cloze_passage",
-        "type": "choice",
-        "domain": "language",
-        "component": "verbal_fluency",
-        "title": {"English": "The Missing Emotion Word", },
-        "prompt": {"English": "Fill in the blank: 'When the lost puppy finally returned home wagging its tail, the children felt extremely ? and began to celebrate.'", },
-        "options": [
-            {"label": {"English": "Joyful", }, "value": 4},
-            {"label": {"English": "Tired", }, "value": 0},
-            {"label": {"English": "Angry", }, "value": 0},
-            {"label": {"English": "Scared", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-
-    # ── KINESTHETIC & PHYSICAL (6 puzzles) ──
-    {
-        "key": "visual_reaction",
-        "type": "reaction",
-        "domain": "kinesthetic",
-        "component": "body_coordination",
-        "title": {"English": "The Lightning Flash", },
-        "prompt": {"English": "Tap the center target as fast as a lightning bolt the exact millisecond it flashes happy gold!", },
-        "waitMs": 1200,
-        "metric": "reaction_time"
-    },
-    {
-        "key": "kinesthetic_motor_planning",
-        "type": "choice",
-        "domain": "kinesthetic",
-        "component": "body_coordination",
-        "title": {"English": "The Treehouse Rope Bridge", },
-        "prompt": {"English": "You are crossing a high, wobbling rope bridge to reach a treehouse. A strong gust of wind suddenly blows from the right! What is the best way to balance your body so you don't slip?", },
-        "options": [
-            {"label": {"English": "Bend your knees slightly, spread your arms wide, and lean your weight slightly into the wind to the right", }, "value": 4},
-            {"label": {"English": "Stand completely straight and close your eyes", }, "value": 0},
-            {"label": {"English": "Run as fast as you can to the other side", }, "value": 1},
-            {"label": {"English": "Sit down on the rope bridge and shout for help", }, "value": 2}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "kinesthetic_balancing",
-        "type": "choice",
-        "domain": "kinesthetic",
-        "component": "fine_motor",
-        "title": {"English": "The Gymnastic Beam", },
-        "prompt": {"English": "You are balancing on one foot on a narrow wooden beam. To stay balanced for a long time, what is the best strategy?", },
-        "options": [
-            {"label": {"English": "Extend your arms out to the sides and focus your eyes on a single still point ahead", }, "value": 4},
-            {"label": {"English": "Swing your arms quickly back and forth", }, "value": 0},
-            {"label": {"English": "Look down at your feet and jump slightly", }, "value": 1},
-            {"label": {"English": "Close your eyes and stand completely stiff", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "kinesthetic_aiming",
-        "type": "choice",
-        "domain": "kinesthetic",
-        "component": "fine_motor",
-        "title": {"English": "The Stone Throwing Game", },
-        "prompt": {"English": "You are trying to hit a plastic bottle placed on a rock from a distance. To improve your accuracy and hit the target, what should you do?", },
-        "options": [
-            {"label": {"English": "Stand firmly, align your shoulder with the target, and follow through with a smooth arm movement", }, "value": 4},
-            {"label": {"English": "Throw the stone as hard as possible without looking", }, "value": 0},
-            {"label": {"English": "Close one eye and throw backwards", }, "value": 0},
-            {"label": {"English": "Run forward and throw while jumping", }, "value": 2}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "kinesthetic_speed_tapping",
-        "type": "reaction",
-        "domain": "kinesthetic",
-        "component": "rhythm_accuracy",
-        "title": {"English": "The Speed Tap Test", },
-        "prompt": {"English": "How fast can you react to a green signal? Try this quick tap exercise when it turns green!", },
-        "waitMs": 1500,
-        "metric": "reaction_time"
-    },
-    {
-        "key": "kinesthetic_dance_improvisation",
-        "type": "choice",
-        "domain": "kinesthetic",
-        "component": "movement_memory",
-        "title": {"English": "The Flowing River Movement", },
-        "prompt": {"English": "Imagine you are acting like a quiet flowing river that suddenly turns into a fast, crashing waterfall. How does your body naturally move to show this?", },
-        "options": [
-            {"label": {"English": "Slow, wavy arm gestures that suddenly turn into sharp, downward drops", }, "value": 4},
-            {"label": {"English": "Standing completely still and stiff", }, "value": 0},
-            {"label": {"English": "Jumping up and down in one place repeatedly", }, "value": 1},
-            {"label": {"English": "Spinning around in fast circles until you are dizzy", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-
-    # ── SOCIAL & LEADERSHIP (6 puzzles) ──
-    {
-        "key": "social_response",
-        "type": "choice",
-        "domain": "social",
-        "component": "empathy_recognition",
-        "title": {"English": "The Project Deadline", "Hindi": "The Project Deadline"},
+        "title": {
+            "English": "Explaining a Game",
+            "Hindi": "Explaining a Game"
+        },
         "prompt": {
-            "English": "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?",
-            "Hindi": "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?"
+            "English": "You want to teach a new friend how to play a game you love, but they do not speak your language well. What is the best way to explain the game?",
+            "Hindi": "खेल समझाना: आप एक नए दोस्त को एक खेल सिखाना चाहते हैं जो आपको पसंद है, लेकिन वे आपकी भाषा अच्छी तरह से नहीं बोलते हैं। खेल को समझाने का सबसे अच्छा तरीका क्या है?"
         },
         "options": [
-            {"label": {"English": "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation.", "Hindi": "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation."}, "value": 4},
-            {"label": {"English": "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important.", "Hindi": "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important."}, "value": 4},
-            {"label": {"English": "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time.", "Hindi": "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time."}, "value": 4},
-            {"label": {"English": "Do nothing and let the other teammates decide.", "Hindi": "Do nothing and let the other teammates decide."}, "value": 1}
+            {
+                "label": {
+                    "English": "Show them the actions slowly with hands and play a practice round together",
+                    "Hindi": "हाथों के इशारों से धीरे-धीरे समझाएं और साथ में एक अभ्यास दौर खेलें"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "Speak very fast in English to save time",
+                    "Hindi": "समय बचाने के लिए अंग्रेजी में बहुत तेजी से बोलें"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Give them a rulebook to read by themselves",
+                    "Hindi": "उन्हें अपने आप पढ़ने के लिए एक नियम पुस्तिका दें"
+                },
+                "value": 1
+            },
+            {
+                "label": {
+                    "English": "Tell them to watch you play for an hour",
+                    "Hindi": "उन्हें एक घंटे तक आपको खेलते हुए देखने के लिए कहें"
+                },
+                "value": 0
+            }
         ],
-        "metric": "judgement"
+        "metric": "judgement",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Measures communication clarity and adaptive explanation capability."
+    },
+    {
+        "key": "kinesthetic_catch",
+        "type": "choice",
+        "domain": "kinesthetic",
+        "component": "body_coordination",
+        "title": {
+            "English": "Catching the Ball",
+            "Hindi": "Catching the Ball"
+        },
+        "prompt": {
+            "English": "A teammate throws a ball high in the air towards you. What is the best way to catch it safely without dropping it?",
+            "Hindi": "गेंद पकड़ना: आपका एक साथी हवा में ऊंची गेंद आपकी तरफ फेंकता है। बिना गिराए उसे सुरक्षित रूप से पकड़ने का सबसे अच्छा तरीका क्या है?"
+        },
+        "options": [
+            {
+                "label": {
+                    "English": "Move under the ball, make a cup with your hands, and bring your hands down slightly as it lands",
+                    "Hindi": "Move under the ball, make a cup with your hands, and bring your hands down slightly as it lands"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "Keep your arms completely stiff and let the ball hit your chest",
+                    "Hindi": "Keep your arms completely stiff and let the ball hit your chest"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Close your eyes and cross your arms over your face",
+                    "Hindi": "Close your eyes and cross your arms over your face"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Try to catch it with only one hand while looking away",
+                    "Hindi": "Try to catch it with only one hand while looking away"
+                },
+                "value": 0
+            }
+        ],
+        "answer": "Move under the ball, make a cup with your hands, and bring your hands down slightly as it lands",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Kinesthetic coordination and physical execution strategy."
+    },
+    {
+        "key": "kinesthetic_turn",
+        "type": "choice",
+        "domain": "kinesthetic",
+        "component": "body_coordination",
+        "title": {
+            "English": "The Sharp Turn",
+            "Hindi": "The Sharp Turn"
+        },
+        "prompt": {
+            "English": "You are running fast in a tag game at school. To turn left quickly to avoid being caught without falling, what should you do?",
+            "Hindi": "तेज़ मोड़: आप स्कूल के मैदान में पकड़म-पकड़ाई खेल में बहुत तेज़ दौड़ रहे हैं। बिना गिरे, पकड़े जाने से बचने के लिए तुरंत बाईं (left) ओर मुड़ने का सबसे अच्छा तरीका क्या है?"
+        },
+        "options": [
+            {
+                "label": {
+                    "English": "Bend your knees, lean your body slightly to the left, and take shorter, quick steps",
+                    "Hindi": "Bend your knees, lean your body slightly to the left, and take shorter, quick steps"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "Keep your body completely straight and jump as high as you can",
+                    "Hindi": "Keep your body completely straight and jump as high as you can"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Stop running completely, turn around, and walk backwards",
+                    "Hindi": "Stop running completely, turn around, and walk backwards"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Lean your weight backwards and slide on your heels",
+                    "Hindi": "Lean your weight backwards and slide on your heels"
+                },
+                "value": 0
+            }
+        ],
+        "answer": "Bend your knees, lean your body slightly to the left, and take shorter, quick steps",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Kinesthetic coordination and physical execution strategy."
+    },
+    {
+        "key": "social_sandcastle",
+        "type": "choice",
+        "domain": "intrapersonal",
+        "component": "resilience_signal",
+        "title": {
+            "English": "The Broken Clay Castle",
+            "Hindi": "The Broken Clay Castle"
+        },
+        "prompt": {
+            "English": "You spent an hour building a clay castle, but a classmate accidentally trips and crushes it. What do you do?",
+            "Hindi": "टूटा हुआ किला: आपने मिट्टी का किला बनाने में एक घंटा लगाया, लेकिन एक सहपाठी गलती से फिसल कर उसे तोड़ देता है। आप क्या करेंगे?"
+        },
+        "options": [
+            {
+                "label": {
+                    "English": "Acknowledge it, clean the area, and plan a better version using what you learned.",
+                    "Hindi": "इसे स्वीकार करें, जगह साफ करें और सीखी हुई बातों का उपयोग करके एक बेहतर संस्करण की योजना बनाएं।"
+                },
+                "value": 4,
+                "mapping": {
+                    "intrapersonal": 4
+                },
+                "riasec": "Investigative"
+            },
+            {
+                "label": {
+                    "English": "Try to fix it gently using available tools or helpers.",
+                    "Hindi": "उपलब्ध उपकरणों या सहायकों की मदद से इसे धीरे से ठीक करने का प्रयास करें।"
+                },
+                "value": 4,
+                "mapping": {
+                    "social": 3
+                },
+                "riasec": "Social"
+            },
+            {
+                "label": {
+                    "English": "Collaborate with friends to find a fun alternative activity indoors.",
+                    "Hindi": "घर के अंदर एक मजेदार वैकल्पिक गतिविधि खोजने के लिए दोस्तों के साथ मिलकर काम करें।"
+                },
+                "value": 3,
+                "mapping": {
+                    "logical": 4
+                },
+                "riasec": "Realistic"
+            },
+            {
+                "label": {
+                    "English": "Feel angry, drop the activity completely, and walk away.",
+                    "Hindi": "गुस्सा महसूस करें, गतिविधि को पूरी तरह से छोड़ दें और चले जाएं।"
+                },
+                "value": 1,
+                "mapping": {
+                    "intrapersonal": 1
+                },
+                "riasec": "Conventional"
+            }
+        ],
+        "metric": "grit_resilience",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Measures coping strategies and persistence."
     },
     {
         "key": "social_conflict_resolution",
         "type": "choice",
         "domain": "social",
-        "component": "conflict_resolution",
-        "title": {"English": "The Playground Game Dispute", },
-        "prompt": {"English": "During a football match, two of your classmates start arguing loudly about whether the ball crossed the goal line. Everyone is shouting and the game has stopped. How do you resolve this conflict so everyone plays again happily?", },
-        "options": [
-            {"label": {"English": "Suggest playing a quick penalty kick or flip a coin to decide, and remind them that having fun together is the main goal", }, "value": 4},
-            {"label": {"English": "Shout louder than both of them to make them shut up", }, "value": 0},
-            {"label": {"English": "Take the football and walk home", }, "value": 1},
-            {"label": {"English": "Blame one classmate immediately to end the argument quickly", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "social_group_project",
-        "type": "choice",
-        "domain": "social",
-        "component": "group_organising",
-        "title": {"English": "The Team Display Board", },
-        "prompt": {"English": "Your group is making a chart paper display, but one team member is shy and not writing anything. How do you help them participate?", },
-        "options": [
-            {"label": {"English": "Ask them what they like to draw or write, and give them a specific, fun part of the poster to work on", }, "value": 4},
-            {"label": {"English": "Do all the work yourself and write their name anyway", }, "value": 1},
-            {"label": {"English": "Tell the teacher they are lazy and not working", }, "value": 0},
-            {"label": {"English": "Ignore them and let the group finish without them", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "social_empathy",
-        "type": "choice",
-        "domain": "social",
         "component": "empathy_recognition",
-        "title": {"English": "The Crying Classmate", },
-        "prompt": {"English": "A classmate sits alone on the stairs crying because they dropped their lunchbox and all their food fell. What do you do?", },
-        "options": [
-            {"label": {"English": "Sit next to them, ask if they are okay, and offer to share some of your own lunch with them", }, "value": 4},
-            {"label": {"English": "Walk past them and pretend you didn't see", }, "value": 0},
-            {"label": {"English": "Tell other friends so they can laugh together", }, "value": 0},
-            {"label": {"English": "Go tell the cleaner to sweep up the spilled food", }, "value": 2}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "social_leadership_style",
-        "type": "choice",
-        "domain": "social",
-        "component": "peer_influence",
-        "title": {"English": "The Lost Hike Route", },
-        "prompt": {"English": "During a nature walk, your group gets confused about which path leads back to the school bus. Everyone is starting to panic. How do you lead?", },
-        "options": [
-            {"label": {"English": "Ask everyone to pause, check the map together calmly, and walk back in a single line holding hands", }, "value": 4},
-            {"label": {"English": "Run ahead alone on the path you think is right", }, "value": 1},
-            {"label": {"English": "Start crying so someone else takes charge", }, "value": 0},
-            {"label": {"English": "Tell everyone that they are foolish for getting lost", }, "value": 0}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "social_cooperation",
-        "type": "choice",
-        "domain": "social",
-        "component": "group_organising",
-        "title": {"English": "Cleaning the Classroom", },
-        "prompt": {"English": "The teacher asks the class to clean the room in 5 minutes. What is the most effective way to cooperate?", },
-        "options": [
-            {"label": {"English": "Divide the classroom into small zones and assign 2-3 friends to clean each zone together", }, "value": 4},
-            {"label": {"English": "Everyone runs to grab the single broom at the same time", }, "value": 0},
-            {"label": {"English": "Wait until most people finish, then pick up one small paper"}, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "naturalist_weather_pattern",
-        "type": "choice",
-        "domain": "naturalist",
-        "component": "pattern_in_nature",
-        "title": {"English": "The Rain Clouds", "Hindi": "बारिश के बादल"},
+        "title": {
+            "English": "Group Project Dispute",
+            "Hindi": "Group Project Dispute"
+        },
         "prompt": {
-            "English": "You are playing outdoors and notice the wind suddenly blowing cold, swallows flying low, and the sky turning dark grey. What is nature telling you?",
-            "Hindi": "आप बाहर खेल रहे हैं और अचानक ठंडी हवा चलने लगती है, चिड़ियाँ नीचे उड़ने लगती हैं, और आसमान गहरा भूरा हो जाता है। प्रकृति आपको क्या बता रही है?"
+            "English": "During a class group activity, two friends start arguing loudly about a drawing layout. What do you do?",
+            "Hindi": "समूह परियोजना विवाद: कक्षा की एक समूह गतिविधि के दौरान, दो दोस्त एक चित्र के लेआउट को लेकर आपस में बहस करने लगते हैं। आप क्या करेंगे?"
         },
         "options": [
-            {"label": {"English": "A heavy rain shower is coming very soon", "Hindi": "बहुत जल्द तेज़ बारिश होने वाली है"}, "value": 4},
-            {"label": {"English": "The sun is going to shine brighter", "Hindi": "सूरज और तेज़ चमकने वाला है"}, "value": 0},
-            {"label": {"English": "An earthquake is happening", "Hindi": "भूकंप आ रहा है"}, "value": 0},
-            {"label": {"English": "A cold winter night has started", "Hindi": "ठंड की रात शुरू हो गई है"}, "value": 1}
+            {
+                "label": {
+                    "English": "Approach them gently, speak kindly, and check how to help.",
+                    "Hindi": "उनके पास धीरे से जाएं, प्यार से बात करें और देखें कि कैसे मदद की जा सकती है।"
+                },
+                "value": 4,
+                "mapping": {
+                    "social": 4
+                },
+                "riasec": "Social"
+            },
+            {
+                "label": {
+                    "English": "Invite them to join immediately or share my spot with them.",
+                    "Hindi": "उन्हें तुरंत शामिल होने के लिए आमंत्रित करें या उनके साथ अपनी जगह साझा करें।"
+                },
+                "value": 4,
+                "mapping": {
+                    "social": 3
+                },
+                "riasec": "Social"
+            },
+            {
+                "label": {
+                    "English": "Suggest a fair compromise or try to calm both sides down.",
+                    "Hindi": "एक निष्पक्ष समझौता सुझाएं या दोनों पक्षों को शांत करने का प्रयास करें।"
+                },
+                "value": 3,
+                "mapping": {
+                    "intrapersonal": 3
+                },
+                "riasec": "Investigative"
+            },
+            {
+                "label": {
+                    "English": "Keep playing with my friends and let them resolve it themselves.",
+                    "Hindi": "अपने दोस्तों के साथ खेलते रहें और उन्हें खुद इसे सुलझाने दें।"
+                },
+                "value": 1,
+                "mapping": {
+                    "social": 1
+                },
+                "riasec": "Conventional"
+            }
         ],
-        "metric": "judgement"
+        "metric": "social_intelligence",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Measures prosocial empathy and conflict resolution strategies."
     },
     {
-        "key": "naturalist_wind_disperse",
-        "type": "choice",
-        "domain": "naturalist",
-        "component": "living_systems",
-        "title": {"English": "The Secret Butterfly Garden", },
-        "prompt": {"English": "You want to attract colorful butterflies to live in your school garden. Which of these actions will help the butterflies the MOST?", },
-        "options": [
-            {"label": {"English": "Plant bright native flowering plants that have sweet nectar and keep fresh shallow water trays nearby", }, "value": 4},
-            {"label": {"English": "Spray strong insect spray to keep other bugs away from the plants", }, "value": 0},
-            {"label": {"English": "Cover all the flowers with plastic sheets so they don't get dirty", }, "value": 0},
-            {"label": {"English": "Catch butterflies from other parks and release them inside your garden", }, "value": 1}
-        ],
-        "metric": "classification"
-    },
-    {
-        "key": "naturalist_weather_pattern",
+        "key": "naturalist_weather",
         "type": "choice",
         "domain": "naturalist",
         "component": "pattern_in_nature",
-        "title": {"English": "The Rain Clouds", },
-        "prompt": {"English": "You are playing outdoors and notice the wind suddenly blowing cold, swallows flying low, and the sky turning dark grey. What is nature telling you?", },
+        "title": {
+            "English": "The Rain Clouds",
+            "Hindi": "The Rain Clouds"
+        },
+        "prompt": {
+            "English": "You are playing outside. You notice the wind turns cold, swallows fly low, and the sky becomes dark grey. What is nature telling you?",
+            "Hindi": "बारिश के बादल: आप बाहर खेल रहे हैं। आप देखते हैं कि हवा ठंडी हो जाती है, चिड़ियाँ नीचे उड़ती हैं, और आसमान गहरा भूरा हो जाता है। प्रकृति आपको क्या बता रही है?"
+        },
         "options": [
-            {"label": {"English": "A heavy rain shower is coming very soon", }, "value": 4},
-            {"label": {"English": "The sun is going to shine brighter", }, "value": 0},
-            {"label": {"English": "An earthquake is happening", }, "value": 0},
-            {"label": {"English": "A cold winter night has started", }, "value": 1}
+            {
+                "label": {
+                    "English": "A heavy rain shower is coming soon",
+                    "Hindi": "A heavy rain shower is coming soon"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "The sun is going to shine brighter",
+                    "Hindi": "The sun is going to shine brighter"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "An earthquake is starting",
+                    "Hindi": "An earthquake is starting"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "A hot day is beginning",
+                    "Hindi": "A hot day is beginning"
+                },
+                "value": 0
+            }
         ],
-        "metric": "judgement"
+        "answer": "A heavy rain shower is coming soon",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Naturalist and biological observation test."
     },
     {
-        "key": "naturalist_animal_track",
-        "type": "choice",
-        "domain": "naturalist",
-        "component": "animal_empathy",
-        "title": {"English": "The Footprints in the Mud", },
-        "prompt": {"English": "By a muddy river bank, you see small webbed footprints. Which animal most likely walked here?", },
-        "options": [
-            {"label": {"English": "A duck or frog", }, "value": 4},
-            {"label": {"English": "A dog or cat", }, "value": 0},
-            {"label": {"English": "A horse or cow", }, "value": 0},
-            {"label": {"English": "A bird like a crow", }, "value": 2}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "naturalist_plant_needs",
-        "type": "choice",
-        "domain": "naturalist",
-        "component": "environment_awareness",
-        "title": {"English": "The Sick Potted Plant", },
-        "prompt": {"English": "A potted plant in your classroom has yellow, dry leaves that are drooping down. How can you help it recover best?", },
-        "options": [
-            {"label": {"English": "Move it near the window for sunlight and water the soil gently", }, "value": 4},
-            {"label": {"English": "Put it in a dark closet and cover it with a cloth", }, "value": 0},
-            {"label": {"English": "Spray perfume on it to make it smell good", }, "value": 0},
-            {"label": {"English": "Pour a whole bucket of water on it until it drowns", }, "value": 1}
-        ],
-        "metric": "judgement"
-    },
-    {
-        "key": "naturalist_biodiversity",
+        "key": "naturalist_butterfly",
         "type": "choice",
         "domain": "naturalist",
         "component": "living_systems",
-        "title": {"English": "The Classroom Aquarium", },
-        "prompt": {"English": "You are setting up a small aquarium for fish. Besides clean water and fish food, what else should you add to keep the fish healthy and happy?", },
+        "title": {
+            "English": "Attracting Butterflies",
+            "Hindi": "Attracting Butterflies"
+        },
+        "prompt": {
+            "English": "You want to attract colorful butterflies to live in your school garden. Which action helps the MOST?",
+            "Hindi": "तितलियों को आकर्षित करना: आप अपने स्कूल के बगीचे में रंग-बिरंगी तितलियों को आकर्षित करना चाहते हैं। कौन सा काम सबसे ज्यादा मदद करता है?"
+        },
         "options": [
-            {"label": {"English": "Live green water plants and smooth pebbles for hiding spots", }, "value": 4},
-            {"label": {"English": "Colorful plastic toys and shiny glitter", }, "value": 0},
-            {"label": {"English": "Lots of sugar to make the water sweet", }, "value": 0},
-            {"label": {"English": "Small pieces of bread and milk", }, "value": 1}
+            {
+                "label": {
+                    "English": "Plant native flowering plants with sweet nectar and keep shallow water trays nearby",
+                    "Hindi": "Plant native flowering plants with sweet nectar and keep shallow water trays nearby"
+                },
+                "value": 4
+            },
+            {
+                "label": {
+                    "English": "Spray chemical insect spray to clear other bugs",
+                    "Hindi": "Spray chemical insect spray to clear other bugs"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Cover all flowers with plastic sheets",
+                    "Hindi": "Cover all flowers with plastic sheets"
+                },
+                "value": 0
+            },
+            {
+                "label": {
+                    "English": "Catch butterflies from other parks and release them",
+                    "Hindi": "Catch butterflies from other parks and release them"
+                },
+                "value": 0
+            }
         ],
-        "metric": "judgement"
+        "answer": "Plant native flowering plants with sweet nectar and keep shallow water trays nearby",
+        "metric": "correctness",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Naturalist and biological observation test."
     },
-
-    # ── INTRAPERSONAL & REFLECTIVE (6 puzzles) ──
     {
         "key": "intrapersonal_reflection",
-        "type": "scale",
+        "type": "choice",
         "domain": "intrapersonal",
-        "component": "reflective_thinking",
-        "title": {"English": "The Brave Explorer Goal", },
-        "prompt": {"English": "When you face a challenge that is very hard for you, do you tell yourself that you can get better at it with practice?", },
-        "low": {"English": "Never, I get discouraged", },
-        "high": {"English": "Always, I love to learn!", },
-        "metric": "self_reflection"
+        "component": "self_awareness",
+        "title": {
+            "English": "Frustration in Drawing",
+            "Hindi": "Frustration in Drawing"
+        },
+        "prompt": {
+            "English": "You feel frustrated because your drawing is not turning out as good as you expected. How do you handle it?",
+            "Hindi": "चित्र बनाने में निराशा: आप निराश महसूस करते हैं क्योंकि आपका चित्र वैसा नहीं बन रहा है जैसा आपने उम्मीद की थी। आप इसे कैसे संभालेंगे?"
+        },
+        "options": [
+            {
+                "label": {
+                    "English": "Stop, take deep breaths, and understand exactly why I feel this way.",
+                    "Hindi": "रुकें, गहरी सांसें लें और समझें कि मैं ऐसा क्यों महसूस कर रहा हूँ।"
+                },
+                "value": 4,
+                "mapping": {
+                    "intrapersonal": 4
+                },
+                "riasec": "Investigative"
+            },
+            {
+                "label": {
+                    "English": "Write down my thoughts briefly to calm down, then talk to the team.",
+                    "Hindi": "शांत होने के लिए अपने विचारों को संक्षेप में लिखें, फिर टीम से बात करें।"
+                },
+                "value": 4,
+                "mapping": {
+                    "intrapersonal": 3
+                },
+                "riasec": "Artistic"
+            },
+            {
+                "label": {
+                    "English": "Focus purely on working on the next steps to keep moving forward.",
+                    "Hindi": "आगे बढ़ते रहने के लिए पूरी तरह से अगले कदमों पर काम करने पर ध्यान केंद्रित करें।"
+                },
+                "value": 2,
+                "mapping": {
+                    "kinesthetic": 3
+                },
+                "riasec": "Realistic"
+            },
+            {
+                "label": {
+                    "English": "Express my frustration loudly so the group knows I am upset.",
+                    "Hindi": "अपनी निराशा जोर से व्यक्त करें ताकि समूह जान सके कि मैं परेशान हूँ।"
+                },
+                "value": 1,
+                "mapping": {
+                    "intrapersonal": 1
+                },
+                "riasec": "Enterprising"
+            }
+        ],
+        "metric": "self_regulation",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Measures emotional self-regulation and coping mechanisms."
     },
     {
         "key": "intrapersonal_frustration",
         "type": "choice",
         "domain": "intrapersonal",
-        "component": "resilience_signal",
-        "title": {"English": "The Stuck Kite", "Hindi": "The Stuck Kite"},
+        "component": "self_awareness",
+        "title": {
+            "English": "Anger in Teamwork",
+            "Hindi": "Anger in Teamwork"
+        },
         "prompt": {
-            "English": "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?",
-            "Hindi": "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?"
+            "English": "A classmate in your project group ignores your idea, and you feel very angry. What do you do?",
+            "Hindi": "टीम वर्क में गुस्सा: आपके प्रोजेक्ट ग्रुप का एक सहपाठी आपके विचार की अनदेखी करता है, और आपको बहुत गुस्सा आता है। आप क्या करेंगे?"
         },
         "options": [
-            {"label": {"English": "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned.", "Hindi": "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned."}, "value": 4},
-            {"label": {"English": "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper.", "Hindi": "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper."}, "value": 4},
-            {"label": {"English": "Ask friends for ideas on how to build a simple pulley or tool to hook the string.", "Hindi": "Ask friends for ideas on how to build a simple pulley or tool to hook the string."}, "value": 4},
-            {"label": {"English": "Leave the park feeling angry and give up on flying kites altogether.", "Hindi": "Leave the park feeling angry and give up on flying kites altogether."}, "value": 1}
+            {
+                "label": {
+                    "English": "Stop, take deep breaths, and understand exactly why I feel this way.",
+                    "Hindi": "रुकें, गहरी सांसें लें और समझें कि मैं ऐसा क्यों महसूस कर रहा हूँ।"
+                },
+                "value": 4,
+                "mapping": {
+                    "intrapersonal": 4
+                },
+                "riasec": "Investigative"
+            },
+            {
+                "label": {
+                    "English": "Write down my thoughts briefly to calm down, then talk to the team.",
+                    "Hindi": "शांत होने के लिए अपने विचारों को संक्षेप में लिखें, फिर टीम से बात करें।"
+                },
+                "value": 4,
+                "mapping": {
+                    "intrapersonal": 3
+                },
+                "riasec": "Artistic"
+            },
+            {
+                "label": {
+                    "English": "Focus purely on working on the next steps to keep moving forward.",
+                    "Hindi": "आगे बढ़ते रहने के लिए पूरी तरह से अगले कदमों पर काम करने पर ध्यान केंद्रित करें।"
+                },
+                "value": 2,
+                "mapping": {
+                    "kinesthetic": 3
+                },
+                "riasec": "Realistic"
+            },
+            {
+                "label": {
+                    "English": "Express my frustration loudly so the group knows I am upset.",
+                    "Hindi": "अपनी निराशा जोर से व्यक्त करें ताकि समूह जान सके कि मैं परेशान हूँ।"
+                },
+                "value": 1,
+                "mapping": {
+                    "intrapersonal": 1
+                },
+                "riasec": "Enterprising"
+            }
         ],
-        "metric": "judgement"
+        "metric": "self_regulation",
+        "difficulty": "medium",
+        "ai_interpretation_notes": "Measures emotional self-regulation and coping mechanisms."
     },
     {
-        "key": "intrapersonal_journaling",
-        "type": "scale",
+        "key": "deep_discovery_flow",
+        "type": "open_ended",
         "domain": "intrapersonal",
         "component": "reflective_thinking",
-        "title": {"English": "The Quiet Reflection", },
-        "prompt": {"English": "After a very long and busy day, what makes you feel most relaxed and helps you understand your day better?", },
-        "low": {"English": "Nothing, I just ignore it", },
-        "high": {"English": "Quietly sitting and thinking about my choices", },
-        "metric": "self_reflection"
+        "title": {
+            "English": "AI Reflection 1",
+            "Hindi": "AI Reflection 1"
+        },
+        "prompt": {
+            "English": "What activity makes you completely lose track of time? Describe it simply.",
+            "Hindi": "कौन सी गतिविधि आपको समय का ध्यान पूरी तरह से भुला देती है? इसके बारे में संक्षेप में लिखें।"
+        },
+        "metric": "narrative_expression",
+        "difficulty": "adaptive",
+        "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
     },
     {
-        "key": "intrapersonal_goal_setting",
-        "type": "choice",
+        "key": "deep_discovery_curiosity",
+        "type": "open_ended",
         "domain": "intrapersonal",
-        "component": "self_awareness",
-        "title": {"English": "Learning a Hard Skill", },
-        "prompt": {"English": "You want to learn how to play a new musical instrument or a sport. What is your plan?", },
-        "options": [
-            {"label": {"English": "Practice for 15 minutes every single day, even when it is hard", }, "value": 4},
-            {"label": {"English": "Practice for 5 hours in one day and then stop forever", }, "value": 1},
-            {"label": {"English": "Wait until you are naturally perfect at it", }, "value": 0},
-            {"label": {"English": "Ask someone else to play it for you", }, "value": 0}
-        ],
-        "metric": "judgement"
+        "component": "reflective_thinking",
+        "title": {
+            "English": "AI Reflection 2",
+            "Hindi": "AI Reflection 2"
+        },
+        "prompt": {
+            "English": "If you could spend one year learning absolutely anything without tests, what would it be?",
+            "Hindi": "यदि आप बिना किसी परीक्षा के एक पूरा वर्ष किसी भी चीज को सीखने में बिता सकते हैं, तो वह क्या होगी?"
+        },
+        "metric": "narrative_expression",
+        "difficulty": "adaptive",
+        "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
     },
     {
-        "key": "intrapersonal_self_regulation",
-        "type": "choice",
-        "domain": "intrapersonal",
-        "component": "resilience_signal",
-        "title": {"English": "Handling Anger", },
-        "prompt": {"English": "Someone accidentally bumps into you and your drawings spill all over the floor. You feel a sudden rush of anger. What do you do?", },
-        "options": [
-            {"label": {"English": "Take a deep breath, realize it was an accident, and pick up your papers calmly", }, "value": 4},
-            {"label": {"English": "Shout at them and push them back", }, "value": 0},
-            {"label": {"English": "Cry loudly and tear up all your drawings", }, "value": 0},
-            {"label": {"English": "Sit on the floor and refuse to move", }, "value": 1}
-        ],
-        "metric": "judgement"
+        "key": "deep_discovery_vision",
+        "type": "open_ended",
+        "domain": "social",
+        "component": "expression_clarity",
+        "title": {
+            "English": "AI Reflection 3",
+            "Hindi": "AI Reflection 3"
+        },
+        "prompt": {
+            "English": "What is one big problem in your school or neighborhood that you would love to solve?",
+            "Hindi": "आपके स्कूल या पड़ोस में ऐसी कौन सी बड़ी समस्या है जिसे आप हल करना चाहेंगे?"
+        },
+        "metric": "narrative_expression",
+        "difficulty": "adaptive",
+        "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
     },
     {
-        "key": "intrapersonal_self_awareness",
-        "type": "scale",
+        "key": "deep_discovery_pride",
+        "type": "open_ended",
         "domain": "intrapersonal",
-        "component": "self_awareness",
-        "title": {"English": "Knowing Your Strengths", },
-        "prompt": {"English": "How well do you know what activities make you feel happiest and most excited?", },
-        "low": {"English": "I have no idea", },
-        "high": {"English": "I know exactly what I love", },
-        "metric": "self_reflection"
+        "component": "reflective_thinking",
+        "title": {
+            "English": "AI Reflection 4",
+            "Hindi": "AI Reflection 4"
+        },
+        "prompt": {
+            "English": "Describe a toy, project, or model you built that made you feel proud.",
+            "Hindi": "आपके द्वारा बनाए गए किसी खिलौने, प्रोजेक्ट या मॉडल के बारे में लिखें जिसे बनाकर आपको गर्व महसूस हुआ।"
+        },
+        "metric": "narrative_expression",
+        "difficulty": "adaptive",
+        "ai_interpretation_notes": "Open narrative analysis for interests, values, and latent talent alignment."
     }
 ]
-
 import urllib.request
 
 def call_gemini_api(prompt, api_key):
@@ -2335,12 +2474,7 @@ LOCAL_PRIMARY_OVERRIDES = {
             "Hindi": "एक 'T' आकार के खिलौने पर बाईं (LEFT) ओर से टॉर्च की रोशनी पड़ने पर दीवार पर कैसी छाया बनेगी?"
         }
     },
-    "creative_uses": {
-        "prompt": {
-            "English": "Imagine gravity pulls you SIDEWAYS at school instead of down! 😮 Write 3 funny things that would happen!",
-            "Hindi": "सोचें कि आपके स्कूल में गुरुत्वाकर्षण नीचे के बजाय बगल में काम करने लगे! 😮 3 मजेदार चीजें लिखें जो आपके साथ होंगी!"
-        }
-    },
+
     "language_story_order": {
         "title": {"English": "Story Order", "Hindi": "कहानी जमाएं"},
         "prompt": {
@@ -2495,12 +2629,7 @@ LOCAL_ADVANCED_OVERRIDES = {
             "Hindi": "एक त्रि-आयामी (3D) समतलीय T-आकार की संरचना को बाईं ओर (lateral left) से प्रकाश स्रोत के नीचे रखा गया है। दीवार पर कौन सी द्वि-आयामी (2D) ऑर्थोग्राफिक परछाई दिखाई देगी?"
         }
     },
-    "creative_uses": {
-        "prompt": {
-            "English": "Hypothesize a scenario where gravity shifts to operate along the horizontal lateral axis rather than the vertical pull. Propose 3 distinct, highly divergent consequences of this physical anomaly on daily routines.",
-            "Hindi": "एक ऐसी स्थिति की परिकल्पना करें जहां गुरुत्वाकर्षण ऊर्ज्वाधर (vertical) खिंचाव के बजाय क्षैतिज (horizontal lateral) अक्ष पर काम करना शुरू कर देता है। दैनिक जीवन पर इस भौतिक विसंगति के 3 बिल्कुल अलग परिणामों का प्रस्ताव दें।"
-        }
-    },
+
     "language_story_order": {
         "title": {"English": "Narrative Reconstruction Sequence", "Hindi": "कथा पुनर्निर्माण क्रम"},
         "prompt": {
@@ -3824,7 +3953,7 @@ FORMAL_MAPPING = {
     "spatial_maze_logic": "Navigation",
     "spatial_shape_match": "Visual transformation",
     "visualizer_memory_grid": "Visual imagination",
-    "creative_uses": "Alternative uses",
+
     "creative_story_spark": "Story generation",
     "creative_color_harmony": "Visual imagination",
     "creative_instrument": "Pattern invention",
