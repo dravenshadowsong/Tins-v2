@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 const EXPOSURE_QUESTIONS = [
-  { id: "exp_language", title: "Language & Communication", desc: "Have you ever spoken or performed on a stage in front of a group?", desc_hi: "क्या आपने कभी किसी समूह के सामने मंच पर बात की है या कोई प्रस्तुति दी है?" },
-  { id: "exp_creative", title: "Creative & Artistic", desc: "Have you ever made art, crafts, or creative projects?", desc_hi: "क्या आपने कभी कला, शिल्प (क्राफ्ट) या कोई रचनात्मक चीज़ बनाई है?" },
-  { id: "exp_logical", title: "Logical & Analytical", desc: "Have you ever solved riddles, code puzzles, or math games?", desc_hi: "क्या आपने कभी पहेलियाँ, कोड पहेलियाँ या गणित के खेल हल किए हैं?" },
-  { id: "exp_social", title: "Social & Leadership", desc: "Have you ever led a team, group, or classroom activity?", desc_hi: "क्या आपने कभी किसी टीम, समूह या कक्षा की गतिविधि का नेतृत्व किया है?" },
-  { id: "exp_spatial", title: "Spatial & Making", desc: "Have you ever built models with blocks, cardboard, or toys?", desc_hi: "क्या आपने कभी ब्लॉक, गत्ते या खिलौनों से मॉडल बनाए हैं?" },
-  { id: "exp_kinesthetic", title: "Kinesthetic & Physical", desc: "Have you ever participated in running games, sports, or dance?", desc_hi: "क्या आपने कभी दौड़ने वाले खेलों, खेलकूद या नृत्य में भाग लिया है?" },
-  { id: "exp_naturalist", title: "Naturalist & Environmental", desc: "Have you ever sowed seeds, watered gardens, or cared for animals?", desc_hi: "क्या आपने कभी बीज बोए हैं, बगीचे में पानी दिया है या जानवरों की देखभाल की है?" },
-  { id: "exp_intrapersonal", title: "Intrapersonal & Reflective", desc: "Have you ever set personal goals or written in a diary?", desc_hi: "क्या आपने कभी अपने लिए लक्ष्य तय किए हैं या डायरी में लिखा है?" }
+  { id: "exp_language", title: "Language & Communication", desc: "Have you ever spoken or told a story in front of a group of people?", desc_hi: "क्या आपने कभी लोगों के समूह के सामने बात की है या कोई कहानी सुनाई है?" },
+  { id: "exp_creative", title: "Creative & Artistic", desc: "Have you ever made art, crafts, drawings, or creative projects?", desc_hi: "क्या आपने कभी कोई चित्र (ड्राइंग), पेंटिंग या क्राफ्ट की चीज़ बनाई है?" },
+  { id: "exp_logical", title: "Logical & Analytical", desc: "Have you ever solved riddles, puzzles, or played math games?", desc_hi: "क्या आपने कभी पहेलियाँ सुलझाई हैं या गणित के खेल खेले हैं?" },
+  { id: "exp_social", title: "Social & Leadership", desc: "Have you ever led a team, group, or classmates in a game or activity?", desc_hi: "क्या आपने कभी किसी खेल या काम में अपनी टीम या दोस्तों का नेतृत्व (लीड) किया है?" },
+  { id: "exp_spatial", title: "Spatial & Making", desc: "Have you ever built models or shapes with blocks, clay, cardboard, or toys?", desc_hi: "क्या आपने कभी खिलौने, मिट्टी (clay) या गत्ते से कोई मॉडल या ढांचा बनाया है?" },
+  { id: "exp_kinesthetic", title: "Kinesthetic & Physical", desc: "Have you ever participated in running games, sports, dance, or physical exercises?", desc_hi: "क्या आपने कभी दौड़ने-भागने वाले खेलों, खेलकूद, डांस या कसरत में भाग लिया है?" },
+  { id: "exp_naturalist", title: "Naturalist & Environmental", desc: "Have you ever planted seeds, watered gardens, or cared for animals or plants?", desc_hi: "क्या आपने कभी पौधे लगाए हैं, पौधों में पानी दिया है या जानवरों की देखभाल की है?" },
+  { id: "exp_intrapersonal", title: "Intrapersonal & Reflective", desc: "Have you ever written down your thoughts, kept a diary, or set personal goals?", desc_hi: "क्या आपने कभी अपने विचारों को लिखा है, डायरी रखी है या अपने लिए कोई लक्ष्य तय किया है?" }
 ];
 
 export default function Intake() {
