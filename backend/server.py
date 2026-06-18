@@ -3306,6 +3306,7 @@ def generate_ai_tasks(child, discovery_answers):
 
 
 
+@app.route("/api/sessions/<int:sid>/discovery", methods=["POST"])
 def submit_discovery(sid):
     user = current_user()
     
