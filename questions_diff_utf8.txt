@@ -1,0 +1,1124 @@
+﻿diff --git a/frontend/src/data/questions.js b/frontend/src/data/questions.js
+index a9f134d..2e15cb5 100644
+--- a/frontend/src/data/questions.js
++++ b/frontend/src/data/questions.js
+@@ -150,12 +150,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "logical",
+     component: "pattern_recognition",
+     title: {
+-      English: "The Wizard's Door Pyramid",
+-      Hindi: "αñ£αñ╛αñªαÑéαñùαñ░ αñòαÑç αñªαñ░αñ╡αñ╛αñ£αÑç αñòαñ╛ αñ¬αñ┐αñ░αñ╛αñ«αñ┐αñí"
++      English: "The Magic Number Lock",
++      Hindi: "αñ£αñ╛αñªαÑé αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛"
+     },
+     prompt: {
+-      English: "At the bottom of a stone tower, numbers are added together to open the lock. The bottom rows are 3 and 5, which add up to 8. Next to them are 5 and 9, which add up to 14. What number belongs at the very top of the pyramid? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)",
+-      Hindi: "αñÅαñò αñ¬αññαÑìαñÑαñ░ αñòαÑç αñ«αÑÇαñ¿αñ╛αñ░ αñòαÑç αñ¿αÑÇαñÜαÑç, αññαñ╛αñ▓αñ╛ αñûαÑïαñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñ╕αñéαñûαÑìαñ»αñ╛αñôαñé αñòαÑï αñåαñ¬αñ╕ αñ«αÑçαñé αñ£αÑïαñíαñ╝αñ╛ αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñ╕αñ¼αñ╕αÑç αñ¿αÑÇαñÜαÑç αñòαÑÇ αñ¬αñéαñòαÑìαññαñ┐ αñ«αÑçαñé 3 αñöαñ░ 5 αñ╣αÑêαñé, αñ£αÑï αñ«αñ┐αñ▓αñòαñ░ 8 αñ¼αñ¿αññαÑç αñ╣αÑêαñéαÑñ αñëαñ¿αñòαÑç αñ¼αñùαñ▓ αñ«αÑçαñé 5 αñöαñ░ 9 αñ╣αÑêαñé, αñ£αÑï αñ«αñ┐αñ▓αñòαñ░ 14 αñ¼αñ¿αññαÑç αñ╣αÑêαñéαÑñ αñ¬αñ┐αñ░αñ╛αñ«αñ┐αñí αñòαÑç αñ╕αñ¼αñ╕αÑç αñèαñ¬αñ░ αñòαÑîαñ¿ αñ╕αÑÇ αñ╕αñéαñûαÑìαñ»αñ╛ αñåαñÅαñùαÑÇ? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)"
++      English: "Add the numbers in the pyramid to open the lock. The bottom numbers add up to the ones above them: 3 and 5 make 8, and 5 and 9 make 14. What number belongs at the top of the pyramid? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)",
++      Hindi: "αññαñ╛αñ▓αñ╛ αñûαÑïαñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñ¬αñ┐αñ░αñ╛αñ«αñ┐αñí αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛αñôαñé αñòαÑï αñ£αÑïαñíαñ╝αÑçαñéαÑñ αñ¿αÑÇαñÜαÑç αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛αñÅαñü αñèαñ¬αñ░ αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛αñôαñé αñ«αÑçαñé αñ£αÑüαñíαñ╝αññαÑÇ αñ╣αÑêαñé: 3 αñöαñ░ 5 αñ«αñ┐αñ▓αñòαñ░ 8 αñ¼αñ¿αññαÑç αñ╣αÑêαñé, αñöαñ░ 5 αñöαñ░ 9 αñ«αñ┐αñ▓αñòαñ░ 14 αñ¼αñ¿αññαÑç αñ╣αÑêαñéαÑñ αñ¬αñ┐αñ░αñ╛αñ«αñ┐αñí αñòαÑç αñ╕αñ¼αñ╕αÑç αñèαñ¬αñ░ αñòαÑîαñ¿ αñ╕αÑÇ αñ╕αñéαñûαÑìαñ»αñ╛ αñåαñÅαñùαÑÇ? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)"
+     },
+     sequence: ["3", "5", "9", "8", "14", "?"],
+     options: ["18", "20", "22", "24"],
+@@ -168,12 +168,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "logical",
+     component: "sequence_logic",
+     title: {
+-      English: "The Secret Cipher of Animals",
+-      Hindi: "αñ£αñ╛αñ¿αñ╡αñ░αÑïαñé αñòαñ╛ αñùαÑüαñ¬αÑìαññ αñòαÑïαñí"
++      English: "The Leg Code Riddle",
++      Hindi: "αñ¬αÑêαñ░ αñùαñ┐αñ¿αñ¿αÑç αñòαñ╛ αñûαÑçαñ▓"
+     },
+     prompt: {
+-      English: "A secret code matches animals to numbers based on their legs: Cat is 4, Spider is 8, Ant is 6. What number represents a Snake?",
+-      Hindi: "αñÅαñò αñùαÑüαñ¬αÑìαññ αñòαÑïαñí αñ£αñ╛αñ¿αñ╡αñ░αÑïαñé αñòαÑç αñ¬αÑêαñ░αÑïαñé αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛ αñòαÑç αñåαñºαñ╛αñ░ αñ¬αñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñÅαñò αñ¿αñéαñ¼αñ░ αñªαÑçαññαñ╛ αñ╣αÑê: αñ¼αñ┐αñ▓αÑìαñ▓αÑÇ (Cat) 4 αñ╣αÑê, αñ«αñòαñíαñ╝αÑÇ (Spider) 8 αñ╣αÑê, αñÜαÑÇαñéαñƒαÑÇ (Ant) 6 αñ╣αÑêαÑñ αñ╕αñ╛αñéαñ¬ (Snake) αñòαñ╛ αñ¿αñéαñ¼αñ░ αñòαÑìαñ»αñ╛ αñ╣αÑïαñùαñ╛?"
++      English: "A secret code matches animals to numbers based on how many legs they have: Cat is 4, Spider is 8, and Ant is 6. What number represents a Snake?",
++      Hindi: "αñÅαñò αñùαÑüαñ¬αÑìαññ αñòαÑïαñí αñ£αñ╛αñ¿αñ╡αñ░αÑïαñé αñòαÑç αñ¬αÑêαñ░αÑïαñé αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛ αñòαÑç αñåαñºαñ╛αñ░ αñ¬αñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñÅαñò αñ¿αñéαñ¼αñ░ αñªαÑçαññαñ╛ αñ╣αÑê: αñ¼αñ┐αñ▓αÑìαñ▓αÑÇ (Cat) 4 αñ╣αÑê, αñ«αñòαñíαñ╝αÑÇ (Spider) 8 αñ╣αÑê, αñöαñ░ αñÜαÑÇαñéαñƒαÑÇ (Ant) 6 αñ╣αÑêαÑñ αñ╕αñ╛αñéαñ¬ (Snake) αñòαñ╛ αñ¿αñéαñ¼αñ░ αñòαÑìαñ»αñ╛ αñ╣αÑïαñùαñ╛?"
+     },
+     options: [
+       {
+@@ -205,8 +205,8 @@ export const ASSESSMENT_TASKS = [
+       Hindi: "αñ£αñ╛αñªαÑüαñê αñÿαñíαñ╝αÑÇ αñòαÑÇ αñ╕αÑüαñê"
+     },
+     prompt: {
+-      English: "A glowing star on a clock moves around: First it points UP (12 o'clock), then RIGHT (3 o'clock), then DOWN (6 o'clock). Where will the star point next?",
+-      Hindi: "αñÅαñò αñÿαñíαñ╝αÑÇ αñ¬αñ░ αñÜαñ«αñòαññαñ╛ αñ╣αÑüαñå αñ╕αñ┐αññαñ╛αñ░αñ╛ αñÿαÑéαñ«αññαñ╛ αñ╣αÑê: αñ¬αñ╣αñ▓αÑç αñ╡αñ╣ αñèαñ¬αñ░ (12 αñ¼αñ£αÑç) αñçαñ╢αñ╛αñ░αñ╛ αñòαñ░αññαñ╛ αñ╣αÑê, αñ½αñ┐αñ░ αñªαñ╛αñÅαñé (3 αñ¼αñ£αÑç), αñ½αñ┐αñ░ αñ¿αÑÇαñÜαÑç (6 αñ¼αñ£αÑç)αÑñ αñçαñ╕αñòαÑç αñ¼αñ╛αñª αñ╕αñ┐αññαñ╛αñ░αñ╛ αñòαñ┐αñ╕ αñªαñ┐αñ╢αñ╛ αñ«αÑçαñé αñçαñ╢αñ╛αñ░αñ╛ αñòαñ░αÑçαñùαñ╛?"
++      English: "A glowing pointer star turns in a circle: first it points UP Γåæ, then RIGHT ΓåÆ, then DOWN Γåô. Where will it point next?",
++      Hindi: "αñÅαñò αñÜαñ«αñòαññαñ╛ αñ╣αÑüαñå αññαÑÇαñ░ αñùαÑïαñ▓ αñÿαÑéαñ«αññαñ╛ αñ╣αÑê: αñ¬αñ╣αñ▓αÑç αñ╡αñ╣ αñèαñ¬αñ░ Γåæ αñçαñ╢αñ╛αñ░αñ╛ αñòαñ░αññαñ╛ αñ╣αÑê, αñ½αñ┐αñ░ αñªαñ╛αñÅαñé ΓåÆ, αñ½αñ┐αñ░ αñ¿αÑÇαñÜαÑç ΓåôαÑñ αñçαñ╕αñòαÑç αñ¼αñ╛αñª αñ╡αñ╣ αñòαñ┐αñ╕ αññαñ░αñ½ αñçαñ╢αñ╛αñ░αñ╛ αñòαñ░αÑçαñùαñ╛?"
+     },
+     sequence: ["Γåæ", "ΓåÆ", "Γåô", "?"],
+     options: ["Γåæ", "ΓåÆ", "Γåô", "ΓåÉ"],
+@@ -219,18 +219,18 @@ export const ASSESSMENT_TASKS = [
+     domain: "spatial",
+     component: "mechanical_intuition",
+     title: {
+-      English: "The Golden Key Shadow",
+-      Hindi: "αñÜαñ╛αñ¼αÑÇ αñòαÑÇ αñ¬αñ░αñ¢αñ╛αñê"
++      English: "Looking from Top",
++      Hindi: "αñèαñ¬αñ░ αñ╕αÑç αñªαÑçαñûαñ¿αñ╛"
+     },
+     prompt: {
+-      English: "A 3D key shaped like a flat 'T' is held in front of a flashlight. If the flashlight shines directly from the LEFT side, what shape of shadow does the T-key make on the wall?",
+-      Hindi: "αñÅαñò 'T' αñåαñòαñ╛αñ░ αñòαÑÇ 3D αñÜαñ╛αñ¼αÑÇ αñòαÑï αñƒαÑëαñ░αÑìαñÜ αñòαÑç αñ╕αñ╛αñ«αñ¿αÑç αñ░αñûαñ╛ αñùαñ»αñ╛ αñ╣αÑêαÑñ αñ»αñªαñ┐ αñƒαÑëαñ░αÑìαñÜ αñòαÑÇ αñ░αÑïαñ╢αñ¿αÑÇ αñ╕αÑÇαñºαÑç αñ¼αñ╛αñêαñé (LEFT) αñôαñ░ αñ╕αÑç αñ¬αñíαñ╝αññαÑÇ αñ╣αÑê, αññαÑï αñªαÑÇαñ╡αñ╛αñ░ αñ¬αñ░ αñÜαñ╛αñ¼αÑÇ αñòαÑÇ αñ¢αñ╛αñ»αñ╛ αñòαñ╛ αñåαñòαñ╛αñ░ αñòαÑêαñ╕αñ╛ αñªαñ┐αñûαÑçαñùαñ╛?"
++      English: "A drinking cup with a handle is sitting on a table. If you look at the cup directly from the TOP, what shape do you see?",
++      Hindi: "αñ«αÑçαñ£ αñ¬αñ░ αñ╣αÑêαñéαñíαñ▓ αñ╡αñ╛αñ▓αñ╛ αñÅαñò αñ¬αÑÇαñ¿αÑç αñòαñ╛ αñòαñ¬ αñ░αñûαñ╛ αñ╣αÑêαÑñ αñ»αñªαñ┐ αñåαñ¬ αñòαñ¬ αñòαÑï αñáαÑÇαñò αñèαñ¬αñ░ (TOP) αñ╕αÑç αñªαÑçαñûαññαÑç αñ╣αÑêαñé, αññαÑï αñåαñ¬αñòαÑï αñòαÑêαñ╕αÑÇ αñåαñòαÑâαññαñ┐ αñªαñ┐αñûαñ╛αñê αñªαÑçαñùαÑÇ?"
+     },
+     options: [
+-      { label: { English: "A long vertical rectangle", Hindi: "αñÅαñò αñ▓αñéαñ¼αÑÇ αñûαñíαñ╝αÑÇ αñ¬αñƒαÑìαñƒαÑÇ" }, value: 4 },
+-      { label: { English: "A perfect square", Hindi: "αñÅαñò αñÜαÑîαñòαÑïαñ░ αñ╡αñ░αÑìαñù" }, value: 0 },
+-      { label: { English: "A cross shape", Hindi: "αñÅαñò αñòαÑìαñ░αÑëαñ╕ αñòαñ╛ αñåαñòαñ╛αñ░" }, value: 1 },
+-      { label: { English: "A round circle", Hindi: "αñÅαñò αñùαÑïαñ▓ αñ╡αÑâαññαÑìαññ" }, value: 0 }
++      { label: { English: "A circle with a small loop on one side", Hindi: "αñÅαñò αñùαÑïαñ▓ αñ╡αÑâαññαÑìαññ (circle) αñ£αñ┐αñ╕αñòαÑç αñÅαñò αññαñ░αñ½ αñ¢αÑïαñƒαñ╛ αñ╕αñ╛ αñ▓αÑéαñ¬ (loop) αñ╣αÑï" }, value: 4 },
++      { label: { English: "A simple rectangle", Hindi: "αñÅαñò αñ╕αñ╛αñºαñ╛αñ░αñú αñåαñ»αññ (rectangle)" }, value: 0 },
++      { label: { English: "A perfect square", Hindi: "αñÅαñò αñÜαÑîαñòαÑïαñ░ αñ╡αñ░αÑìαñù (square)" }, value: 0 },
++      { label: { English: "Two small triangles", Hindi: "αñªαÑï αñ¢αÑïαñƒαÑç αññαÑìαñ░αñ┐αñ¡αÑüαñ£ (triangles)" }, value: 0 }
+     ],
+     metric: "judgement",
+   },
+@@ -240,12 +240,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "creative",
+     component: "visual_imagination",
+     title: {
+-      English: "The Constellation Map",
+-      Hindi: "αññαñ╛αñ░αñ╛αñ«αñéαñíαñ▓ αñòαñ╛ αñ¿αñòαÑìαñ╢αñ╛"
++      English: "The Star Map",
++      Hindi: "αñ╕αñ┐αññαñ╛αñ░αÑïαñé αñòαñ╛ αñ¿αñòαÑìαñ╢αñ╛"
+     },
+     prompt: {
+-      English: "Look closely at the glowing stars in the magic night sky grid, and click them exactly as you remember them!",
+-      Hindi: "αñ£αñ╛αñªαÑüαñê αñ░αñ╛αññ αñòαÑç αñåαñ╕αñ«αñ╛αñ¿ αñòαÑç αñùαÑìαñ░αñ┐αñí αñ«αÑçαñé αñÜαñ«αñòαññαÑç αñ╕αñ┐αññαñ╛αñ░αÑïαñé αñòαÑï αñºαÑìαñ»αñ╛αñ¿ αñ╕αÑç αñªαÑçαñûαÑçαñé, αñöαñ░ αñáαÑÇαñò αñ╡αÑêαñ╕αÑç αñ╣αÑÇ αñëαñ¿ αñ¬αñ░ αñòαÑìαñ▓αñ┐αñò αñòαñ░αÑçαñé αñ£αÑêαñ╕αÑç αñ╡αÑç αñåαñ¬αñòαÑï αñ»αñ╛αñª αñ╣αÑêαñé!"
++      English: "Look closely at the glowing stars in the magic grid, and click them exactly as you remember them!",
++      Hindi: "αñ£αñ╛αñªαÑüαñê αñùαÑìαñ░αñ┐αñí αñ«αÑçαñé αñÜαñ«αñòαññαÑç αñ╕αñ┐αññαñ╛αñ░αÑïαñé αñòαÑï αñºαÑìαñ»αñ╛αñ¿ αñ╕αÑç αñªαÑçαñûαÑçαñé, αñöαñ░ αñáαÑÇαñò αñ╡αÑêαñ╕αÑç αñ╣αÑÇ αñëαñ¿ αñ¬αñ░ αñòαÑìαñ▓αñ┐αñò αñòαñ░αÑçαñé αñ£αÑêαñ╕αÑç αñ╡αÑç αñåαñ¬αñòαÑï αñ»αñ╛αñª αñ╣αÑêαñé!"
+     },
+     gridSize: 9,
+     highlights: [1, 3, 5, 7],
+@@ -258,12 +258,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "creative",
+     component: "divergent_thinking",
+     title: {
+-      English: "Sideways Gravity School",
+-      Hindi: "αñàαñ¿αÑïαñûαÑÇ αñ╕αÑïαñÜ: αññαñ┐αñ░αñ¢αñ╛ αñùαÑüαñ░αÑüαññαÑìαñ╡αñ╛αñòαñ░αÑìαñ╖αñú"
++      English: "The Cardboard Box Challenge",
++      Hindi: "αñòαñ╛αñ░αÑìαñíαñ¼αÑïαñ░αÑìαñí αñ¼αÑëαñòαÑìαñ╕ αñòαÑÇ αñÜαÑüαñ¿αÑîαññαÑÇ"
+     },
+     prompt: {
+-      English: "Imagine that gravity suddenly starts working SIDEWAYS at your school instead of pulling you down! Write down at least 3 super funny or amazing things that would happen to you and your friends!",
+-      Hindi: "αñòαñ▓αÑìαñ¬αñ¿αñ╛ αñòαÑÇαñ£αñ┐αñÅ αñòαñ┐ αñåαñ¬αñòαÑç αñ╕αÑìαñòαÑéαñ▓ αñ«αÑçαñé αñùαÑüαñ░αÑüαññαÑìαñ╡αñ╛αñòαñ░αÑìαñ╖αñú (gravity) αñ¿αÑÇαñÜαÑç αñûαÑÇαñéαñÜαñ¿αÑç αñòαÑç αñ¼αñ£αñ╛αñ» αñàαñÜαñ╛αñ¿αñò αñªαñ╛αñêαñé αñ»αñ╛ αñ¼αñ╛αñêαñé αñôαñ░ (SIDEWAYS) αñòαñ╛αñ« αñòαñ░αñ¿αÑç αñ▓αñùαÑç! αñ▓αñ┐αñûαÑçαñé αñòαñ┐ αñåαñ¬αñòαÑç αñöαñ░ αñåαñ¬αñòαÑç αñªαÑïαñ╕αÑìαññαÑïαñé αñòαÑç αñ╕αñ╛αñÑ αñòαÑîαñ¿ αñ╕αÑÇ 3 αñ╕αñ¼αñ╕αÑç αñ«αñ£αÑçαñªαñ╛αñ░ αñ»αñ╛ αñàαñ¿αÑïαñûαÑÇ αñ¼αñ╛αññαÑçαñé αñ╣αÑïαñéαñùαÑÇ!"
++      English: "Imagine you are given a large, empty cardboard box. Write down 3 completely different and creative things you could build or play with it!",
++      Hindi: "αñòαñ▓αÑìαñ¬αñ¿αñ╛ αñòαÑÇαñ£αñ┐αñÅ αñòαñ┐ αñåαñ¬αñòαÑï αñÅαñò αñ¼αñíαñ╝αñ╛, αñûαñ╛αñ▓αÑÇ αñòαñ╛αñ░αÑìαñíαñ¼αÑïαñ░αÑìαñí αñ¼αÑëαñòαÑìαñ╕ αñ«αñ┐αñ▓αñ╛ αñ╣αÑêαÑñ 3 αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñàαñ▓αñù αñöαñ░ αñ░αñÜαñ¿αñ╛αññαÑìαñ«αñò αñÜαÑÇαñ£αÑçαñé αñ▓αñ┐αñûαÑçαñé αñ£αÑï αñåαñ¬ αñçαñ╕αñ╕αÑç αñ¼αñ¿αñ╛ αñ╕αñòαññαÑç αñ╣αÑêαñé αñ»αñ╛ αñçαñ╕αñòαÑç αñ╕αñ╛αñÑ αñûαÑçαñ▓ αñ╕αñòαññαÑç αñ╣αÑêαñé!"
+     },
+     minIdeas: 3,
+     metric: "fluency",
+@@ -274,39 +274,39 @@ export const ASSESSMENT_TASKS = [
+     domain: "language",
+     component: "storytelling",
+     title: {
+-      English: "The Robot Escape Adventure",
+-      Hindi: "αñ░αÑïαñ¼αÑïαñƒ αñ╕αÑç αñ¼αñÜαñ¿αÑç αñòαñ╛ αñ░αÑïαñ«αñ╛αñéαñÜ"
++      English: "The School Sports Race",
++      Hindi: "αñ╕αÑìαñòαÑéαñ▓ αñòαÑÇ αñªαÑîαñíαñ╝"
+     },
+     prompt: {
+-      English: "Put these secret agent message pieces in the order that tells the exciting escape story!",
+-      Hindi: "αñçαñ¿ αñ£αñ╛αñ╕αÑéαñ╕ αñ╕αñéαñªαÑçαñ╢αÑïαñé αñòαÑï αñ╕αñ╣αÑÇ αñòαÑìαñ░αñ« αñ«αÑçαñé αñ▓αñùαñ╛αñÅαñé αññαñ╛αñòαñ┐ αñ░αÑïαñ«αñ╛αñéαñÜαñò αñ½αñ░αñ╛αñ░αÑÇ αñòαÑÇ αñòαñ╣αñ╛αñ¿αÑÇ αñ¬αÑéαñ░αÑÇ αñ╣αÑï αñ╕αñòαÑç!"
++      English: "Put these steps in the correct order to tell the story of a fun school race:",
++      Hindi: "αñçαñ¿ αñ╡αñ╛αñòαÑìαñ»αÑïαñé αñòαÑï αñ╕αñ╣αÑÇ αñòαÑìαñ░αñ« αñ«αÑçαñé αñ▓αñùαñ╛αñÅαñé αññαñ╛αñòαñ┐ αñ╕αÑìαñòαÑéαñ▓ αñòαÑÇ αñÅαñò αñ«αñ£αÑçαñªαñ╛αñ░ αñªαÑîαñíαñ╝ αñòαÑÇ αñòαñ╣αñ╛αñ¿αÑÇ αñ¼αñ¿ αñ╕αñòαÑç:"
+     },
+     steps: {
+       English: [
+-        "We saw a giant iron gate guarded by two sleeping robots.",
+-        "I whispered the secret code word to open the gate.",
+-        "We ran through the dark jungle and found a hidden sailboat.",
+-        "We sailed away under the beautiful starry night sky."
++        "The whistle blew and all the children started running fast.",
++        "Rohan fell down but his friend helped him stand up.",
++        "They ran together holding hands towards the finish line.",
++        "Everyone cheered as they crossed the line at the same time."
+       ],
+       Hindi: [
+-        "αñ╣αñ«αñ¿αÑç αñÅαñò αñ╡αñ┐αñ╢αñ╛αñ▓ αñ▓αÑïαñ╣αÑç αñòαñ╛ αñªαñ░αñ╡αñ╛αñ£αñ╛ αñªαÑçαñûαñ╛ αñ£αñ┐αñ╕ αñ¬αñ░ αñªαÑï αñ╕αÑïαññαÑç αñ╣αÑüαñÅ αñ░αÑïαñ¼αÑïαñƒ αñ¬αñ╣αñ░αñ╛ αñªαÑç αñ░αñ╣αÑç αñÑαÑçαÑñ",
+-        "αñ«αÑêαñéαñ¿αÑç αñªαñ░αñ╡αñ╛αñ£αñ╛ αñûαÑïαñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñùαÑüαñ¬αÑìαññ αñòαÑïαñí αñ╢αñ¼αÑìαñª αñ½αÑüαñ╕αñ½αÑüαñ╕αñ╛αñ»αñ╛αÑñ",
+-        "αñ╣αñ« αñàαñéαñºαÑçαñ░αÑç αñ£αñéαñùαñ▓ αñ«αÑçαñé αñ¡αñ╛αñùαÑç αñöαñ░ αñ╣αñ«αÑçαñé αñÅαñò αñ¢αñ┐αñ¬αÑÇ αñ╣αÑüαñê αñ¿αñ╛αñ╡ αñ«αñ┐αñ▓αÑÇαÑñ",
+-        "αñ╣αñ« αñ╕αÑüαñéαñªαñ░ αññαñ╛αñ░αÑïαñé αñ╡αñ╛αñ▓αÑç αñåαñ╕αñ«αñ╛αñ¿ αñòαÑç αñ¿αÑÇαñÜαÑç αñ¿αñ╛αñ╡ αñ▓αÑçαñòαñ░ αñ¿αñ┐αñòαñ▓ αñùαñÅαÑñ"
++        "αñ╕αÑÇαñƒαÑÇ αñ¼αñ£αÑÇ αñöαñ░ αñ╕αñ¡αÑÇ αñ¼αñÜαÑìαñÜαÑç αññαÑçαñ£αñ╝αÑÇ αñ╕αÑç αñªαÑîαñíαñ╝αñ¿αÑç αñ▓αñùαÑçαÑñ",
++        "αñ░αÑïαñ╣αñ¿ αñùαñ┐αñ░ αñùαñ»αñ╛ αñ▓αÑçαñòαñ┐αñ¿ αñëαñ╕αñòαÑç αñªαÑïαñ╕αÑìαññ αñ¿αÑç αñëαñ╕αÑç αñûαñíαñ╝αÑç αñ╣αÑïαñ¿αÑç αñ«αÑçαñé αñ«αñªαñª αñòαÑÇαÑñ",
++        "αñ╡αÑç αñ╣αñ╛αñÑ αñ¬αñòαñíαñ╝αñòαñ░ αñÅαñò αñ╕αñ╛αñÑ αñ½αñ┐αñ¿αñ┐αñ╢ αñ▓αñ╛αñçαñ¿ αñòαÑÇ αñôαñ░ αñ¡αñ╛αñùαÑçαÑñ",
++        "αñ£αñ¼ αñëαñ¿αÑìαñ╣αÑïαñéαñ¿αÑç αñÅαñò αñ╣αÑÇ αñ╕αñ«αñ» αñ«αÑçαñé αñ▓αñ╛αñçαñ¿ αñ¬αñ╛αñ░ αñòαÑÇ αññαÑï αñ╕αñ¡αÑÇ αñ¿αÑç αññαñ╛αñ▓αñ┐αñ»αñ╛αñü αñ¼αñ£αñ╛αñêαñéαÑñ"
+       ]
+     },
+     shuffled: {
+       English: [
+-        "We ran through the dark jungle and found a hidden sailboat.",
+-        "We saw a giant iron gate guarded by two sleeping robots.",
+-        "We sailed away under the beautiful starry night sky.",
+-        "I whispered the secret code word to open the gate."
++        "Rohan fell down but his friend helped him stand up.",
++        "Everyone cheered as they crossed the line at the same time.",
++        "The whistle blew and all the children started running fast.",
++        "They ran together holding hands towards the finish line."
+       ],
+       Hindi: [
+-        "αñ╣αñ« αñàαñéαñºαÑçαñ░αÑç αñ£αñéαñùαñ▓ αñ«αÑçαñé αñ¡αñ╛αñùαÑç αñöαñ░ αñ╣αñ«αÑçαñé αñÅαñò αñ¢αñ┐αñ¬αÑÇ αñ╣αÑüαñê αñ¿αñ╛αñ╡ αñ«αñ┐αñ▓αÑÇαÑñ",
+-        "αñ╣αñ«αñ¿αÑç αñÅαñò αñ╡αñ┐αñ╢αñ╛αñ▓ αñ▓αÑïαñ╣αÑç αñòαñ╛ αñªαñ░αñ╡αñ╛αñ£αñ╛ αñªαÑçαñûαñ╛ αñ£αñ┐αñ╕ αñ¬αñ░ αñªαÑï αñ╕αÑïαññαÑç αñ╣αÑüαñÅ αñ░αÑïαñ¼αÑïαñƒ αñ¬αñ╣αñ░αñ╛ αñªαÑç αñ░αñ╣αÑç αñÑαÑçαÑñ",
+-        "αñ╣αñ« αñ╕αÑüαñéαñªαñ░ αññαñ╛αñ░αÑïαñé αñ╡αñ╛αñ▓αÑç αñåαñ╕αñ«αñ╛αñ¿ αñòαÑç αñ¿αÑÇαñÜαÑç αñ¿αñ╛αñ╡ αñ▓αÑçαñòαñ░ αñ¿αñ┐αñòαñ▓ αñùαñÅαÑñ",
+-        "αñ«αÑêαñéαñ¿αÑç αñªαñ░αñ╡αñ╛αñ£αñ╛ αñûαÑïαñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñùαÑüαñ¬αÑìαññ αñòαÑïαñí αñ╢αñ¼αÑìαñª αñ½αÑüαñ╕αñ½αÑüαñ╕αñ╛αñ»αñ╛αÑñ"
++        "αñ░αÑïαñ╣αñ¿ αñùαñ┐αñ░ αñùαñ»αñ╛ αñ▓αÑçαñòαñ┐αñ¿ αñëαñ╕αñòαÑç αñªαÑïαñ╕αÑìαññ αñ¿αÑç αñëαñ╕αÑç αñûαñíαñ╝αÑç αñ╣αÑïαñ¿αÑç αñ«αÑçαñé αñ«αñªαñª αñòαÑÇαÑñ",
++        "αñ£αñ¼ αñëαñ¿αÑìαñ╣αÑïαñéαñ¿αÑç αñÅαñò αñ╣αÑÇ αñ╕αñ«αñ» αñ«αÑçαñé αñ▓αñ╛αñçαñ¿ αñ¬αñ╛αñ░ αñòαÑÇ αññαÑï αñ╕αñ¡αÑÇ αñ¿αÑç αññαñ╛αñ▓αñ┐αñ»αñ╛αñü αñ¼αñ£αñ╛αñêαñéαÑñ",
++        "αñ╕αÑÇαñƒαÑÇ αñ¼αñ£αÑÇ αñöαñ░ αñ╕αñ¡αÑÇ αñ¼αñÜαÑìαñÜαÑç αññαÑçαñ£αñ╝αÑÇ αñ╕αÑç αñªαÑîαñíαñ╝αñ¿αÑç αñ▓αñùαÑçαÑñ",
++        "αñ╡αÑç αñ╣αñ╛αñÑ αñ¬αñòαñíαñ╝αñòαñ░ αñÅαñò αñ╕αñ╛αñÑ αñ½αñ┐αñ¿αñ┐αñ╢ αñ▓αñ╛αñçαñ¿ αñòαÑÇ αñôαñ░ αñ¡αñ╛αñùαÑçαÑñ"
+       ]
+     },
+     metric: "sequence_accuracy",
+@@ -317,36 +317,89 @@ export const ASSESSMENT_TASKS = [
+     domain: "language",
+     component: "expression_clarity",
+     title: {
+-      English: "The Secret Word Bridges",
+-      Hindi: "αñ╢αñ¼αÑìαñªαÑïαñé αñòαñ╛ αñ£αñ╛αñªαÑüαñê αñ¬αÑüαñ▓"
++      English: "Explaining a Game",
++      Hindi: "αñûαÑçαñ▓ αñ╕αñ«αñ¥αñ╛αñ¿αñ╛"
+     },
+     prompt: {
+-      English: "Complete this word connection bridge: A FEATHER is to a BIRD as a SCALE is to...?",
+-      Hindi: "αñ╢αñ¼αÑìαñªαÑïαñé αñòαñ╛ αñ╕αñéαñ¼αñéαñº αñ¬αÑéαñ░αñ╛ αñòαñ░αÑçαñé: αñÅαñò αñ¬αñéαñû (FEATHER) αñÜαñ┐αñíαñ╝αñ┐αñ»αñ╛ (BIRD) αñòαÑç αñ▓αñ┐αñÅ αñ╣αÑê, αññαÑï αñÅαñò αñ╢αñ▓αÑìαñò (SCALE) αñòαñ┐αñ╕αñòαÑç αñ▓αñ┐αñÅ αñ╣αÑê...?"
++      English: "You want to teach a new friend how to play a game you love, but they do not speak your language well. What is the best way to explain the game?",
++      Hindi: "αñåαñ¬ αñÅαñò αñ¿αñÅ αñªαÑïαñ╕αÑìαññ αñòαÑï αñàαñ¬αñ¿αñ╛ αñ¬αñ╕αñéαñªαÑÇαñªαñ╛ αñûαÑçαñ▓ αñ╕αñ┐αñûαñ╛αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñé, αñ▓αÑçαñòαñ┐αñ¿ αñ╡αÑç αñåαñ¬αñòαÑÇ αñ¡αñ╛αñ╖αñ╛ αñáαÑÇαñò αñ╕αÑç αñ¿αñ╣αÑÇαñé αñ╕αñ«αñ¥ αñ¬αñ╛αññαÑçαÑñ αñûαÑçαñ▓ αñòαÑï αñ╕αñ«αñ¥αñ╛αñ¿αÑç αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αñ╛ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+     },
+     options: [
+-      { label: { English: "A Fish", Hindi: "αñÅαñò αñ«αñ¢αñ▓αÑÇ" }, value: 4 },
+-      { label: { English: "A Dog", Hindi: "αñÅαñò αñòαÑüαññαÑìαññαñ╛" }, value: 0 },
+-      { label: { English: "A Tree", Hindi: "αñÅαñò αñ¬αÑçαñíαñ╝" }, value: 0 },
+-      { label: { English: "A River", Hindi: "αñÅαñò αñ¿αñªαÑÇ" }, value: 0 }
++      {
++        label: {
++          English: "Show them the actions slowly with your hands, play a practice round together, and smile when they do well",
++          Hindi: "αñ╣αñ╛αñÑαÑïαñé αñòαÑç αñçαñ╢αñ╛αñ░αÑïαñé αñ╕αÑç αñºαÑÇαñ░αÑç-αñºαÑÇαñ░αÑç αñ╕αñ«αñ¥αñ╛αñÅαñé, αñ╕αñ╛αñÑ αñ«αÑçαñé αñÅαñò αñàαñ¡αÑìαñ»αñ╛αñ╕ αñ«αÑêαñÜ αñûαÑçαñ▓αÑçαñé, αñöαñ░ αñëαñ¿αñòαÑç αñàαñÜαÑìαñ¢αñ╛ αñòαñ░αñ¿αÑç αñ¬αñ░ αñ«αÑüαñ╕αÑìαñòαÑüαñ░αñ╛αñÅαñé"
++        },
++        value: 4
++      },
++      {
++        label: {
++          English: "Explain all the rules very quickly in English",
++          Hindi: "αñàαñéαñùαÑìαñ░αÑçαñ£αÑÇ αñ«αÑçαñé αñ¼αñ╣αÑüαññ αññαÑçαñ£αÑÇ αñ╕αÑç αñ╕αñ╛αñ░αÑç αñ¿αñ┐αñ»αñ« αñ¼αÑïαñ▓ αñªαÑçαñé"
++        },
++        value: 0
++      },
++      {
++        label: {
++          English: "Give them a rulebook to read by themselves",
++          Hindi: "αñëαñ¿αÑìαñ╣αÑçαñé αñ¿αñ┐αñ»αñ«αÑïαñé αñòαÑÇ αñÅαñò αñòαñ┐αññαñ╛αñ¼ αñªαÑçαñòαñ░ αñûαÑüαñª αñ¬αñóαñ╝αñ¿αÑç αñòαÑï αñòαñ╣αÑçαñé"
++        },
++        value: 0
++      },
++      {
++        label: {
++          English: "Tell them to watch you play for an hour without playing",
++          Hindi: "αñëαñ¿αÑìαñ╣αÑçαñé αñ¼αñ┐αñ¿αñ╛ αñûαñ┐αñ▓αñ╛αñÅ αñÅαñò αñÿαñéαñƒαÑç αññαñò αñ╕αñ┐αñ░αÑìαñ½ αñåαñ¬αñòαÑï αñûαÑçαñ▓αññαÑç αñ╣αÑüαñÅ αñªαÑçαñûαñ¿αÑç αñòαÑï αñòαñ╣αÑçαñé"
++        },
++        value: 1
++      }
+     ],
+     metric: "judgement",
+   },
+   {
+     key: "visual_reaction",
+-    type: "reaction",
++    type: "choice",
+     domain: "kinesthetic",
+     component: "body_coordination",
+     title: {
+-      English: "The Lightning Flash",
+-      Hindi: "αñ¼αñ┐αñ£αñ▓αÑÇ αñòαÑÇ αñÜαñ«αñò"
++      English: "Catching the Ball",
++      Hindi: "αñùαÑçαñéαñª αñ¬αñòαñíαñ╝αñ¿αñ╛"
+     },
+     prompt: {
+-      English: "Tap the center target as fast as a lightning bolt the exact millisecond it flashes happy gold!",
+-      Hindi: "αñ£αÑêαñ╕αÑç αñ╣αÑÇ αñ¼αÑÇαñÜ αñòαñ╛ αñùαÑïαñ▓αñ╛ αñÜαñ«αñòαÑÇαñ▓αñ╛ αñ╕αÑüαñ¿αñ╣αñ░αñ╛ (gold) αñ░αñéαñù αñòαñ╛ αñ╣αÑï, αñ¼αñ┐αñ£αñ▓αÑÇ αñòαÑÇ αññαÑçαñ£αÑÇ αñ╕αÑç αñëαñ╕ αñ¬αñ░ αñƒαÑêαñ¬ αñòαñ░αÑçαñé!"
++      English: "A teammate throws a ball high in the air towards you. What is the best way to catch it safely without dropping it?",
++      Hindi: "αñåαñ¬αñòαñ╛ αñÅαñò αñ╕αñ╛αñÑαÑÇ αñ╣αñ╡αñ╛ αñ«αÑçαñé αñèαñüαñÜαÑÇ αñùαÑçαñéαñª αñåαñ¬αñòαÑÇ αññαñ░αñ½ αñ½αÑçαñéαñòαññαñ╛ αñ╣αÑêαÑñ αñ¼αñ┐αñ¿αñ╛ αñùαñ┐αñ░αñ╛αñÅ αñëαñ╕αÑç αñ╕αÑüαñ░αñòαÑìαñ╖αñ┐αññ αñ░αÑéαñ¬ αñ╕αÑç αñ¬αñòαñíαñ╝αñ¿αÑç αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αñ╛ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+     },
+-    waitMs: 1200,
+-    metric: "reaction_time",
++    options: [
++      {
++        label: {
++          English: "Move to stand under the ball, make a cup with your hands, and bring your hands down slightly as it lands",
++          Hindi: "αñùαÑçαñéαñª αñòαÑç αñ¿αÑÇαñÜαÑç αñûαñíαñ╝αÑç αñ╣αÑïαñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñ¼αñóαñ╝αÑçαñé, αñàαñ¬αñ¿αÑç αñ╣αñ╛αñÑαÑïαñé αñòαÑÇ αñòαñƒαÑïαñ░αÑÇ αñ¼αñ¿αñ╛αñÅαñé, αñöαñ░ αñùαÑçαñéαñª αñ╣αñ╛αñÑ αñ«αÑçαñé αñåαññαÑç αñ╣αÑÇ αñ╣αñ╛αñÑαÑïαñé αñòαÑï αñÑαÑïαñíαñ╝αñ╛ αñ¿αÑÇαñÜαÑç αñ▓αñ╛αñÅαñé"
++        },
++        value: 4
++      },
++      {
++        label: {
++          English: "Keep your arms completely stiff and let the ball hit your chest",
++          Hindi: "αñàαñ¬αñ¿αÑç αñ╣αñ╛αñÑαÑïαñé αñòαÑï αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñòαñíαñ╝αñ╛ αñ░αñûαÑçαñé αñöαñ░ αñùαÑçαñéαñª αñòαÑï αñàαñ¬αñ¿αÑÇ αñ¢αñ╛αññαÑÇ αñ╕αÑç αñƒαñòαñ░αñ╛αñ¿αÑç αñªαÑçαñé"
++        },
++        value: 0
++      },
++      {
++        label: {
++          English: "Close your eyes and cross your arms over your face",
++          Hindi: "αñàαñ¬αñ¿αÑÇ αñåαñüαñûαÑçαñé αñ¼αñéαñª αñòαñ░αÑçαñé αñöαñ░ αñàαñ¬αñ¿αÑç αñÜαÑçαñ╣αñ░αÑç αñ¬αñ░ αñàαñ¬αñ¿αÑç αñ╣αñ╛αñÑαÑïαñé αñòαÑï αñòαÑìαñ░αÑëαñ╕ αñòαñ░αÑçαñé"
++        },
++        value: 0
++      },
++      {
++        label: {
++          English: "Try to catch it with only one hand while looking away",
++          Hindi: "αñªαÑéαñ╕αñ░αÑÇ αññαñ░αñ½ αñªαÑçαñûαññαÑç αñ╣αÑüαñÅ αñòαÑçαñ╡αñ▓ αñÅαñò αñ╣αñ╛αñÑ αñ╕αÑç αñëαñ╕αÑç αñ¬αñòαñíαñ╝αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑçαñé"
++        },
++        value: 1
++      }
++    ],
++    metric: "judgement",
+   },
+   {
+     key: "kinesthetic_motor_planning",
+@@ -354,29 +407,41 @@ export const ASSESSMENT_TASKS = [
+     domain: "kinesthetic",
+     component: "body_coordination",
+     title: {
+-      English: "The Treehouse Rope Bridge",
+-      Hindi: "αñ░αñ╕αÑìαñ╕αÑÇ αñòαÑç αñ¬αÑüαñ▓ αñ¬αñ░ αñ╕αñéαññαÑüαñ▓αñ¿"
++      English: "The Sharp Turn",
++      Hindi: "αññαÑçαñ£αñ╝ αñ«αÑïαñíαñ╝"
+     },
+     prompt: {
+-      English: "You are crossing a high, wobbling rope bridge to reach a treehouse. A strong gust of wind suddenly blows from the right! What is the best way to balance your body so you don't slip?",
+-      Hindi: "αñåαñ¬ αñ¬αÑçαñíαñ╝ αñ¬αñ░ αñ¼αñ¿αÑç αñÿαñ░ αññαñò αñ¬αñ╣αÑüαñüαñÜαñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñÅαñò αñèαñüαñÜαÑç, αñ╣αñ┐αñ▓αññαÑç αñ╣αÑüαñÅ αñ░αñ╕αÑìαñ╕αÑÇ αñòαÑç αñ¬αÑüαñ▓ αñòαÑï αñ¬αñ╛αñ░ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ αñàαñÜαñ╛αñ¿αñò αñªαñ╛αñêαñé αñôαñ░ αñ╕αÑç αññαÑçαñ£αñ╝ αñ╣αñ╡αñ╛ αñòαñ╛ αñ¥αÑïαñéαñòαñ╛ αñåαññαñ╛ αñ╣αÑê! αñàαñ¬αñ¿αÑç αñ╢αñ░αÑÇαñ░ αñòαÑï αñ╕αñéαññαÑüαñ▓αñ┐αññ αñòαñ░αñ¿αÑç αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñ╕αÑüαñ░αñòαÑìαñ╖αñ┐αññ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê αññαñ╛αñòαñ┐ αñåαñ¬ αñ½αñ┐αñ╕αñ▓αÑçαñé αñ¿αñ╣αÑÇαñé?"
++      English: "You are running fast in a tag game at the school playground. To turn left quickly to avoid being caught without losing your balance, what should you do?",
++      Hindi: "αñåαñ¬ αñ╕αÑìαñòαÑéαñ▓ αñòαÑç αñ«αÑêαñªαñ╛αñ¿ αñ«αÑçαñé αñ¬αñòαñíαñ╝αñ«-αñ¬αñòαñíαñ╝αñ╛αñê αñûαÑçαñ▓ αñ«αÑçαñé αñ¼αñ╣αÑüαññ αññαÑçαñ£αñ╝ αñªαÑîαñíαñ╝ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ αñ¼αñ┐αñ¿αñ╛ αñ╕αñéαññαÑüαñ▓αñ¿ αñûαÑïαñÅ αñ¬αñòαñíαñ╝αÑç αñ£αñ╛αñ¿αÑç αñ╕αÑç αñ¼αñÜαñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αññαÑüαñ░αñéαññ αñ¼αñ╛αñêαñé (left) αñôαñ░ αñ«αÑüαñíαñ╝αñ¿αÑç αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αñ╛ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+     },
+     options: [
+       {
+-        label: { English: "Bend your knees slightly, spread your arms wide, and lean your weight slightly into the wind to the right", Hindi: "αñàαñ¬αñ¿αÑç αñÿαÑüαñƒαñ¿αÑïαñé αñòαÑï αñÑαÑïαñíαñ╝αñ╛ αñ«αÑïαñíαñ╝αÑçαñé, αñàαñ¬αñ¿αÑç αñªαÑïαñ¿αÑïαñé αñ╣αñ╛αñÑαÑïαñé αñòαÑï αñ½αÑêαñ▓αñ╛αñÅαñé, αñöαñ░ αñàαñ¬αñ¿αÑç αñ╡αñ£αñ¿ αñòαÑï αñÑαÑïαñíαñ╝αñ╛ αñªαñ╛αñêαñé αñôαñ░ (αñ╣αñ╡αñ╛ αñòαÑÇ αññαñ░αñ½) αñ¥αÑüαñòαñ╛αñÅαñé" },
++        label: {
++          English: "Lower your body slightly, lean your weight to the left, and push off firmly with your right foot",
++          Hindi: "αñàαñ¬αñ¿αÑç αñ╢αñ░αÑÇαñ░ αñòαÑï αñÑαÑïαñíαñ╝αñ╛ αñ¥αÑüαñòαñ╛αñÅαñé, αñàαñ¬αñ¿αñ╛ αñ╡αñ£αñ¿ αñ¼αñ╛αñêαñé αñôαñ░ αñ▓αÑç αñ£αñ╛αñÅαñé, αñöαñ░ αñªαñ╛αñÅαñé αñ¬αÑêαñ░ αñ╕αÑç αñ«αñ£αñ¼αÑéαññαÑÇ αñ╕αÑç αñºαñòαÑìαñòαñ╛ αñªαÑçαñé"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Stand completely straight and close your eyes", Hindi: "αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñ╕αÑÇαñºαÑç αñûαñíαñ╝αÑç αñ╣αÑï αñ£αñ╛αñÅαñé αñöαñ░ αñàαñ¬αñ¿αÑÇ αñåαñüαñûαÑçαñé αñ¼αñéαñª αñòαñ░ αñ▓αÑçαñé" },
++        label: {
++          English: "Keep your body completely stiff and straight while turning",
++          Hindi: "αñ«αÑüαñíαñ╝αññαÑç αñ╕αñ«αñ» αñàαñ¬αñ¿αÑç αñ╢αñ░αÑÇαñ░ αñòαÑï αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñ╕αÑÇαñºαñ╛ αñöαñ░ αñòαñíαñ╝αñ╛ αñ░αñûαÑçαñé"
++        },
+         value: 0
+       },
+       {
+-        label: { English: "Run as fast as you can to the other side", Hindi: "αñ£αñ┐αññαñ¿αÑÇ αññαÑçαñ£αÑÇ αñ╕αÑç αñ╣αÑï αñ╕αñòαÑç αñªαÑéαñ╕αñ░αÑÇ αññαñ░αñ½ αñªαÑîαñíαñ╝αÑçαñé" },
+-        value: 1
++        label: {
++          English: "Close your eyes and jump high in the air",
++          Hindi: "αñàαñ¬αñ¿αÑÇ αñåαñüαñûαÑçαñé αñ¼αñéαñª αñòαñ░αÑçαñé αñöαñ░ αñ╣αñ╡αñ╛ αñ«αÑçαñé αñèαñüαñÜαÑÇ αñ¢αñ▓αñ╛αñéαñù αñ▓αñùαñ╛αñÅαñé"
++        },
++        value: 0
+       },
+       {
+-        label: { English: "Sit down on the rope bridge and shout for help", Hindi: "αñ░αñ╕αÑìαñ╕αÑÇ αñòαÑç αñ¬αÑüαñ▓ αñ¬αñ░ αñ¼αÑêαñá αñ£αñ╛αñÅαñé αñöαñ░ αñ«αñªαñª αñòαÑç αñ▓αñ┐αñÅ αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñé" },
+-        value: 2
++        label: {
++          English: "Stop running completely and slide on your knees",
++          Hindi: "αñªαÑîαñíαñ╝αñ¿αñ╛ αñ¬αÑéαñ░αÑÇ αññαñ░αñ╣ αñ¼αñéαñª αñòαñ░ αñªαÑçαñé αñöαñ░ αñàαñ¬αñ¿αÑç αñÿαÑüαñƒαñ¿αÑïαñé αñòαÑç αñ¼αñ▓ αñ½αñ┐αñ╕αñ▓αÑçαñé"
++        },
++        value: 1
+       }
+     ],
+     metric: "judgement",
+@@ -387,29 +452,41 @@ export const ASSESSMENT_TASKS = [
+     domain: "social",
+     component: "empathy_recognition",
+     title: {
+-      English: "The Project Deadline",
+-      Hindi: "The Project Deadline"
++      English: "The Broken Sandcastle",
++      Hindi: "αñƒαÑéαñƒαñ╛ αñ╣αÑüαñå αñòαñ┐αñ▓αñ╛"
+     },
+     prompt: {
+-      English: "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?",
+-      Hindi: "Your team has 10 minutes left to submit a project. The poster looks great, but one teammate is upset because the group forgot to include their drawing. The other teammates want to submit immediately to win. What do you do?"
++      English: "Your group of friends is building a big sandcastle in the school playground. A friend accidentally steps on it and breaks a corner. They look very sorry. What do you do?",
++      Hindi: "αñåαñ¬αñòαñ╛ αñªαÑïαñ╕αÑìαññαÑïαñé αñòαñ╛ αñ╕αñ«αÑéαñ╣ αñ╕αÑìαñòαÑéαñ▓ αñòαÑç αñ«αÑêαñªαñ╛αñ¿ αñ«αÑçαñé αñ░αÑçαññ αñòαñ╛ αñÅαñò αñ¼αñíαñ╝αñ╛ αñòαñ┐αñ▓αñ╛ αñ¼αñ¿αñ╛ αñ░αñ╣αñ╛ αñ╣αÑêαÑñ αñÅαñò αñªαÑïαñ╕αÑìαññ αñòαñ╛ αñ¬αÑêαñ░ αñùαñ▓αññαÑÇ αñ╕αÑç αñëαñ╕ αñ¬αñ░ αñ¬αñíαñ╝ αñ£αñ╛αññαñ╛ αñ╣αÑê αñöαñ░ αñÅαñò αñòαÑïαñ¿αñ╛ αñƒαÑéαñƒ αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñ╡αñ╣ αñ¼αñ╣αÑüαññ αñëαñªαñ╛αñ╕ αñªαñ┐αñûαññαñ╛ αñ╣αÑêαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
+     },
+     options: [
+       {
+-        label: { English: "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation.", Hindi: "Submit the project now to ensure the team wins, then promise the teammate to highlight their drawing during the presentation." },
++        label: {
++          English: "Tell them it is okay, it was an accident, and ask them to help you rebuild that corner even stronger",
++          Hindi: "αñëαñ¿αñ╕αÑç αñòαñ╣αÑçαñé αñòαñ┐ αñòαÑïαñê αñ¼αñ╛αññ αñ¿αñ╣αÑÇαñé, αñ»αñ╣ αñùαñ▓αññαÑÇ αñ╕αÑç αñ╣αÑüαñå, αñöαñ░ αñëαñ╕ αñòαÑïαñ¿αÑç αñòαÑï αñ¬αñ╣αñ▓αÑç αñ╕αÑç αñ¡αÑÇ αñ«αñ£αñ¼αÑéαññ αñ¼αñ¿αñ╛αñ¿αÑç αñ«αÑçαñé αñëαñ¿αñòαÑÇ αñ«αñªαñª αñ▓αÑçαñé"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important.", Hindi: "Delay the submission to glue the drawing on, even if it means missing the absolute deadline, because team unity is more important." },
+-        value: 4
++        label: {
++          English: "Get angry and break their toys or shoes",
++          Hindi: "αñùαÑüαñ╕αÑìαñ╕αñ╛ αñ╣αÑï αñ£αñ╛αñÅαñé αñöαñ░ αñëαñ¿αñòαÑç αñûαñ┐αñ▓αÑîαñ¿αÑç αñ»αñ╛ αñ£αÑéαññαÑç αñ½αÑçαñéαñò αñªαÑçαñé"
++        },
++        value: 0
+       },
+       {
+-        label: { English: "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time.", Hindi: "Find a quick, creative compromise, like taping the drawing to the back of the poster as an 'Appendix' to save time." },
+-        value: 4
++        label: {
++          English: "Start crying and refuse to play anymore",
++          Hindi: "αñ░αÑïαñ¿αñ╛ αñ╢αÑüαñ░αÑé αñòαñ░ αñªαÑçαñé αñöαñ░ αñåαñùαÑç αñûαÑçαñ▓αñ¿αÑç αñ╕αÑç αñ«αñ¿αñ╛ αñòαñ░ αñªαÑçαñé"
++        },
++        value: 1
+       },
+       {
+-        label: { English: "Do nothing and let the other teammates decide.", Hindi: "Do nothing and let the other teammates decide." },
+-        value: 1
++        label: {
++          English: "Ignore them and rebuild the corner alone without talking",
++          Hindi: "αñëαñ¿αÑìαñ╣αÑçαñé αñ¿αñ£αñ░αñàαñéαñªαñ╛αñ£ αñòαñ░αÑçαñé αñöαñ░ αñ¼αñ┐αñ¿αñ╛ αñ¼αñ╛αññ αñòαñ┐αñÅ αñàαñòαÑçαñ▓αÑç αñ╣αÑÇ αñòαÑïαñ¿αñ╛ αñªαÑïαñ¼αñ╛αñ░αñ╛ αñ¼αñ¿αñ╛αñ¿αÑç αñ▓αñùαÑçαñé"
++        },
++        value: 2
+       }
+     ],
+     metric: "judgement",
+@@ -429,19 +506,31 @@ export const ASSESSMENT_TASKS = [
+     },
+     options: [
+       {
+-        label: { English: "Suggest playing a quick penalty kick or flip a coin to decide, and remind them that having fun together is the main goal", Hindi: "αñÅαñò αññαÑìαñ╡αñ░αñ┐αññ αñ¬αÑçαñ¿αñ▓αÑìαñƒαÑÇ αñòαñ┐αñò αñ▓αÑçαñ¿αÑç αñ»αñ╛ αñ╕αñ┐αñòαÑìαñòαñ╛ αñëαñ¢αñ╛αñ▓αñòαñ░ αñ½αÑêαñ╕αñ▓αñ╛ αñòαñ░αñ¿αÑç αñòαñ╛ αñ╕αÑüαñ¥αñ╛αñ╡ αñªαÑçαñé, αñöαñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñ»αñ╛αñª αñªαñ┐αñ▓αñ╛αñÅαñé αñòαñ┐ αñ╕αñ╛αñÑ αñ«αÑçαñé αñ«αñ£αñ╝αñ╛ αñòαñ░αñ¿αñ╛ αñ╣αÑÇ αñ«αÑüαñûαÑìαñ» αñ▓αñòαÑìαñ╖αÑìαñ» αñ╣αÑê" },
++        label: {
++          English: "Suggest playing a quick penalty kick or flip a coin to decide, and remind them that having fun together is the main goal",
++          Hindi: "αñÅαñò αññαÑìαñ╡αñ░αñ┐αññ αñ¬αÑçαñ¿αñ▓αÑìαñƒαÑÇ αñòαñ┐αñò αñ▓αÑçαñ¿αÑç αñ»αñ╛ αñ╕αñ┐αñòαÑìαñòαñ╛ αñëαñ¢αñ╛αñ▓αñòαñ░ αñ½αÑêαñ╕αñ▓αñ╛ αñòαñ░αñ¿αÑç αñòαñ╛ αñ╕αÑüαñ¥αñ╛αñ╡ αñªαÑçαñé, αñöαñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñ»αñ╛αñª αñªαñ┐αñ▓αñ╛αñÅαñé αñòαñ┐ αñ╕αñ╛αñÑ αñ«αÑçαñé αñ«αñ£αñ╝αñ╛ αñòαñ░αñ¿αñ╛ αñ╣αÑÇ αñ«αÑüαñûαÑìαñ» αñ▓αñòαÑìαñ╖αÑìαñ» αñ╣αÑê"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Shout louder than both of them to make them shut up", Hindi: "αñëαñ¿ αñªαÑïαñ¿αÑïαñé αñ╕αÑç αñ¡αÑÇ αñ£αñ╝αÑìαñ»αñ╛αñªαñ╛ αñ£αñ╝αÑïαñ░ αñ╕αÑç αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñü αññαñ╛αñòαñ┐ αñ╡αÑç αñÜαÑüαñ¬ αñ╣αÑï αñ£αñ╛αñÅαñü" },
++        label: {
++          English: "Shout louder than both of them to make them shut up",
++          Hindi: "αñëαñ¿ αñªαÑïαñ¿αÑïαñé αñ╕αÑç αñ¡αÑÇ αñ£αñ╝αÑìαñ»αñ╛αñªαñ╛ αñ£αñ╝αÑïαñ░ αñ╕αÑç αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñü αññαñ╛αñòαñ┐ αñ╡αÑç αñÜαÑüαñ¬ αñ╣αÑï αñ£αñ╛αñÅαñü"
++        },
+         value: 0
+       },
+       {
+-        label: { English: "Take the football and walk home", Hindi: "αñ½αÑüαñƒαñ¼αÑëαñ▓ αñ▓αÑçαñòαñ░ αñàαñ¬αñ¿αÑç αñÿαñ░ αñÜαñ▓αÑç αñ£αñ╛αñÅαñé" },
++        label: {
++          English: "Take the football and walk home",
++          Hindi: "αñ½αÑüαñƒαñ¼αÑëαñ▓ αñ▓αÑçαñòαñ░ αñàαñ¬αñ¿αÑç αñÿαñ░ αñÜαñ▓αÑç αñ£αñ╛αñÅαñé"
++        },
+         value: 1
+       },
+       {
+-        label: { English: "Blame one classmate immediately to end the argument quickly", Hindi: "αñ¼αñ╣αñ╕ αñòαÑï αñ£αñ▓αÑìαñªαÑÇ αñûαññαÑìαñ« αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αññαÑüαñ░αñéαññ αñÅαñò αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñòαÑï αñªαÑïαñ╖αÑÇ αñáαñ╣αñ░αñ╛αñÅαñé" },
++        label: {
++          English: "Blame one classmate immediately to end the argument quickly",
++          Hindi: "αñ¼αñ╣αñ╕ αñòαÑï αñ£αñ▓αÑìαñªαÑÇ αñûαññαÑìαñ« αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αññαÑüαñ░αñéαññ αñÅαñò αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñòαÑï αñªαÑïαñ╖αÑÇ αñáαñ╣αñ░αñ╛αñÅαñé"
++        },
+         value: 0
+       }
+     ],
+@@ -474,29 +563,41 @@ export const ASSESSMENT_TASKS = [
+     domain: "naturalist",
+     component: "living_systems",
+     title: {
+-      English: "The Secret Butterfly Garden",
+-      Hindi: "αññαñ┐αññαñ▓αñ┐αñ»αÑïαñé αñòαñ╛ αñ£αñ╛αñªαÑüαñê αñ¼αñùαÑÇαñÜαñ╛"
++      English: "The Hungry Puppy",
++      Hindi: "αñ¡αÑéαñûαñ╛ αñ¬αñ┐αñ▓αÑìαñ▓αñ╛"
+     },
+     prompt: {
+-      English: "You want to attract colorful butterflies to live in your school garden. Which of these actions will help the butterflies the MOST?",
+-      Hindi: "αñåαñ¬ αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñòαÑç αñ¼αñùαÑÇαñÜαÑç αñ«αÑçαñé αñ░αñéαñù-αñ¼αñ┐αñ░αñéαñùαÑÇ αññαñ┐αññαñ▓αñ┐αñ»αÑïαñé αñòαÑï αñåαñòαñ░αÑìαñ╖αñ┐αññ αñòαñ░αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñéαÑñ αñçαñ¿αñ«αÑçαñé αñ╕αÑç αñòαÑîαñ¿ αñ╕αñ╛ αñòαñ╛αñ« αññαñ┐αññαñ▓αñ┐αñ»αÑïαñé αñòαÑÇ αñ╕αñ¼αñ╕αÑç αñ£αñ╝αÑìαñ»αñ╛αñªαñ╛ αñ«αñªαñª αñòαñ░αÑçαñùαñ╛?"
++      English: "You find a small puppy near your school that looks hungry, cold, and scared. What is the best and safest way to care for it?",
++      Hindi: "αñåαñ¬αñòαÑï αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñòαÑç αñ¬αñ╛αñ╕ αñÅαñò αñ¢αÑïαñƒαñ╛ αñ¬αñ┐αñ▓αÑìαñ▓αñ╛ αñ«αñ┐αñ▓αññαñ╛ αñ╣αÑê αñ£αÑï αñ¡αÑéαñûαñ╛, αñáαñ┐αñáαÑüαñ░αññαñ╛ αñ╣αÑüαñå αñöαñ░ αñíαñ░αñ╛ αñ╣αÑüαñå αñ▓αñù αñ░αñ╣αñ╛ αñ╣αÑêαÑñ αñëαñ╕αñòαÑÇ αñªαÑçαñûαñ¡αñ╛αñ▓ αñòαñ░αñ¿αÑç αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αñ╛ αñöαñ░ αñ╕αÑüαñ░αñòαÑìαñ╖αñ┐αññ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+     },
+     options: [
+       {
+-        label: { English: "Plant bright native flowering plants that have sweet nectar and keep fresh shallow water trays nearby", Hindi: "αñ«αÑÇαñáαÑç αñ«αñòαñ░αñéαñª αñ╡αñ╛αñ▓αÑç αñÜαñ«αñòαñªαñ╛αñ░ αñ╕αÑìαñÑαñ╛αñ¿αÑÇαñ» αñ½αÑéαñ▓αÑïαñé αñòαÑç αñ¬αÑîαñºαÑç αñ▓αñùαñ╛αñÅαñé αñöαñ░ αñ¬αñ╛αñ╕ αñ«αÑçαñé αñëαñÑαñ▓αÑç αñ¼αñ░αÑìαññαñ¿αÑïαñé αñ«αÑçαñé αññαñ╛αñ£αñ╛ αñ¬αñ╛αñ¿αÑÇ αñ░αñûαÑçαñé" },
++        label: {
++          English: "Give it clean water, some safe food, and place a dry box with a cloth nearby",
++          Hindi: "αñëαñ╕αÑç αñ╕αñ╛αñ½ αñ¬αñ╛αñ¿αÑÇ, αñÑαÑïαñíαñ╝αñ╛ αñ╕αÑüαñ░αñòαÑìαñ╖αñ┐αññ αñûαñ╛αñ¿αñ╛ αñªαÑçαñé αñöαñ░ αñ¬αñ╛αñ╕ αñ«αÑçαñé αñÅαñò αñòαñ¬αñíαñ╝αÑç αñòαÑç αñ╕αñ╛αñÑ αñ╕αÑéαñûαñ╛ αñíαñ┐αñ¼αÑìαñ¼αñ╛ αñ░αñû αñªαÑçαñé"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Spray strong insect spray to keep other bugs away from the plants", Hindi: "αñ¬αÑîαñºαÑïαñé αñ╕αÑç αñªαÑéαñ╕αñ░αÑç αñòαÑÇαñíαñ╝αÑïαñé αñòαÑï αñªαÑéαñ░ αñ░αñûαñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αññαÑçαñ£αñ╝ αñòαÑÇαñƒαñ¿αñ╛αñ╢αñò αñòαñ╛ αñ¢αñ┐αñíαñ╝αñòαñ╛αñ╡ αñòαñ░αÑçαñé" },
++        label: {
++          English: "Shout at it and chase it away to another street",
++          Hindi: "αñëαñ╕ αñ¬αñ░ αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñé αñöαñ░ αñëαñ╕αÑç αñªαÑéαñ╕αñ░αÑÇ αñùαñ▓αÑÇ αñ«αÑçαñé αñ¡αñùαñ╛ αñªαÑçαñé"
++        },
+         value: 0
+       },
+       {
+-        label: { English: "Cover all the flowers with plastic sheets so they don't get dirty", Hindi: "αñ╕αñ¡αÑÇ αñ½αÑéαñ▓αÑïαñé αñòαÑï αñ¬αÑìαñ▓αñ╛αñ╕αÑìαñƒαñ┐αñò αñòαÑÇ αñ╢αÑÇαñƒ αñ╕αÑç αñóαñò αñªαÑçαñé αññαñ╛αñòαñ┐ αñ╡αÑç αñùαñéαñªαÑç αñ¿ αñ╣αÑïαñé" },
+-        value: 0
++        label: {
++          English: "Pick it up and carry it home immediately without asking parents",
++          Hindi: "αñ«αñ╛αññαñ╛-αñ¬αñ┐αññαñ╛ αñ╕αÑç αñ¬αÑéαñ¢αÑç αñ¼αñ┐αñ¿αñ╛ αññαÑüαñ░αñéαññ αñëαñ╕αÑç αñùαÑïαñª αñ«αÑçαñé αñëαñáαñ╛αñòαñ░ αñÿαñ░ αñ▓αÑç αñåαñÅαñé"
++        },
++        value: 1
+       },
+       {
+-        label: { English: "Catch butterflies from other parks and release them inside your garden", Hindi: "αñªαÑéαñ╕αñ░αÑç αñ¬αñ╛αñ░αÑìαñòαÑïαñé αñ╕αÑç αññαñ┐αññαñ▓αñ┐αñ»αÑïαñé αñòαÑï αñ¬αñòαñíαñ╝αÑçαñé αñöαñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñàαñ¬αñ¿αÑç αñ¼αñùαÑÇαñÜαÑç αñ«αÑçαñé αñ¢αÑïαñíαñ╝ αñªαÑçαñé" },
+-        value: 1
++        label: {
++          English: "Place a bowl of milk in the middle of a busy road",
++          Hindi: "αñ╡αÑìαñ»αñ╕αÑìαññ αñ╕αñíαñ╝αñò αñòαÑç αñ¼αÑÇαñÜαÑïαñé-αñ¼αÑÇαñÜ αñªαÑéαñº αñòαñ╛ αñòαñƒαÑïαñ░αñ╛ αñ░αñû αñªαÑçαñé"
++        },
++        value: 0
+       }
+     ],
+     metric: "classification",
+@@ -507,8 +608,8 @@ export const ASSESSMENT_TASKS = [
+     domain: "intrapersonal",
+     component: "reflective_thinking",
+     title: {
+-      English: "The Brave Explorer Goal",
+-      Hindi: "αñ╕αñ╛αñ╣αñ╕αÑÇ αñûαÑïαñ£αñòαñ░αÑìαññαñ╛ αñòαñ╛ αñ╕αñéαñòαñ▓αÑìαñ¬"
++      English: "Hard Work & Practice",
++      Hindi: "αñ«αÑçαñ╣αñ¿αññ αñöαñ░ αñàαñ¡αÑìαñ»αñ╛αñ╕"
+     },
+     prompt: {
+       English: "When you face a challenge that is very hard for you, do you tell yourself that you can get better at it with practice?",
+@@ -525,27 +626,39 @@ export const ASSESSMENT_TASKS = [
+     component: "resilience_signal",
+     title: {
+       English: "The Stuck Kite",
+-      Hindi: "The Stuck Kite"
++      Hindi: "αñ½αñéαñ╕αÑÇ αñ¬αññαñéαñù"
+     },
+     prompt: {
+       English: "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?",
+-      Hindi: "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. You cannot reach it. What do you do?"
++      Hindi: "αñåαñ¬αñ¿αÑç αñªαÑï αñªαñ┐αñ¿ αñ▓αñùαñ╛αñòαñ░ αñÅαñò αñ╕αÑüαñéαñªαñ░ αñ¬αññαñéαñù αñ¼αñ¿αñ╛αñê, αñ▓αÑçαñòαñ┐αñ¿ αñ¬αñ╣αñ▓αÑÇ αñ¼αñ╛αñ░ αñëαñíαñ╝αñ╛αññαÑç αñ╣αÑÇ αñ╡αñ╣ αñÅαñò αñòαñ╛αñéαñƒαÑçαñªαñ╛αñ░ αñ¬αÑçαñíαñ╝ αñ«αÑçαñé αñ½αñéαñ╕ αñùαñêαÑñ αñåαñ¬ αñ╡αñ╣αñ╛αñé αññαñò αñ¿αñ╣αÑÇαñé αñ¬αñ╣αÑüαñéαñÜ αñ╕αñòαññαÑçαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
+     },
+     options: [
+       {
+-        label: { English: "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned.", Hindi: "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned." },
++        label: {
++          English: "Accept that it's gone for now, and start designing a new, improved paper kite using what you learned.",
++          Hindi: "αñ»αñ╣ αñ«αñ╛αñ¿ αñ▓αÑçαñé αñòαñ┐ αñ╡αñ╣ αñûαÑï αñùαñê αñ╣αÑê, αñöαñ░ αñ£αÑï αñ╕αÑÇαñûαñ╛ αñëαñ╕αñòαñ╛ αñëαñ¬αñ»αÑïαñù αñòαñ░αñòαÑç αñÅαñò αñ¿αñê, αñ¼αÑçαñ╣αññαñ░ αñ¬αññαñéαñù αñ¼αñ¿αñ╛αñ¿αñ╛ αñ╢αÑüαñ░αÑé αñòαñ░αÑçαñé"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper.", Hindi: "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper." },
++        label: {
++          English: "Go find a helper or a long tool to try retrieving it, even if it might take a long time and rip the paper.",
++          Hindi: "αñòαñ┐αñ╕αÑÇ αñ¼αñíαñ╝αÑç αñòαÑÇ αñ«αñªαñª αñ▓αÑçαñé αñ»αñ╛ αñÅαñò αñ▓αñéαñ¼αñ╛ αñíαñéαñíαñ╛ αñóαÑéαñéαñóαñòαñ░ αñëαñ╕αÑç αñ¿αñ┐αñòαñ╛αñ▓αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑçαñé, αñ¡αñ▓αÑç αñ╣αÑÇ αñ¬αññαñéαñù αñ½αñƒ αñ£αñ╛αñÅ"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Ask friends for ideas on how to build a simple pulley or tool to hook the string.", Hindi: "Ask friends for ideas on how to build a simple pulley or tool to hook the string." },
++        label: {
++          English: "Ask friends for ideas on how to build a simple pulley or tool to hook the string.",
++          Hindi: "αñªαÑïαñ╕αÑìαññαÑïαñé αñ╕αÑç αñ¬αÑéαñ¢αÑçαñé αñòαñ┐ αñòαÑìαñ»αñ╛ αñòαÑïαñê αñ╣αÑüαñò αñ»αñ╛ αñ£αÑüαñùαñ╛αñíαñ╝ αñ¼αñ¿αñ╛αñòαñ░ αñ¬αññαñéαñù αñòαÑï αñ¿αñ┐αñòαñ╛αñ▓αñ╛ αñ£αñ╛ αñ╕αñòαññαñ╛ αñ╣αÑê"
++        },
+         value: 4
+       },
+       {
+-        label: { English: "Leave the park feeling angry and give up on flying kites altogether.", Hindi: "Leave the park feeling angry and give up on flying kites altogether." },
++        label: {
++          English: "Leave the park feeling angry and give up on flying kites altogether.",
++          Hindi: "αñùαÑüαñ╕αÑìαñ╕αÑç αñ«αÑçαñé αñ¬αñ╛αñ░αÑìαñò αñ╕αÑç αñÜαñ▓αÑç αñ£αñ╛αñÅαñé αñöαñ░ αñ¬αññαñéαñù αñëαñíαñ╝αñ╛αñ¿αñ╛ αñ¬αÑéαñ░αÑÇ αññαñ░αñ╣ αñ╕αÑç αñ¢αÑïαñíαñ╝ αñªαÑçαñé"
++        },
+         value: 1
+       }
+     ],
+@@ -558,11 +671,11 @@ export const ASSESSMENT_TASKS = [
+     component: "self_awareness",
+     title: {
+       English: "Flow State Tracker",
+-      Hindi: "αñºαÑìαñ»αñ╛αñ¿ αñòαÑçαñéαñªαÑìαñ░αñ┐αññ αñòαñ░αñ¿αÑç αñ╡αñ╛αñ▓αÑÇ αñùαññαñ┐αñ╡αñ┐αñºαñ┐αñ»αñ╛αñü"
++      Hindi: "αñ«αñ¿αñ¬αñ╕αñéαñª αñûαÑçαñ▓ αñöαñ░ αñòαñ╛αñ«"
+     },
+     prompt: {
+-      English: "Tell us about an activity (like building, drawing, reading, or playing) that makes you completely lose track of time. What are you doing, and what makes it so exciting?",
+-      Hindi: "αñ╣αñ«αÑçαñé αñòαñ┐αñ╕αÑÇ αñÉαñ╕αÑÇ αñùαññαñ┐αñ╡αñ┐αñºαñ┐ (αñ£αÑêαñ╕αÑç αñòαÑüαñ¢ αñ¼αñ¿αñ╛αñ¿αñ╛, αñÜαñ┐αññαÑìαñ░ αñ¼αñ¿αñ╛αñ¿αñ╛, αñ¬αÑ¥αñ¿αñ╛, αñ»αñ╛ αñûαÑçαñ▓αñ¿αñ╛) αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ¼αññαñ╛αñÅαñé αñ£αñ┐αñ╕αñ«αÑçαñé αñåαñ¬ αñ╕αñ«αñ» αñòαñ╛ αñºαÑìαñ»αñ╛αñ¿ αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñ¡αÑéαñ▓ αñ£αñ╛αññαÑç αñ╣αÑêαñéαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑïαññαÑç αñ╣αÑêαñé, αñöαñ░ αñ╡αñ╣ αñ¼αñ╛αññ αñåαñ¬αñòαÑï αñçαññαñ¿αÑÇ αñ░αÑïαñ«αñ╛αñéαñÜαñò αñòαÑìαñ»αÑïαñé αñ▓αñùαññαÑÇ αñ╣αÑê?"
++      English: "Tell us about a game, drawing, or activity that makes you completely forget about lunchtime! What are you doing, and what makes it so much fun?",
++      Hindi: "αñ╣αñ«αÑçαñé αñòαñ┐αñ╕αÑÇ αñÉαñ╕αÑç αñûαÑçαñ▓, αñÜαñ┐αññαÑìαñ░αñòαñ╛αñ░αÑÇ αñ»αñ╛ αñòαñ╛αñ« αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ¼αññαñ╛αñÅαñé αñ£αñ┐αñ╕αÑç αñòαñ░αññαÑç αñ╕αñ«αñ» αñåαñ¬ αñ╕αñ«αñ» αñòαñ╛ αñºαÑìαñ»αñ╛αñ¿ αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñ¡αÑéαñ▓ αñ£αñ╛αññαÑç αñ╣αÑêαñé! αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑïαññαÑç αñ╣αÑêαñé, αñöαñ░ αñ╡αñ╣ αñåαñ¬αñòαÑï αñçαññαñ¿αñ╛ αñ«αñ£αÑçαñªαñ╛αñ░ αñòαÑìαñ»αÑïαñé αñ▓αñùαññαñ╛ αñ╣αÑê?"
+     },
+     metric: "narrative_expression"
+   },
+@@ -572,12 +685,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "intrapersonal",
+     component: "self_awareness",
+     title: {
+-      English: "Your Proudest Moment",
+-      Hindi: "αñåαñ¬αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñùαÑîαñ░αñ╡αñ¬αÑéαñ░αÑìαñú αñòαÑìαñ╖αñú"
++      English: "Your Proudest Creation",
++      Hindi: "αñåαñ¬αñòαÑÇ αñ╕αñ¼αñ╕αÑç αñ¬αÑìαñ»αñ╛αñ░αÑÇ αñ░αñÜαñ¿αñ╛"
+     },
+     prompt: {
+-      English: "What is one project, creation, or achievement that you are most proud of? Describe what you did and why it felt so special to you.",
+-      Hindi: "αñòαÑïαñê αñÅαñò αñ¬αÑìαñ░αÑïαñ£αÑçαñòαÑìαñƒ, αñ░αñÜαñ¿αñ╛, αñ»αñ╛ αñëαñ¬αñ▓αñ¼αÑìαñºαñ┐ αñòαÑìαñ»αñ╛ αñ╣αÑê αñ£αñ┐αñ╕ αñ¬αñ░ αñåαñ¬αñòαÑï αñ╕αñ¼αñ╕αÑç αñ£αÑìαñ»αñ╛αñªαñ╛ αñùαñ░αÑìαñ╡ αñ╣αÑê? αñ╡αñ░αÑìαñúαñ¿ αñòαñ░αÑçαñé αñòαñ┐ αñåαñ¬αñ¿αÑç αñòαÑìαñ»αñ╛ αñòαñ┐αñ»αñ╛ αñöαñ░ αñ╡αñ╣ αñåαñ¬αñòαÑç αñ▓αñ┐αñÅ αñçαññαñ¿αñ╛ αñ╡αñ┐αñ╢αÑçαñ╖ αñòαÑìαñ»αÑïαñé αñÑαñ╛αÑñ"
++      English: "What is one thing you built, drew, or made that you love showing to everyone? Describe what you did and why you love it.",
++      Hindi: "αñåαñ¬αñ¿αÑç αñûαÑüαñª αñ╕αÑç αñÉαñ╕αÑÇ αñòαÑîαñ¿ αñ╕αÑÇ αñÜαÑÇαñ£αñ╝ αñ¼αñ¿αñ╛αñê αñ»αñ╛ αñÜαñ┐αññαÑìαñ░ αñ¼αñ¿αñ╛αñ»αñ╛ αñ╣αÑê αñ£αñ┐αñ╕αÑç αñåαñ¬ αñ╕αñ¼αñòαÑï αñùαñ░αÑìαñ╡ αñ╕αÑç αñªαñ┐αñûαñ╛αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñé? αñ¼αññαñ╛αñÅαñé αñòαñ┐ αñåαñ¬αñ¿αÑç αñëαñ╕αÑç αñòαÑêαñ╕αÑç αñ¼αñ¿αñ╛αñ»αñ╛ αñöαñ░ αñ╡αñ╣ αñåαñ¬αñòαÑÇ αñ¬αñ╕αñéαñªαÑÇαñªαñ╛ αñòαÑìαñ»αÑïαñé αñ╣αÑêαÑñ"
+     },
+     metric: "narrative_expression"
+   },
+@@ -587,12 +700,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "intrapersonal",
+     component: "reflective_thinking",
+     title: {
+-      English: "The One-Year Learning Quest",
+-      Hindi: "αñÅαñò αñ╕αñ╛αñ▓ αñòαñ╛ αñ╕αÑÇαñûαñ¿αÑç αñòαñ╛ αñ╕αñ½αñ░"
++      English: "The Magic Learning Day",
++      Hindi: "αñ╕αÑÇαñûαñ¿αÑç αñòαñ╛ αñàαñ¿αÑïαñûαñ╛ αñªαñ┐αñ¿"
+     },
+     prompt: {
+-      English: "If you could spend one whole year learning about anything you want without any exams or grades, what topic or skill would you choose, and why?",
+-      Hindi: "αñ»αñªαñ┐ αñåαñ¬ αñ¼αñ┐αñ¿αñ╛ αñòαñ┐αñ╕αÑÇ αñ¬αñ░αÑÇαñòαÑìαñ╖αñ╛ αñ»αñ╛ αñùαÑìαñ░αÑçαñí αñòαÑç αñàαñ¬αñ¿αÑÇ αñ¬αñ╕αñéαñª αñòαÑÇ αñòαñ┐αñ╕αÑÇ αñ¡αÑÇ αñÜαÑÇαñ£αñ╝ αñòαÑï αñ╕αÑÇαñûαñ¿αÑç αñ«αÑçαñé αñÅαñò αñ¬αÑéαñ░αñ╛ αñ╡αñ░αÑìαñ╖ αñ¼αñ┐αññαñ╛ αñ╕αñòαññαÑç αñ╣αÑêαñé, αññαÑï αñåαñ¬ αñòαñ┐αñ╕ αñ╡αñ┐αñ╖αñ» αñ»αñ╛ αñòαÑîαñ╢αñ▓ αñòαÑï αñÜαÑüαñ¿αÑçαñéαñùαÑç, αñöαñ░ αñòαÑìαñ»αÑïαñé?"
++      English: "If you could spend a whole day learning anything you want (like magic tricks, building robots, or drawing animals), what would you choose and why?",
++      Hindi: "αñ»αñªαñ┐ αñåαñ¬ αñ¬αÑéαñ░αñ╛ αñªαñ┐αñ¿ αñàαñ¬αñ¿αÑÇ αñ¬αñ╕αñéαñª αñòαÑÇ αñòαÑïαñê αñ¡αÑÇ αñÜαÑÇαñ£αñ╝ αñ╕αÑÇαñûαñ¿αÑç (αñ£αÑêαñ╕αÑç αñ£αñ╛αñªαÑé αñòαÑç αñûαÑçαñ▓, αñ░αÑïαñ¼αÑïαñƒ αñ¼αñ¿αñ╛αñ¿αñ╛, αñ»αñ╛ αñ£αñ╛αñ¿αñ╡αñ░αÑïαñé αñòαÑç αñÜαñ┐αññαÑìαñ░ αñ¼αñ¿αñ╛αñ¿αñ╛) αñ«αÑçαñé αñ¼αñ┐αññαñ╛ αñ╕αñòαÑçαñé, αññαÑï αñåαñ¬ αñòαÑìαñ»αñ╛ αñÜαÑüαñ¿αÑçαñéαñùαÑç αñöαñ░ αñòαÑìαñ»αÑïαñé?"
+     },
+     metric: "narrative_expression"
+   },
+@@ -602,12 +715,12 @@ export const ASSESSMENT_TASKS = [
+     domain: "social",
+     component: "peer_influence",
+     title: {
+-      English: "The Big Problem Solver",
+-      Hindi: "αñ¼αÑ£αÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñòαñ╛ αñ╕αñ«αñ╛αñºαñ╛αñ¿"
++      English: "The Magic Wand Helper",
++      Hindi: "αñ£αñ╛αñªαÑé αñòαÑÇ αñ¢αñíαñ╝αÑÇ"
+     },
+     prompt: {
+-      English: "If you were given resources to solve one big problem in your school, community, or the world, what problem would you choose, and how would you start solving it?",
+-      Hindi: "αñ»αñªαñ┐ αñåαñ¬αñòαÑï αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓, αñ╕αñ«αÑüαñªαñ╛αñ» αñ»αñ╛ αñªαÑüαñ¿αñ┐αñ»αñ╛ αñ«αÑçαñé αñÅαñò αñ¼αñíαñ╝αÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñòαÑï αñ╣αñ▓ αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñ╕αñéαñ╕αñ╛αñºαñ¿ αñªαñ┐αñÅ αñ£αñ╛αñÅαñé, αññαÑï αñåαñ¬ αñòαÑîαñ¿ αñ╕αÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñÜαÑüαñ¿αÑçαñéαñùαÑç, αñöαñ░ αñåαñ¬ αñçαñ╕αÑç αñòαÑêαñ╕αÑç αñ╣αñ▓ αñòαñ░αñ¿αñ╛ αñ╢αÑüαñ░αÑé αñòαñ░αÑçαñéαñùαÑç?"
++      English: "If you had a magic wand to fix one big problem in your school or neighborhood, what would you choose to fix first and why?",
++      Hindi: "αñ»αñªαñ┐ αñåαñ¬αñòαÑç αñ¬αñ╛αñ╕ αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñ»αñ╛ αñ«αÑïαñ╣αñ▓αÑìαñ▓αÑç αñòαÑÇ αñòαñ┐αñ╕αÑÇ αñÅαñò αñ¼αñíαñ╝αÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñòαÑï αñªαÑéαñ░ αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñÅαñò αñ£αñ╛αñªαÑüαñê αñ¢αñíαñ╝αÑÇ αñ╣αÑï, αññαÑï αñåαñ¬ αñ╕αñ¼αñ╕αÑç αñ¬αñ╣αñ▓αÑç αñòαñ┐αñ╕αÑç αñáαÑÇαñò αñòαñ░αÑçαñéαñùαÑç αñöαñ░ αñòαÑìαñ»αÑïαñé?"
+     },
+     metric: "narrative_expression"
+   }
+@@ -756,167 +869,7 @@ export function getAdaptedDiscoveryQuestions(schoolYear, age, language) {
+         ],
+         MIDDLE: [
+           { label: isHindi ? "αñëαñ╕αñòαÑÇ αñ¬αÑìαñ░αñ£αñ╛αññαñ┐ αñöαñ░ αñ░αñ╣αñ¿αÑç αñòαÑÇ αñ£αñùαñ╣ αñ¬αñ╣αñÜαñ╛αñ¿αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑçαñé" : "Try to identify its species and habitat", emoji: "≡ƒªï", domains: ["naturalist"] },
+-          { label: isHindi ? "αñëαñ╕ αñ¬αñ░ αñÅαñò αñòαñ╡αñ┐αññαñ╛ αñ▓αñ┐αñûαÑçαñé αñ»αñ╛ αñëαñ╕αñòαñ╛ αñÜαñ┐αññαÑìαñ░ αñ¼αñ¿αñ╛αñÅαñé" : "Write a poem or sketch its feathers", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñ¬αÑìαñ░αñòαÑâαññαñ┐ αñòαÑç αñëαñ╕ αñ╢αñ╛αñéαññ αñòαÑìαñ╖αñú αñòαñ╛ αñåαñ¿αñéαñª αñ▓αÑçαñé" : "Enjoy the peaceful, quiet moment in nature", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñàαñ¬αñ¿αÑç αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñòαÑï αñëαñ╕αñòαÑç αñ╡αÑìαñ»αñ╡αñ╣αñ╛αñ░ αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ╕αñ«αñ¥αñ╛αñÅαñé" : "Explain its behavior to your classmate", emoji: "≡ƒùú∩╕Å", domains: ["language"] }
+-        ],
+-        SECONDARY: [
+-          { label: isHindi ? "αñ»αñ╣ αñàαñºαÑìαñ»αñ»αñ¿ αñòαñ░αñ¿αñ╛ αñòαñ┐ αñ╕αÑìαñÑαñ╛αñ¿αÑÇαñ» αñ¬αñ░αÑìαñ»αñ╛αñ╡αñ░αñú αñòαÑêαñ╕αÑç αñòαñ╛αñ« αñòαñ░αññαñ╛ αñ╣αÑê" : "Studying how the local ecosystem functions", emoji: "≡ƒªï", domains: ["naturalist"] },
+-          { label: isHindi ? "αñ╕αÑüαñéαñªαñ░ αñªαÑâαñ╢αÑìαñ»αÑïαñé αñòαÑÇ αññαñ╕αÑìαñ╡αÑÇαñ░αÑçαñé αñûαÑÇαñéαñÜαñ¿αñ╛" : "Photographing the scenic nature views", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñ╢αñ╛αñéαññ αñ£αñéαñùαñ▓ αñ«αÑçαñé αñàαñ¬αñ¿αÑç αñ▓αñòαÑìαñ╖αÑìαñ»αÑïαñé αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ╕αÑïαñÜαñ¿αñ╛" : "Reflecting on your goals in the quiet woods", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñ╕αñ«αÑéαñ╣ αñòαñ╛ αñ«αñ╛αñ░αÑìαñùαñªαñ░αÑìαñ╢αñ¿ αñòαñ░αñ¿αñ╛ αñöαñ░ αñ░αñ╛αñ╕αÑìαññαÑç αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ¼αññαñ╛αñ¿αñ╛" : "Guiding the group and explaining the route details", emoji: "≡ƒùú∩╕Å", domains: ["language"] }
+-        ],
+-        SENIOR: [
+-          { label: isHindi ? "αñ«αñ┐αñƒαÑìαñƒαÑÇ αñòαÑÇ αñ£αÑêαñ╡ αñ╡αñ┐αñ╡αñ┐αñºαññαñ╛ αñöαñ░ αñ¬αÑîαñºαÑïαñé αñòαÑç αñàαñ¿αÑüαñòαÑéαñ▓αñ¿ αñòαñ╛ αñ╡αñ┐αñ╢αÑìαñ▓αÑçαñ╖αñú αñòαñ░αñ¿αñ╛" : "Analyzing soil biodiversity and plant adaptations", emoji: "≡ƒªï", domains: ["naturalist"] },
+-          { label: isHindi ? "αñ¬αÑìαñ░αñòαÑâαññαñ┐ αñòαÑÇ αñ╕αÑüαñéαñªαñ░αññαñ╛ αñ¬αñ░ αñÅαñò αñ╡αÑâαññαÑìαññαñÜαñ┐αññαÑìαñ░ (documentary) αñ¼αñ¿αñ╛αñ¿αñ╛" : "Creating a visual documentary about nature's ecosystem", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñ¬αÑìαñ░αñòαÑâαññαñ┐ αñòαÑç αñ¬αÑìαñ░αññαñ┐ αñ«αñ╛αñ¿αñ╡αññαñ╛ αñòαÑç αñ¿αÑêαññαñ┐αñò αñ╕αñéαñ¼αñéαñºαÑïαñé αñ¬αñ░ αñÜαñ┐αñéαññαñ¿ αñòαñ░αñ¿αñ╛" : "Reflecting on humanity's ethical relationship with nature", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñ╕αÑìαñÑαñ╛αñ¿αÑÇαñ» αñàαñºαñ┐αñòαñ╛αñ░αñ┐αñ»αÑïαñé αñòαÑç αñ╕αñ«αñòαÑìαñ╖ αñ¿αÑÇαññαñ┐ αñ¬αÑìαñ░αñ╕αÑìαññαñ╛αñ╡ αñ¬αÑìαñ░αñ╕αÑìαññαÑüαññ αñòαñ░αñ¿αñ╛" : "Presenting a policy proposal to local authorities", emoji: "≡ƒùú∩╕Å", domains: ["language"] }
+-        ]
+-      }[level]
+-    },
+-    {
+-      id: "q_discovery_4",
+-      question: {
+-        PRIMARY: isHindi
+-          ? "αñÅαñò αñ¿αñ»αñ╛ αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñëαñªαñ╛αñ╕ αñöαñ░ αñàαñòαÑçαñ▓αñ╛ αñ¼αÑêαñáαñ╛ αñ╣αÑêαÑñ ≡ƒÿö αñåαñ¬ αñ¬αñ╣αñ▓αÑç αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
+-          : "A new classmate looks sad and lonely. ≡ƒÿö What do you do first?",
+-        MIDDLE: isHindi
+-          ? "αñÅαñò αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñòαÑï αñ╕αÑìαñòαÑéαñ▓ αñ«αÑçαñé αññαñ╛αñ▓αñ«αÑçαñ▓ αñ¼αñ┐αñáαñ╛αñ¿αÑç αñ«αÑçαñé αñ¬αñ░αÑçαñ╢αñ╛αñ¿αÑÇ αñ╣αÑï αñ░αñ╣αÑÇ αñ╣αÑêαÑñ ≡ƒñ¥ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αññαÑç αñ╣αÑêαñé?"
+-          : "A classmate is struggling to fit in at school. ≡ƒñ¥ What do you do?",
+-        SECONDARY: isHindi
+-          ? "αñåαñ¬ αñ╕αÑìαñòαÑéαñ▓ αñ«αÑçαñé αñ╕αñ¼αñòαÑï αñ╢αñ╛αñ«αñ┐αñ▓ αñòαñ░αñ¿αÑç αñòαÑÇ αñ¡αñ╛αñ╡αñ¿αñ╛ αñòαÑï αñ¼αñóαñ╝αñ╛αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñéαÑñ ≡ƒÅ½ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αññαÑç αñ╣αÑêαñé?"
+-          : "You want to improve school community inclusion. ≡ƒÅ½ What do you do?",
+-        SENIOR: isHindi
+-          ? "αñåαñ¬ αñ╕αñ╛αñ«αÑüαñªαñ╛αñ»αñ┐αñò αñàαñ▓αñùαñ╛αñ╡ αñòαÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñòαÑï αñªαÑéαñ░ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ ≡ƒæÑ αñåαñ¬αñòαñ╛ αñªαÑâαñ╖αÑìαñƒαñ┐αñòαÑïαñú αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+-          : "You are addressing community isolation. ≡ƒæÑ What is your approach?"
+-      }[level],
+-      type: "choice",
+-      options: {
+-        PRIMARY: [
+-          { label: isHindi ? "αñëαñ¿αÑìαñ╣αÑçαñé αñàαñ¬αñ¿αÑç αñªαÑïαñ╕αÑìαññαÑïαñé αñòαÑç αñ╕αñ«αÑéαñ╣ αñ«αÑçαñé αñ╢αñ╛αñ«αñ┐αñ▓ αñ╣αÑïαñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñòαñ╣αÑéαñéαñùαñ╛" : "Invite them to join your group of friends", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ¿αñ«αñ╕αÑìαññαÑç αñòαñ╣αÑéαñéαñùαñ╛ αñöαñ░ αñëαñ¿αñ╕αÑç αñ¼αñ╛αññαñÜαÑÇαññ αñ╢αÑüαñ░αÑé αñòαñ░αÑéαñéαñùαñ╛" : "Say hello and start a friendly chat", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñÜαÑüαñ¬αñÜαñ╛αñ¬ αñ╕αÑïαñÜαÑéαñéαñùαñ╛ αñòαñ┐ αñ╡αÑç αñòαÑêαñ╕αñ╛ αñ«αñ╣αñ╕αÑéαñ╕ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑïαñéαñùαÑç" : "Wonder quietly how they are feeling inside", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñëαñ¿αÑìαñ╣αÑçαñé αñ¬αñòαñíαñ╝αñ«-αñ¬αñòαñíαñ╝αñ╛αñê αñ»αñ╛ αñªαÑîαñíαñ╝αñ¿αÑç αñ╡αñ╛αñ▓αÑç αñûαÑçαñ▓ αñòαÑç αñ▓αñ┐αñÅ αñòαñ╣αÑéαñéαñùαñ╛" : "Ask them to play tag or run with you", emoji: "≡ƒÅâ", domains: ["kinesthetic"] }
+-        ],
+-        MIDDLE: [
+-          { label: isHindi ? "αñëαñ¿αÑìαñ╣αÑçαñé αñàαñ▓αñù-αñàαñ▓αñù αñòαÑìαñ▓αñ¼αÑïαñé αñöαñ░ αñàαñºαÑìαñ»αñ»αñ¿ αñ╕αñ«αÑéαñ╣αÑïαñé αñ╕αÑç αñ¬αñ░αñ┐αñÜαñ┐αññ αñòαñ░αñ╛αñÅαñé" : "Introduce them to different clubs and study groups", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñëαñ¿αÑìαñ╣αÑçαñé αñ╕αñ╣αñ£ αñ«αñ╣αñ╕αÑéαñ╕ αñòαñ░αñ╛αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñÅαñò αñàαñÜαÑìαñ¢αÑÇ αñ¼αñ╛αññαñÜαÑÇαññ αñòαñ░αÑçαñé" : "Have a warm conversation to make them feel welcome", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñ╕αÑïαñÜαÑçαñé αñòαñ┐ αñëαñ¿αñòαÑç αñ╕αÑìαñÑαñ╛αñ¿ αñ¬αñ░ αñ╣αÑïαñ¿αÑç αñ¬αñ░ αñòαÑêαñ╕αñ╛ αñ«αñ╣αñ╕αÑéαñ╕ αñ╣αÑïαññαñ╛ αñ╣αÑê" : "Think about how it feels to be in their place", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñëαñ¿αÑìαñ╣αÑçαñé αñ½αÑüαñƒαñ¼αÑëαñ▓ αñ»αñ╛ αñòαñ┐αñ╕αÑÇ αñûαÑçαñ▓ αñòαÑç αñ«αÑêαñÜ αñ«αÑçαñé αñûαÑçαñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñåαñ«αñéαññαÑìαñ░αñ┐αññ αñòαñ░αÑçαñé" : "Invite them to play in a football or sports match", emoji: "≡ƒÅâ", domains: ["kinesthetic"] }
+-        ],
+-        SECONDARY: [
+-          { label: isHindi ? "αñ¿αñÅ αñ¢αñ╛αññαÑìαñ░αÑïαñé αñòαÑç αñ▓αñ┐αñÅ αñÅαñò αñ╕αÑìαñ╡αñ╛αñùαññ αñ╕αñ«αñ┐αññαñ┐ αñ¼αñ¿αñ╛αñÅαñé" : "Form a welcoming committee for new students", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ╕αñ¡αÑÇ αñòαñ╛ αñ╕αÑìαñ╡αñ╛αñùαññ αñòαñ░αñ¿αÑç αñ¬αñ░ αñÅαñò αñ▓αÑçαñû αñ»αñ╛ αñ¬αÑïαñ╕αÑìαñƒ αñ▓αñ┐αñûαÑçαñé" : "Write an article or post about welcoming everyone", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñÜαñ┐αñéαññαñ¿ αñòαñ░αÑçαñé αñòαñ┐ αñåαñ¬ αñàαñ¬αñ¿αÑç αñ╡αÑìαñ»αñ╡αñ╣αñ╛αñ░ αñòαÑï αñöαñ░ αñàαñºαñ┐αñò αñ╕αñ«αñ╛αñ╡αÑçαñ╢αÑÇ αñòαÑêαñ╕αÑç αñ¼αñ¿αñ╛ αñ╕αñòαññαÑç αñ╣αÑêαñé" : "Reflect on how to make your own actions more inclusive", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñÅαñò αñªαÑïαñ╕αÑìαññαñ╛αñ¿αñ╛ αñûαÑçαñ▓αñòαÑéαñª αñ¬αÑìαñ░αññαñ┐αñ»αÑïαñùαñ┐αññαñ╛ (sports tournament) αñåαñ»αÑïαñ£αñ┐αññ αñòαñ░αÑçαñé" : "Organize a friendly sports tournament", emoji: "≡ƒÅâ", domains: ["kinesthetic"] }
+-        ],
+-        SENIOR: [
+-          { label: isHindi ? "αñ╕αñ╣αñòαñ░αÑìαñ«αÑÇ αñ¬αñ░αñ╛αñ«αñ░αÑìαñ╢ αñ¿αÑçαñƒαñ╡αñ░αÑìαñò (peer mentorship network) αñ╕αÑìαñÑαñ╛αñ¬αñ┐αññ αñòαñ░αñ¿αñ╛" : "Establishing a peer mentorship network", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ╕αñ╣αñ╛αñ¿αÑüαñ¡αÑéαññαñ┐ αñöαñ░ αñ╕αñéαñÜαñ╛αñ░ αñ¬αñ░ αñÅαñò αñ¬αÑìαñ░αñ¡αñ╛αñ╡αñ╢αñ╛αñ▓αÑÇ αñ¡αñ╛αñ╖αñú αñ▓αñ┐αñûαñ¿αñ╛" : "Writing a persuasive speech on empathy and communication", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñ¬αÑéαñ░αÑìαñ╡αñ╛αñùαÑìαñ░αñ╣ αñöαñ░ αñ╕αñ«αñ╛αñ╡αÑçαñ╢ αñ¬αñ░ αñÅαñò αñåαññαÑìαñ«-αñÜαñ┐αñéαññαñ¿ αñ«αñ╛αñ░αÑìαñùαñªαñ░αÑìαñ╢αñ┐αñòαñ╛ αñ╡αñ┐αñòαñ╕αñ┐αññ αñòαñ░αñ¿αñ╛" : "Developing a self-reflection guide on bias and inclusion", emoji: "≡ƒñö", domains: ["intrapersonal"] },
+-          { label: isHindi ? "αñÅαñò αñ╢αñ╛αñ░αÑÇαñ░αñ┐αñò αñƒαÑÇαñ«-αñ¿αñ┐αñ░αÑìαñ«αñ╛αñú αñùαññαñ┐αñ╡αñ┐αñºαñ┐ αñ»αñ╛ αñòαñ╛αñ░αÑìαñ»αñ╢αñ╛αñ▓αñ╛ αñòαñ╛ αñ╕αñéαñÜαñ╛αñ▓αñ¿ αñòαñ░αñ¿αñ╛" : "Coaching a physical team-building activity or workshop", emoji: "≡ƒÅâ", domains: ["kinesthetic"] }
+-        ]
+-      }[level]
+-    },
+-    {
+-      id: "q_discovery_5",
+-      question: {
+-        PRIMARY: isHindi
+-          ? "αñåαñ¬αñòαñ╛ αñ¼αñ¿αñ╛αñ»αñ╛ αñ╣αÑüαñå αñûαñ┐αñ▓αÑîαñ¿αñ╛ αñ«αÑÇαñ¿αñ╛αñ░ αñùαñ┐αñ░ αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ ≡ƒº▒ αñåαñ¬ αñçαñ╕αñòαÑç αñ¼αñ╛αñª αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
+-          : "Your toy tower falls down. ≡ƒº▒ What do you do next?",
+-        MIDDLE: isHindi
+-          ? "αñÅαñò αñ¬αÑìαñ░αññαñ┐αñ»αÑïαñùαñ┐αññαñ╛ αñ«αÑçαñé αñåαñ¬αñòαÑÇ αñƒαÑÇαñ« αñòαñ╛ αñ¬αÑüαñ▓ αñòαñ╛ αñ«αÑëαñíαñ▓ αñóαñ╣ αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ ≡ƒîë αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αññαÑç αñ╣αÑêαñé?"
+-          : "Your team's bridge model collapses in a contest. ≡ƒîë What do you do?",
+-        SECONDARY: isHindi
+-          ? "αñåαñ¬αñòαñ╛ αñòαÑïαñê αñ╕αÑëαñ½αÑìαñƒαñ╡αÑçαñ»αñ░ αñ¬αÑìαñ░αÑïαñùαÑìαñ░αñ╛αñ« αñ»αñ╛ αñëαñ¬αñòαñ░αñú αñòαñ╛αñ« αñòαñ░αñ¿αñ╛ αñ¼αñéαñª αñòαñ░ αñªαÑçαññαñ╛ αñ╣αÑêαÑñ ≡ƒÆ╗ αñåαñ¬αñòαÑÇ αñòαÑìαñ»αñ╛ αñ¬αÑìαñ░αññαñ┐αñòαÑìαñ░αñ┐αñ»αñ╛ αñ╣αÑïαññαÑÇ αñ╣αÑê?"
+-          : "Your software program or device stops working. ≡ƒÆ╗ What is your reaction?",
+-        SENIOR: isHindi
+-          ? "αñåαñ¬αñòαÑç αñ¿αñÅ αñ╕αÑìαñƒαñ╛αñ░αÑìαñƒαñàαñ¬ αñëαññαÑìαñ¬αñ╛αñª αñòαñ╛ αñ▓αÑëαñ¿αÑìαñÜ αñ╡αñ┐αñ½αñ▓ αñ╣αÑï αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ ≡ƒôë αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αññαÑç αñ╣αÑêαñé?"
+-          : "Your entrepreneurial venture's product launch fails. ≡ƒôë What do you do?"
+-      }[level],
+-      type: "choice",
+-      options: {
+-        PRIMARY: [
+-          { label: isHindi ? "αñ╕αÑïαñÜαÑéαñéαñùαñ╛ αñòαñ┐ αñ╡αñ╣ αñòαÑìαñ»αÑïαñé αñùαñ┐αñ░αñ╛ αñöαñ░ αñëαñ╕αñòαñ╛ αñíαñ┐αñ£αñ╛αñçαñ¿ αñ¼αñªαñ▓αÑéαñéαñùαñ╛" : "Think why it fell and change the design", emoji: "≡ƒº⌐", domains: ["logical"] },
+-          { label: isHindi ? "αñ¿αÑÇαñÜαÑç αñÜαÑîαñíαñ╝αÑç αñ¼αÑìαñ▓αÑëαñò αñ▓αñùαñ╛αñòαñ░ αñëαñ╕αÑç αñªαÑïαñ¼αñ╛αñ░αñ╛ αñ¼αñ¿αñ╛αñèαñéαñùαñ╛" : "Build it again with wider blocks at the bottom", emoji: "≡ƒö¿", domains: ["spatial"] },
+-          { label: isHindi ? "αñçαñ╕ αñ¼αñ╛αñ░ αñëαñ╕αÑç αñöαñ░ αññαÑçαñ£αñ╝αÑÇ αñ╕αÑç αñ¼αñ¿αñ╛αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑéαñéαñùαñ╛" : "Try to build it faster this time", emoji: "≡ƒÅâ", domains: ["kinesthetic"] },
+-          { label: isHindi ? "αñàαñ¬αñ¿αÑç αñªαÑïαñ╕αÑìαññ αñòαÑï αñ╕αñ╛αñÑ αñ«αñ┐αñ▓αñòαñ░ αñ¼αñ¿αñ╛αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñòαñ╣αÑéαñéαñùαñ╛" : "Ask a friend to build it with you", emoji: "≡ƒñ¥", domains: ["social"] }
+-        ],
+-        MIDDLE: [
+-          { label: isHindi ? "αñëαñ¿ αñòαñ«αñ£αÑïαñ░ αñ╣αñ┐αñ╕αÑìαñ╕αÑïαñé αñòαñ╛ αñ╡αñ┐αñ╢αÑìαñ▓αÑçαñ╖αñú αñòαñ░αÑçαñé αñ£αÑï αñ╡αñ┐αñ½αñ▓ αñ░αñ╣αÑç" : "Analyze the stress points that failed", emoji: "≡ƒº⌐", domains: ["logical"] },
+-          { label: isHindi ? "αñóαñ╛αñéαñÜαÑç αñòαÑÇ αñ«αñ£αñ¼αÑéαññαÑÇ αñòαÑç αñ▓αñ┐αñÅ αñ¿αñÅ αñ╕αñ┐αñ░αÑç αñ╕αÑç αñíαñ┐αñ£αñ╛αñçαñ¿ αñ¼αñ¿αñ╛αñÅαñé" : "Redesign the structural support layout", emoji: "≡ƒö¿", domains: ["spatial"] },
+-          { label: isHindi ? "αñ¬αÑéαñ░αÑÇ αñèαñ░αÑìαñ£αñ╛ αñòαÑç αñ╕αñ╛αñÑ αññαÑüαñ░αñéαññ αñªαÑïαñ¼αñ╛αñ░αñ╛ αñ¼αñ¿αñ╛αñ¿αÑç αñòαñ╛ αñòαñ╛αñ« αñ╢αÑüαñ░αÑé αñòαñ░αÑçαñé" : "Start rebuild work immediately with high energy", emoji: "≡ƒÅâ", domains: ["kinesthetic"] },
+-          { label: isHindi ? "αñªαÑïαñ¼αñ╛αñ░αñ╛ αñòαñ╛αñ« αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñƒαÑÇαñ« αñòαÑç αñ╕αñ╛αñÑαñ┐αñ»αÑïαñé αñ«αÑçαñé αñòαñ╛αñ« αñ¼αñ╛αñéαñƒαÑçαñé" : "Coordinate the team to split the rebuild tasks", emoji: "≡ƒñ¥", domains: ["social"] }
+-        ],
+-        SECONDARY: [
+-          { label: isHindi ? "αñùαñ▓αññαÑÇ αñóαÑéαñéαñóαñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñòαÑïαñí αñòαÑÇ αñòαñªαñ«-αñªαñ░-αñòαñªαñ« αñ£αñ╛αñéαñÜ (debug) αñòαñ░αÑçαñé" : "Debug the code step-by-step to find the error", emoji: "≡ƒº⌐", domains: ["logical"] },
+-          { label: isHindi ? "αñëαñ¬αñòαñ░αñú αñòαÑç αñ¡αÑîαññαñ┐αñò αñ»αñ╛ αñçαñéαñƒαñ░αñ½αÑçαñ╕ αñ▓αÑçαñåαñëαñƒ αñòαÑï αñ½αñ┐αñ░ αñ╕αÑç αññαÑêαñ»αñ╛αñ░ αñòαñ░αÑçαñé" : "Redesign the physical or interface layout", emoji: "≡ƒö¿", domains: ["spatial"] },
+-          { label: isHindi ? "αñÿαñƒαñòαÑïαñé (components) αñòαÑï αñ£αñ▓αÑìαñªαÑÇ αñ╕αÑç αñ░αÑÇαñ╕αÑçαñƒ αñ»αñ╛ αñªαÑïαñ¼αñ╛αñ░αñ╛ αñ£αÑïαñíαñ╝αÑçαñé" : "Quickly rebuild or reset the hardware components", emoji: "≡ƒÅâ", domains: ["kinesthetic"] },
+-          { label: isHindi ? "αñ╕αñ«αñ╛αñºαñ╛αñ¿ αñûαÑïαñ£αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñàαñ¬αñ¿αÑç αñ╕αñ«αÑéαñ╣ αñòαÑç αñ╕αñ╛αñÑ αñÜαñ░αÑìαñÜαñ╛ αñòαñ░αÑçαñé" : "Consult with your group to brainstorm fixes", emoji: "≡ƒñ¥", domains: ["social"] }
+-        ],
+-        SENIOR: [
+-          { label: isHindi ? "αñ╡αñ┐αñ╕αÑìαññαÑâαññ αñíαÑçαñƒαñ╛ αñ╡αñ┐αñ╢αÑìαñ▓αÑçαñ╖αñú αñòαñ░αÑçαñé αññαñ╛αñòαñ┐ αñ╡αñ┐αñ½αñ▓αññαñ╛ αñòαÑç αñòαñ╛αñ░αñúαÑïαñé αñòαñ╛ αñ¬αññαñ╛ αñÜαñ▓αÑç" : "Perform a root-cause data analysis on the failure", emoji: "≡ƒº⌐", domains: ["logical"] },
+-          { label: isHindi ? "αñëαññαÑìαñ¬αñ╛αñª αñòαÑÇ αñ«αÑüαñûαÑìαñ» αñ╡αñ╛αñ╕αÑìαññαÑüαñòαñ▓αñ╛ (architecture) αñöαñ░ αñíαñ┐αñ£αñ╛αñçαñ¿ αñòαÑï αñ½αñ┐αñ░ αñ╕αÑç αññαÑêαñ»αñ╛αñ░ αñòαñ░αÑçαñé" : "Re-engineer the core product architecture and design", emoji: "≡ƒö¿", domains: ["spatial"] },
+-          { label: isHindi ? "αñ¬αñ░αñ┐αñÜαñ╛αñ▓αñ¿ αñ╕αÑüαñºαñ╛αñ░ αñ»αÑïαñ£αñ¿αñ╛ (recovery plan) αñòαÑï αññαÑçαñ£αÑÇ αñ╕αÑç αñ▓αñ╛αñùαÑé αñòαñ░αÑçαñé" : "Execute the operational recovery plan quickly", emoji: "≡ƒÅâ", domains: ["kinesthetic"] },
+-          { label: isHindi ? "αñ╣αñ┐αññαñºαñ╛αñ░αñòαÑïαñé αñöαñ░ αñƒαÑÇαñ« αñòαÑç αñ╕αñªαñ╕αÑìαñ»αÑïαñé αñòαÑï αñ¬αÑìαñ░αÑçαñ░αñ┐αññ αñòαñ░αÑçαñé αñöαñ░ αñòαñ╛αñ« αñ«αÑçαñé αñ▓αñùαñ╛αñÅαñé" : "Re-align and motivate stakeholders and team members", emoji: "≡ƒñ¥", domains: ["social"] }
+-        ]
+-      }[level]
+-    },
+-    {
+-      id: "q_discovery_6",
+-      question: {
+-        PRIMARY: isHindi
+-          ? "αñåαñ¬αñòαÑç αñ╕αÑìαñòαÑéαñ▓ αñ«αÑçαñé αñÅαñò αñ¼αñíαñ╝αñ╛ αñ«αÑçαñ▓αñ╛ αñ▓αñù αñ░αñ╣αñ╛ αñ╣αÑêαÑñ ≡ƒÄ¬ αñåαñ¬αñòαñ╛ αñ¬αñ╕αñéαñªαÑÇαñªαñ╛ αñòαñ╛αñ« αñòαÑîαñ¿ αñ╕αñ╛ αñ╣αÑïαñùαñ╛?"
+-          : "Your school is having a big fun fair. ≡ƒÄ¬ What is your favorite job?",
+-        MIDDLE: isHindi
+-          ? "αñåαñ¬αñòαÑÇ αñòαñòαÑìαñ╖αñ╛ αñ╕αÑìαñòαÑéαñ▓ αñ¬αÑìαñ░αñªαñ░αÑìαñ╢αñ¿αÑÇ αñòαÑÇ αññαÑêαñ»αñ╛αñ░αÑÇ αñòαñ░ αñ░αñ╣αÑÇ αñ╣αÑêαÑñ ≡ƒÄ¿ αñåαñ¬ αñòαÑîαñ¿ αñ╕αÑÇ αñ¡αÑéαñ«αñ┐αñòαñ╛ αñÜαÑüαñ¿αññαÑç αñ╣αÑêαñé?"
+-          : "Your class is preparing a school exhibition. ≡ƒÄ¿ What role do you choose?",
+-        SECONDARY: isHindi
+-          ? "αñåαñ¬ αñÅαñò αñ╕αñ╛αñ«αÑüαñªαñ╛αñ»αñ┐αñò αñòαñ╛αñ░αÑìαñ»αñòαÑìαñ░αñ« αñòαñ╛ αñåαñ»αÑïαñ£αñ¿ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ ≡ƒôú αñåαñ¬αñòαÑÇ αñòαÑìαñ»αñ╛ αñ¡αÑéαñ«αñ┐αñòαñ╛ αñ╣αÑê?"
+-          : "You are organizing a community event. ≡ƒôú What is your role?",
+-        SENIOR: isHindi
+-          ? "αñåαñ¬ αñÅαñò αñ¿αñ»αñ╛ αñ«αñ╛αñ░αÑìαñòαÑçαñƒαñ┐αñéαñù αñàαñ¡αñ┐αñ»αñ╛αñ¿ αñ╢αÑüαñ░αÑé αñòαñ░ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ ≡ƒÜÇ αñåαñ¬αñòαñ╛ αñ«αÑüαñûαÑìαñ» αñºαÑìαñ»αñ╛αñ¿ αñòαñ╣αñ╛αñü αñ╣αÑê?"
+-          : "You are launching a marketing campaign. ≡ƒÜÇ Where do you focus?"
+-      }[level],
+-      type: "choice",
+-      options: {
+-        PRIMARY: [
+-          { label: isHindi ? "αñ╕αÑüαñéαñªαñ░ αñ¬αÑïαñ╕αÑìαñƒαñ░ αñöαñ░ αñ¼αÑïαñ░αÑìαñí αñ¬αÑçαñéαñƒ αñòαñ░αñ¿αñ╛" : "Painting the posters and signs", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñªαÑüαñòαñ╛αñ¿ αñ▓αñùαñ╛αñ¿αÑç αñ«αÑçαñé αñàαñ¬αñ¿αÑç αñªαÑïαñ╕αÑìαññαÑïαñé αñòαÑÇ αñ«αñªαñª αñòαñ░αñ¿αñ╛" : "Helping friends set up their stalls", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ▓αÑïαñùαÑïαñé αñòαÑï αñûαÑçαñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñ£αÑïαñ░-αñ£αÑïαñ░ αñ╕αÑç αñ¼αÑüαñ▓αñ╛αñ¿αñ╛" : "Calling out to invite people to play", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñ▓αñòαñíαñ╝αÑÇ αñ╕αÑç αñûαÑçαñ▓ αñòαÑç αñ¼αÑéαñÑ (stalls) αñ¼αñ¿αñ╛αñ¿αñ╛" : "Building the game booths out of wood", emoji: "≡ƒö¿", domains: ["spatial"] }
+-        ],
+-        MIDDLE: [
+-          { label: isHindi ? "αñ¬αÑìαñ░αñªαñ░αÑìαñ╢αñ¿αÑÇ αñòαÑÇ αñ╕αñ£αñ╛αñ╡αñƒ αñöαñ░ αñ╡αñ┐αñ£αÑüαñàαñ▓ αñ▓αÑçαñåαñëαñƒ αñòαñ╛ αñ¿αñ┐αñ░αÑìαñªαÑçαñ╢ αñªαÑçαñ¿αñ╛" : "Directing the visual layout and decorations", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñ¢αñ╛αññαÑìαñ░αÑïαñé αñòαÑÇ αñ╕αñ«αñ¿αÑìαñ╡αñ» αñƒαÑÇαñ« (coordination team) αñòαñ╛ αñ¬αÑìαñ░αñ¼αñéαñºαñ¿ αñòαñ░αñ¿αñ╛" : "Managing the student coordination team", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ¬αÑìαñ░αÑïαñ£αÑçαñòαÑìαñƒ αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ▓αñ┐αñûαñ¿αñ╛ αñöαñ░ αñ¬αÑìαñ░αñ╕αÑìαññαÑüαññαñ┐ αñªαÑçαñ¿αñ╛" : "Writing and presenting the explanations", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñ¬αÑìαñ░αñªαñ░αÑìαñ╢αñ¿αÑÇ αñ╕αÑìαñƒαÑêαñéαñí αñöαñ░ αñ«αÑëαñíαñ▓ αñòαñ╛ αñ¿αñ┐αñ░αÑìαñ«αñ╛αñú αñòαñ░αñ¿αñ╛" : "Constructing the display stands and models", emoji: "≡ƒö¿", domains: ["spatial"] }
+-        ],
+-        SECONDARY: [
+-          { label: isHindi ? "αñ¬αÑìαñ░αñÜαñ╛αñ░ αñ╡αÑÇαñíαñ┐αñ»αÑï αñöαñ░ αñùαÑìαñ░αñ╛αñ½αñ┐αñò αñíαñ┐αñ£αñ╛αñçαñ¿ αññαÑêαñ»αñ╛αñ░ αñòαñ░αñ¿αñ╛" : "Creating the promotional videos and graphic designs", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñ╕αÑìαñ╡αñ»αñéαñ╕αÑçαñ╡αñò αñƒαÑÇαñ«αÑïαñé αñöαñ░ αñëαñ¿αñòαÑç αñ╕αñ«αñ» αñòαñ╛ αñ¬αÑìαñ░αñ¼αñéαñºαñ¿ αñòαñ░αñ¿αñ╛" : "Directing volunteer teams and schedules", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ¬αÑìαñ░αñ╛αñ»αÑïαñ£αñòαÑïαñé (sponsors) αñ╕αÑç αñ¼αñ╛αññ αñòαñ░αñ¿αñ╛ αñöαñ░ αñ«αñéαñÜ αñòαñ╛ αñ╕αñéαñÜαñ╛αñ▓αñ¿ αñòαñ░αñ¿αñ╛" : "Speaking to sponsors and hosting the stage", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñ«αÑüαñûαÑìαñ» αñ«αñéαñÜ αñöαñ░ αñëαñ¬αñòαñ░αñúαÑïαñé αñòαÑÇ αñ¡αÑîαññαñ┐αñò αñ╡αÑìαñ»αñ╡αñ╕αÑìαñÑαñ╛ αñòαñ░αñ¿αñ╛" : "Setting up the physical stage and equipment", emoji: "≡ƒö¿", domains: ["spatial"] }
+-        ],
+-        SENIOR: [
+-          { label: isHindi ? "αñ░αñÜαñ¿αñ╛αññαÑìαñ«αñò αñ¼αÑìαñ░αñ╛αñéαñíαñ┐αñéαñù αñöαñ░ αñíαñ┐αñ£αñ╛αñçαñ¿ αñ¡αñ╛αñ╖αñ╛ αñòαñ╛ αñ¿αñ┐αñ░αÑìαñªαÑçαñ╢αñ¿ αñòαñ░αñ¿αñ╛" : "Directing the creative branding and design language", emoji: "≡ƒÄ¿", domains: ["creative"] },
+-          { label: isHindi ? "αñùαÑìαñ░αñ╛αñ╣αñò αñ╕αñéαñ¼αñéαñºαÑïαñé αñöαñ░ αñƒαÑÇαñ« αñòαÑç αñ╕αñéαñÜαñ╛αñ▓αñ¿ αñòαñ╛ αñ¬αÑìαñ░αñ¼αñéαñºαñ¿ αñòαñ░αñ¿αñ╛" : "Managing client relationships and team operations", emoji: "≡ƒñ¥", domains: ["social"] },
+-          { label: isHindi ? "αñ╕αñéαñÜαñ╛αñ░ αñ░αñúαñ¿αÑÇαññαñ┐ αññαÑêαñ»αñ╛αñ░ αñòαñ░αñ¿αñ╛ αñöαñ░ αñ╡αñ┐αñ£αÑìαñ₧αñ╛αñ¬αñ¿ αñ▓αÑçαñûαñ¿ (copywriting) αñòαñ░αñ¿αñ╛" : "Drafting the communications strategy and copywriting", emoji: "≡ƒùú∩╕Å", domains: ["language"] },
+-          { label: isHindi ? "αñ¡αÑîαññαñ┐αñò αñ¼αÑéαñÑ αñ╕αÑìαñ¬αÑçαñ╕ αñ»αñ╛ αñ»αÑéαñ£αñ░ αñçαñéαñƒαñ░αñ½αÑçαñ╕ αñ▓αÑçαñåαñëαñƒ αñíαñ┐αñ£αñ╛αñçαñ¿ αñòαñ░αñ¿αñ╛" : "Designing the physical booth space or user interface layout", emoji: "≡ƒö¿", domains: ["spatial"] }
+-        ]
+-      }[level]
+-    }
+-  ];
+-}
+-
+-export function getAdaptedDeepTasks(tasks, schoolYear, age, language) {
+-  const level = getComplexityLevel(schoolYear, age);
+-  if (level === "MIDDLE") return tasks; // Middle uses standard content directly
+-
+-  const isHindi = language === "Hindi";
+-
+-  // Let's define Primary adaptations for core tasks:
+-  const primaryOverrides = {
++          { label: isHindi ? "αñëαñ╕ αñ¬αñ░ αñÅαñò αñòαñ╡αñ┐αññαñ╛ αñ▓αñ┐αñûαÑçαñé αñ»αñ╛ αñëαñ╕αñòαñ╛ αñÜαñ┐αññαÑìαñ░ αñ¼αñ¿α  const primaryOverrides = {
+     logical_pattern_matrix: {
+       title: { English: "The Magic Lock", Hindi: "αñ£αñ╛αñªαÑé αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛" },
+       prompt: {
+@@ -938,56 +891,338 @@ export function getAdaptedDeepTasks(tasks, schoolYear, age, language) {
+       }
+     },
+     spatial_perspective: {
+-      title: { English: "Shadow Match", Hindi: "αñ¬αñ░αñ¢αñ╛αñê αñòαñ╛ αñûαÑçαñ▓" },
++      title: { English: "Looking from Top", Hindi: "αñèαñ¬αñ░ αñ╕αÑç αñªαÑçαñûαñ¿αñ╛" },
++      prompt: {
++        English: "A cup with a handle is on the table. Looking directly from the top, what shape do you see?",
++        Hindi: "αñÅαñò αñòαñ¬ αñ«αÑçαñ£ αñ¬αñ░ αñ░αñûαñ╛ αñ╣αÑêαÑñ αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñèαñ¬αñ░ αñ╕αÑç αñªαÑçαñûαñ¿αÑç αñ¬αñ░ αñåαñ¬αñòαÑï αñòαÑêαñ╕αÑÇ αñåαñòαÑâαññαñ┐ αñªαñ┐αñûαÑçαñùαÑÇ?"
++      }
++    },
++    creative_uses: {
++      prompt: {
++        English: "Imagine you are given a large cardboard box. Write down 3 completely different and creative things you could build or play with it!",
++        Hindi: "αñòαñ▓αÑìαñ¬αñ¿αñ╛ αñòαÑÇαñ£αñ┐αñÅ αñòαñ┐ αñåαñ¬αñòαÑï αñÅαñò αñ¼αñíαñ╝αñ╛ αñòαñ╛αñ░αÑìαñíαñ¼αÑïαñ░αÑìαñí αñ¼αÑëαñòαÑìαñ╕ αñ«αñ┐αñ▓αñ╛ αñ╣αÑêαÑñ 3 αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñàαñ▓αñù αñöαñ░ αñ░αñÜαñ¿αñ╛αññαÑìαñ«αñò αñÜαÑÇαñ£αÑçαñé αñ▓αñ┐αñûαÑçαñé αñ£αÑï αñåαñ¬ αñçαñ╕αñ╕αÑç αñ¼αñ¿αñ╛ αñ╕αñòαññαÑç αñ╣αÑêαñé αñ»αñ╛ αñçαñ╕αñòαÑç αñ╕αñ╛αñÑ αñûαÑçαñ▓ αñ╕αñòαññαÑç αñ╣αÑêαñé!"
++      }
++    },
++    language_story_order: {
++      title: { English: "School Race Story", Hindi: "αñ╕αÑìαñòαÑéαñ▓ αñòαÑÇ αñªαÑîαñíαñ╝" },
++      prompt: {
++        English: "Put these steps in the correct order to tell the story of a fun school race!",
++        Hindi: "αñçαñ¿ αñ╡αñ╛αñòαÑìαñ»αÑïαñé αñòαÑï αñ╕αñ╣αÑÇ αñòαÑìαñ░αñ« αñ«αÑçαñé αñ▓αñùαñ╛αñÅαñé αññαñ╛αñòαñ┐ αñ╕αÑìαñòαÑéαñ▓ αñòαÑÇ αñªαÑîαñíαñ╝ αñòαÑÇ αñòαñ╣αñ╛αñ¿αÑÇ αñ¼αñ¿ αñ╕αñòαÑç!"
++      }
++    },
++    language_analogy: {
++      title: { English: "Explaining a Game", Hindi: "αñûαÑçαñ▓ αñ╕αñ«αñ¥αñ╛αñ¿αñ╛" },
++      prompt: {
++        English: "You want to explain a game you love to a new friend who does not know your language well. What is the best way?",
++        Hindi: "αñåαñ¬ αñÅαñò αñ¿αñÅ αñªαÑïαñ╕αÑìαññ αñòαÑï αñàαñ¬αñ¿αñ╛ αñ¬αñ╕αñéαñªαÑÇαñªαñ╛ αñûαÑçαñ▓ αñ╕αñ«αñ¥αñ╛αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñé αñ£αÑï αñåαñ¬αñòαÑÇ αñ¡αñ╛αñ╖αñ╛ αñ¿αñ╣αÑÇαñé αñ£αñ╛αñ¿αññαñ╛αÑñ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αñ╛ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
++      }
++    },
++    kinesthetic_motor_planning: {
++      title: { English: "The Sharp Turn", Hindi: "αññαÑçαñ£αñ╝ αñ«αÑïαñíαñ╝" },
++      prompt: {
++        English: "You are running fast in a tag game. To turn left quickly without falling or losing balance, what should you do?",
++        Hindi: "αñåαñ¬ αñ¬αñòαñíαñ╝αñ«-αñ¬αñòαñíαñ╝αñ╛αñê αñ«αÑçαñé αñ¼αñ╣αÑüαññ αññαÑçαñ£αñ╝ αñªαÑîαñíαñ╝ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ αñ¼αñ┐αñ¿αñ╛ αñ╕αñéαññαÑüαñ▓αñ¿ αñûαÑïαñÅ αññαÑüαñ░αñéαññ αñ¼αñ╛αñêαñé αñôαñ░ αñ«αÑüαñíαñ╝αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
++      },
++      options: [
++        { label: { English: "Lower body, lean left, and push off firmly with right foot", Hindi: "αñ╢αñ░αÑÇαñ░ αñòαÑï αñÑαÑïαñíαñ╝αñ╛ αñ¥αÑüαñòαñ╛αñÅαñé, αñ╡αñ£αñ¿ αñ¼αñ╛αñêαñé αñôαñ░ αñ▓αÑç αñ£αñ╛αñÅαñé, αñöαñ░ αñªαñ╛αñÅαñé αñ¬αÑêαñ░ αñ╕αÑç αñºαñòαÑìαñòαñ╛ αñªαÑçαñé" }, value: 4 },
++        { label: { English: "Stand straight and close eyes", Hindi: "αñ╕αÑÇαñºαÑç αñûαñíαñ╝αÑç αñ░αñ╣αÑçαñé αñöαñ░ αñåαñéαñûαÑçαñé αñ¼αñéαñª αñòαñ░αÑçαñé" }, value: 0 },
++        { label: { English: "Run fast without turning", Hindi: "αñ¼αñ┐αñ¿αñ╛ αñ«αÑüαñíαñ╝αÑç αñ╕αÑÇαñºαÑç αññαÑçαñ£αñ╝αÑÇ αñ╕αÑç αñªαÑîαñíαñ╝αÑçαñé" }, value: 1 },
++        { label: { English: "Slide on your knees", Hindi: "αñÿαÑüαñƒαñ¿αÑïαñé αñòαÑç αñ¼αñ▓ αñ½αñ┐αñ╕αñ▓αÑçαñé" }, value: 2 }
++      ]
++    },
++    social_response: {
++      title: { English: "Broken Sandcastle", Hindi: "αñƒαÑéαñƒαñ╛ αñ╣αÑüαñå αñòαñ┐αñ▓αñ╛" },
++      prompt: {
++        English: "A friend accidentally steps on your group's sandcastle and breaks a corner. They look very sorry. What do you do?",
++        Hindi: "αñÅαñò αñªαÑïαñ╕αÑìαññ αñòαñ╛ αñ¬αÑêαñ░ αñùαñ▓αññαÑÇ αñ╕αÑç αñåαñ¬αñòαÑç αñ░αÑçαññ αñòαÑç αñòαñ┐αñ▓αÑç αñ¬αñ░ αñ¬αñíαñ╝ αñ£αñ╛αññαñ╛ αñ╣αÑê αñöαñ░ αñòαÑïαñ¿αñ╛ αñƒαÑéαñƒ αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñ╡αñ╣ αñ¼αñ╣αÑüαññ αñëαñªαñ╛αñ╕ αñ╣αÑêαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
++      },
++      options: [
++        { label: { English: "Tell them it is okay and ask them to help rebuild it", Hindi: "αñòαñ╣αÑçαñé αñòαñ┐ αñòαÑïαñê αñ¼αñ╛αññ αñ¿αñ╣αÑÇαñé αñöαñ░ αñëαñ╕αÑç αñªαÑïαñ¼αñ╛αñ░αñ╛ αñ╕αñ╛αñÑ αñ«αñ┐αñ▓αñòαñ░ αñ¼αñ¿αñ╛αñ¿αÑç αñòαÑï αñòαñ╣αÑçαñé" }, value: 4 },
++        { label: { English: "Get angry and break their toys", Hindi: "αñùαÑüαñ╕αÑìαñ╕αñ╛ αñ╣αÑïαñòαñ░ αñëαñ¿αñòαÑç αñûαñ┐αñ▓αÑîαñ¿αÑç αñ½αÑçαñéαñò αñªαÑçαñé" }, value: 0 },
++        { label: { English: "Start crying and refuse to play", Hindi: "αñ░αÑïαñ¿αñ╛ αñ╢αÑüαñ░αÑé αñòαñ░ αñªαÑçαñé αñöαñ░ αñûαÑçαñ▓αñ¿αñ╛ αñ¼αñéαñª αñòαñ░ αñªαÑçαñé" }, value: 1 },
++        { label: { English: "Ignore them and rebuild it alone", Hindi: "αñëαñ¿αÑìαñ╣αÑçαñé αñ¿αñ£αñ░αñàαñéαñªαñ╛αñ£ αñòαñ░αÑçαñé αñöαñ░ αñàαñòαÑçαñ▓αÑç αñ╣αÑÇ αñòαÑïαñ¿αñ╛ αñªαÑïαñ¼αñ╛αñ░αñ╛ αñ¼αñ¿αñ╛αñÅαñé" }, value: 2 }
++      ]
++    },
++    social_conflict_resolution: {
++      title: { English: "Playground Argument", Hindi: "αñ«αÑêαñªαñ╛αñ¿ αñòαñ╛ αñ¥αñùαñíαñ╝αñ╛" },
++      prompt: {
++        English: "Two friends argue about a football goal. The game stops. How do you help them play again?",
++        Hindi: "αñ½αÑüαñƒαñ¼αÑëαñ▓ αñ«αÑêαñÜ αñ«αÑçαñé αñªαÑï αñªαÑïαñ╕αÑìαññ αñùαÑïαñ▓ αñòαÑï αñ▓αÑçαñòαñ░ αñ¥αñùαñíαñ╝ αñ░αñ╣αÑç αñ╣αÑêαñéαÑñ αñûαÑçαñ▓ αñ░αÑüαñò αñùαñ»αñ╛ αñ╣αÑêαÑñ αñåαñ¬ αñ¥αñùαñíαñ╝αñ╛ αñòαÑêαñ╕αÑç αñ╕αÑüαñ▓αñ¥αñ╛αñÅαñéαñùαÑç?"
++      },
++      options: [
++        { label: { English: "Flip a coin to decide and continue having fun", Hindi: "αñ╕αñ┐αñòαÑìαñòαñ╛ αñëαñ¢αñ╛αñ▓αñòαñ░ αñ½αÑêαñ╕αñ▓αñ╛ αñòαñ░αÑçαñé αñöαñ░ αñûαÑçαñ▓ αñ£αñ╛αñ░αÑÇ αñ░αñûαÑçαñé" }, value: 4 },
++        { label: { English: "Shout louder than them to make them stop", Hindi: "αñëαñ¿ αñªαÑïαñ¿αÑïαñé αñ╕αÑç αñ¡αÑÇ αñ£αñ╝αÑìαñ»αñ╛αñªαñ╛ αñ£αñ╝αÑïαñ░ αñ╕αÑç αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñü αññαñ╛αñòαñ┐ αñ╡αÑç αñÜαÑüαñ¬ αñ╣αÑï αñ£αñ╛αñÅαñü" }, value: 0 },
++        { label: { English: "Take the ball and walk home", Hindi: "αñ½αÑüαñƒαñ¼αÑëαñ▓ αñ▓αÑçαñòαñ░ αñàαñ¬αñ¿αÑç αñÿαñ░ αñÜαñ▓αÑç αñ£αñ╛αñÅαñé" }, value: 1 },
++        { label: { English: "Blame one friend to end it quickly", Hindi: "αñ¼αñ╣αñ╕ αñòαÑï αñ£αñ▓αÑìαñªαÑÇ αñûαññαÑìαñ« αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αññαÑüαñ░αñéαññ αñÅαñò αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñòαÑï αñªαÑïαñ╖αÑÇ αñáαñ╣αñ░αñ╛αñÅαñé" }, value: 0 }
++      ]
++    },
++    naturalist_weather_pattern: {
++      prompt: {
++        English: "Cold wind blows, birds fly low, and the sky turns dark grey. What is nature telling you?",
++        Hindi: "αñàαñÜαñ╛αñ¿αñò αñáαñéαñíαÑÇ αñ╣αñ╡αñ╛ αñÜαñ▓αñ¿αÑç αñ▓αñùαññαÑÇ αñ╣αÑê, αñ¬αñòαÑìαñ╖αÑÇ αñ¿αÑÇαñÜαÑç αñëαñíαñ╝αññαÑç αñ╣αÑêαñé αñöαñ░ αñåαñ╕αñ«αñ╛αñ¿ αñòαñ╛αñ▓αñ╛ αñ╣αÑï αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñ¬αÑìαñ░αñòαÑâαññαñ┐ αñòαÑìαñ»αñ╛ αñ¼αññαñ╛ αñ░αñ╣αÑÇ αñ╣αÑê?"
++      },
++      options: [
++        { label: { English: "Heavy rain is coming soon", Hindi: "αñ¼αñ╣αÑüαññ αñ£αñ▓αÑìαñª αññαÑçαñ£ αñ¼αñ╛αñ░αñ┐αñ╢ αñ╣αÑïαñ¿αÑç αñ╡αñ╛αñ▓αÑÇ αñ╣αÑê" }, value: 4 },
++        { label: { English: "The sun will shine brighter", Hindi: "αñ╕αÑéαñ░αñ£ αñöαñ░ αññαÑçαñ£ αñÜαñ«αñòαÑçαñùαñ╛" }, value: 0 },
++        { label: { English: "An earthquake is coming", Hindi: "αñ¡αÑéαñòαñéαñ¬ αñåαñ¿αÑç αñ╡αñ╛αñ▓αñ╛ αñ╣αÑê" }, value: 0 },
++        { label: { English: "A cold winter night has started", Hindi: "αñáαñéαñí αñòαÑÇ αñ░αñ╛αññ αñ╢αÑüαñ░αÑé αñ╣αÑï αñùαñê αñ╣αÑê" }, value: 1 }
++      ]
++    },
++    naturalist_wind_disperse: {
++      title: { English: "The Hungry Puppy", Hindi: "αñ¡αÑéαñûαñ╛ αñ¬αñ┐αñ▓αÑìαñ▓αñ╛" },
++      prompt: {
++        English: "You see a small puppy near your school that looks hungry, cold, and scared. How do you care for it?",
++        Hindi: "αñåαñ¬αñòαÑï αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñòαÑç αñ¬αñ╛αñ╕ αñÅαñò αñ¢αÑïαñƒαñ╛ αñ¬αñ┐αñ▓αÑìαñ▓αñ╛ αñ«αñ┐αñ▓αññαñ╛ αñ╣αÑê αñ£αÑï αñ¡αÑéαñûαñ╛, αñáαñ┐αñáαÑüαñ░αññαñ╛ αñ╣αÑüαñå αñöαñ░ αñíαñ░αñ╛ αñ╣αÑüαñå αñ╣αÑêαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
++      },
++      options: [
++        { label: { English: "Give it clean water, safe food, and a dry box with a blanket", Hindi: "αñ╕αñ╛αñ½ αñ¬αñ╛αñ¿αÑÇ, αñûαñ╛αñ¿αñ╛ αñªαÑçαñé αñöαñ░ αñ¬αñ╛αñ╕ αñ«αÑçαñé αñòαñ¬αñíαñ╝αÑç αñòαÑç αñ╕αñ╛αñÑ αñíαñ┐αñ¼αÑìαñ¼αñ╛ αñ░αñû αñªαÑçαñé" }, value: 4 },
++        { label: { English: "Shout at it and chase it away", Hindi: "αñëαñ╕ αñ¬αñ░ αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñé αñöαñ░ αñëαñ╕αÑç αñ¡αñùαñ╛ αñªαÑçαñé" }, value: 0 },
++        { label: { English: "Carry it home immediately without asking parents", Hindi: "αñ¬αÑéαñ¢αÑç αñ¼αñ┐αñ¿αñ╛ αññαÑüαñ░αñéαññ αñëαñ╕αÑç αñëαñáαñ╛αñòαñ░ αñÿαñ░ αñ▓αÑç αñåαñÅαñé" }, value: 1 },
++        { label: { English: "Place milk in the middle of a busy road", Hindi: "αñ╕αñíαñ╝αñò αñòαÑç αñ¼αÑÇαñÜαÑïαñé-αñ¼αÑÇαñÜ αñªαÑéαñº αñòαñ╛ αñòαñƒαÑïαñ░αñ╛ αñ░αñû αñªαÑçαñé" }, value: 0 }
++      ]
++    },
++    intrapersonal_reflection: {
++      title: { English: "Hard Work", Hindi: "αñòαñáαñ┐αñ¿ αñòαñ╛αñ«" },
++      prompt: {
++        English: "When something is hard, do you tell yourself you can do it with practice?",
++        Hindi: "αñ£αñ¼ αñåαñ¬ αñòαñ┐αñ╕αÑÇ αñ¼αñ╣αÑüαññ αñòαñáαñ┐αñ¿ αñÜαÑüαñ¿αÑîαññαÑÇ αñòαñ╛ αñ╕αñ╛αñ«αñ¿αñ╛ αñòαñ░αññαÑç αñ╣αÑêαñé, αññαÑï αñòαÑìαñ»αñ╛ αñåαñ¬ αñûαÑüαñª αñ╕αÑç αñòαñ╣αññαÑç αñ╣αÑêαñé αñòαñ┐ αñàαñ¡αÑìαñ»αñ╛αñ╕ αñòαñ░αñ¿αÑç αñ╕αÑç αñåαñ¬ αñçαñ╕αñ«αÑçαñé αñ¼αÑçαñ╣αññαñ░ αñ╣αÑï αñ╕αñòαññαÑç αñ╣αÑêαñé?"
++      },
++      low: { English: "No, I get discouraged", Hindi: "αñ¿αñ╣αÑÇαñé, αñ«αÑêαñé αñ╣αñ┐αñ«αÑìαñ«αññ αñ╣αñ╛αñ░ αñ£αñ╛αññαñ╛ αñ╣αÑéαñü" },
++      high: { English: "Yes, I love to learn!", Hindi: "αñ╣αñ╛αñü, αñ«αÑüαñ¥αÑç αñ╕αÑÇαñûαñ¿αñ╛ αñ¬αñ╕αñéαñª αñ╣αÑê!" }
++    },
++    intrapersonal_frustration: {
++      title: { English: "The Stuck Kite", Hindi: "αñ½αñéαñ╕αÑÇ αñ¬αññαñéαñù" },
++      prompt: {
++        English: "Your handmade kite gets stuck in a tree. You cannot reach it. What do you do?",
++        Hindi: "αñåαñ¬αñòαÑÇ αñ¼αñ¿αñ╛αñê αñ¬αññαñéαñù αñ¬αÑçαñíαñ╝ αñ¬αñ░ αñ½αñéαñ╕ αñùαñê αñ╣αÑêαÑñ αñåαñ¬ αñ╡αñ╣αñ╛αñé αññαñò αñ¿αñ╣αÑÇαñé αñ¬αñ╣αÑüαñéαñÜ αñ╕αñòαññαÑçαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
++      },
++      options: [
++        { label: { English: "Accept it and design a new, better kite", Hindi: "αñ«αñ╛αñ¿ αñ▓αÑçαñé αñòαñ┐ αñ╡αñ╣ αñùαñê, αñöαñ░ αñ¿αñê αñ¬αññαñéαñù αñ¼αñ¿αñ╛αñ¿αÑç αñòαÑÇ αñ╕αÑïαñÜαÑçαñé" }, value: 4 },
++        { label: { English: "Find a long stick to try to get it down", Hindi: "αñÅαñò αñ▓αñéαñ¼αñ╛ αñíαñéαñíαñ╛ αñóαÑéαñéαñóαñòαñ░ αñëαñ╕αÑç αñ¿αñ┐αñòαñ╛αñ▓αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑçαñé" }, value: 4 },
++        { label: { English: "Ask friends for ideas to build a hook tool", Hindi: "αñªαÑïαñ╕αÑìαññαÑïαñé αñ╕αÑç αñòαñ╣αÑçαñé αñòαñ┐ αñºαñ╛αñùαñ╛ αñûαÑÇαñéαñÜαñ¿αÑç αñòαÑÇ αñ«αñ╢αÑÇαñ¿ αñ¼αñ¿αñ╛αñÅαñé" }, value: 4 },
++        { label: { English: "Go home angry and give up entirely", Hindi: "αñùαÑüαñ╕αÑìαñ╕αñ╛ αñ╣αÑïαñòαñ░ αñÿαñ░ αñÜαñ▓αÑç αñ£αñ╛αñÅαñé αñöαñ░ αñ¬αññαñéαñù αñëαñíαñ╝αñ╛αñ¿αñ╛ αñ¢αÑïαñíαñ╝ αñªαÑçαñé" }, value: 1 }
++      ]
++    },
++    deep_discovery_flow: {
++      prompt: {
++        English: "Tell us about a game or drawing that makes you forget about lunchtime! ≡ƒÄ¿ What are you doing and why is it so much fun?",
++        Hindi: "αñ╣αñ«αÑçαñé αñòαñ┐αñ╕αÑÇ αñÉαñ╕αÑç αñûαÑçαñ▓ αñ»αñ╛ αñÜαñ┐αññαÑìαñ░αñòαñ╛αñ░αÑÇ αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ¼αññαñ╛αñÅαñé αñ£αñ┐αñ╕αñ«αÑçαñé αñåαñ¬ αñªαÑïαñ¬αñ╣αñ░ αñòαÑç αñûαñ╛αñ¿αÑç αñòαñ╛ αñ╕αñ«αñ» αñ¡αÑÇ αñ¡αÑéαñ▓ αñ£αñ╛αññαÑç αñ╣αÑêαñé! ≡ƒÄ¿ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░ αñ░αñ╣αÑç αñ╣αÑïαññαÑç αñ╣αÑêαñé αñöαñ░ αñ»αñ╣ αñçαññαñ¿αñ╛ αñ«αñ£αÑçαñªαñ╛αñ░ αñòαÑìαñ»αÑïαñé αñ╣αÑê?"
++      }
++    },
++    deep_discovery_pride: {
++      prompt: {
++        English: "What is one thing you built or made that you love showing to everyone? ≡ƒîƒ Describe what you did.",
++        Hindi: "αñåαñ¬αñ¿αÑç αñòαÑîαñ¿ αñ╕αÑÇ αñÅαñò αñÉαñ╕αÑÇ αñÜαÑÇαñ£αñ╝ αñ¼αñ¿αñ╛αñê αñ╣αÑê αñ£αÑï αñåαñ¬ αñ╕αñ¼αñòαÑï αñªαñ┐αñûαñ╛αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñé? ≡ƒîƒ αñ¼αññαñ╛αñÅαñé αñòαñ┐ αñåαñ¬αñ¿αÑç αñëαñ╕αÑç αñòαÑêαñ╕αÑç αñ¼αñ¿αñ╛αñ»αñ╛αÑñ"
++      }
++    },
++    deep_discovery_curiosity: {
++      prompt: {
++        English: "If you could spend a whole day learning anything you want (like magic, space, or building robots), what would it be?",
++        Hindi: "αñ»αñªαñ┐ αñåαñ¬ αñàαñ¬αñ¿αÑÇ αñ¬αñ╕αñéαñª αñòαÑÇ αñòαÑïαñê αñ¡αÑÇ αñÜαÑÇαñ£αñ╝ αñ╕αÑÇαñûαñ¿αÑç (αñ£αÑêαñ╕αÑç αñ£αñ╛αñªαÑé, αñàαñéαññαñ░αñ┐αñòαÑìαñ╖, αñ»αñ╛ αñ░αÑïαñ¼αÑïαñƒ αñ¼αñ¿αñ╛αñ¿αñ╛) αñ«αÑçαñé αñÅαñò αñ¬αÑéαñ░αñ╛ αñªαñ┐αñ¿ αñ¼αñ┐αññαñ╛ αñ╕αñòαññαÑç αñ╣αÑêαñé, αññαÑï αñåαñ¬ αñòαÑìαñ»αñ╛ αñÜαÑüαñ¿αÑçαñéαñùαÑç?"
++      }
++    },
++    deep_discovery_vision: {
++      prompt: {
++        English: "If you had a magic wand to fix one big problem in your school or village, what would you fix first?",
++        Hindi: "αñ»αñªαñ┐ αñåαñ¬αñòαÑç αñ¬αñ╛αñ╕ αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñ»αñ╛ αñùαñ╛αñüαñ╡ αñòαÑÇ αñòαñ┐αñ╕αÑÇ αñÅαñò αñ¼αñíαñ╝αÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñòαÑï αñáαÑÇαñò αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñÅαñò αñ£αñ╛αñªαÑüαñê αñ¢αñíαñ╝αÑÇ αñ╣αÑï, αññαÑï αñåαñ¬ αñ¬αñ╣αñ▓αÑç αñòαÑìαñ»αñ╛ αñáαÑÇαñò αñòαñ░αÑçαñéαñùαÑç?"
++      }
++    }
++  };
++
++  // Secondary & Senior adaptations (aligned with simple, child-friendly contexts):
++  const advancedOverrides = {
++    logical_pattern_matrix: {
++      title: { English: "The Matrix Pattern", Hindi: "αñ«αÑêαñƒαÑìαñ░αñ┐αñòαÑìαñ╕ αñ¬αÑêαñƒαñ░αÑìαñ¿" },
++      prompt: {
++        English: "Find the missing number at the top of the pyramid. The bottom numbers add up to the ones above them: 3 and 5 make 8, and 5 and 9 make 14. What number goes at the top? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)",
++        Hindi: "αñ¬αñ┐αñ░αñ╛αñ«αñ┐αñí αñòαÑç αñ╕αñ¼αñ╕αÑç αñèαñ¬αñ░ αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛ αñ£αÑìαñ₧αñ╛αññ αñòαñ░αÑçαñéαÑñ αñ¿αÑÇαñÜαÑç αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛αñÅαñü αñàαñ¬αñ¿αÑç αñèαñ¬αñ░ αñòαÑÇ αñ╕αñéαñûαÑìαñ»αñ╛αñôαñé αñòαñ╛ αñ»αÑïαñù αñ╣αÑêαñé: 3 αñöαñ░ 5 αñ«αñ┐αñ▓αñòαñ░ 8 αñ¼αñ¿αññαÑç αñ╣αÑêαñé, 5 αñöαñ░ 9 αñ«αñ┐αñ▓αñòαñ░ 14 αñ¼αñ¿αññαÑç αñ╣αÑêαñéαÑñ αñ╢αÑÇαñ░αÑìαñ╖ αñ¬αñ░ αñòαÑîαñ¿ αñ╕αÑÇ αñ╕αñéαñûαÑìαñ»αñ╛ αñåαñÅαñùαÑÇ? (3 + 5 = 8; 5 + 9 = 14; 8 + 14 = ?)"
++      }
++    },
++    logical_riddle: {
++      title: { English: "The Leg Count Riddle", Hindi: "αñ¬αÑêαñ░ αñùαñ┐αñ¿αñ¿αÑç αñòαñ╛ αñûαÑçαñ▓" },
++      prompt: {
++        English: "A secret code matches animals to numbers based on their legs: Cat is 4, Spider is 8, and Ant is 6. What number represents a Snake?",
++        Hindi: "αñÅαñò αñùαÑüαñ¬αÑìαññ αñòαÑïαñí αñ£αñ╛αñ¿αñ╡αñ░αÑïαñé αñòαÑç αñ¬αÑêαñ░αÑïαñé αñòαÑç αñåαñºαñ╛αñ░ αñ¬αñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñÅαñò αñ¿αñéαñ¼αñ░ αñªαÑçαññαñ╛ αñ╣αÑê: αñ¼αñ┐αñ▓αÑìαñ▓αÑÇ 4 αñ╣αÑê, αñ«αñòαñíαñ╝αÑÇ 8 αñ╣αÑê, αñöαñ░ αñÜαÑÇαñéαñƒαÑÇ 6 αñ╣αÑêαÑñ αñ╕αñ╛αñéαñ¬ αñòαñ╛ αñ¿αñéαñ¼αñ░ αñòαÑìαñ»αñ╛ αñ╣αÑïαñùαñ╛?"
++      }
++    },
++    spatial_rotation: {
++      prompt: {
++        English: "A star pointer turns: first UP Γåæ, then RIGHT ΓåÆ, then DOWN Γåô. Where will it point next?",
++        Hindi: "αññαñ╛αñ░αÑç αñòαÑÇ αñ╕αÑüαñê αñÿαÑéαñ«αññαÑÇ αñ╣αÑê: αñ¬αñ╣αñ▓αÑç αñèαñ¬αñ░ αñçαñ╢αñ╛αñ░αñ╛ αñòαñ░αññαÑÇ αñ╣αÑê Γåæ, αñ½αñ┐αñ░ αñªαñ╛αñÅαñé ΓåÆ, αñ½αñ┐αñ░ αñ¿αÑÇαñÜαÑç ΓåôαÑñ αñåαñùαÑç αñòαñ╣αñ╛αñü αñçαñ╢αñ╛αñ░αñ╛ αñòαñ░αÑçαñùαÑÇ?"
++      }
++    },
++    spatial_perspective: {
++      title: { English: "Top-Down Perspective", Hindi: "αñèαñ¬αñ░ αñ╕αÑç αñªαÑçαñûαñ¿αñ╛" },
+       prompt: {
+-        English: "A T-shaped toy has light shining from the LEFT. What shape of shadow does it make on the wall?",
+-        Hindi: "αñÅαñò 'T' αñåαñòαñ╛αñ░ αñòαÑç αñûαñ┐αñ▓αÑîαñ¿αÑç αñ¬αñ░ αñ¼αñ╛αñêαñé (LEFT) αñôαñ░ αñ╕αÑç αñƒαÑëαñ░αÑìαñÜ αñòαÑÇ αñ░αÑïαñ╢αñ¿αÑÇ αñ¬αÑ£αñ¿αÑç αñ¬αñ░ αñªαÑÇαñ╡αñ╛αñ░ αñ¬αñ░ αñòαÑêαñ╕αÑÇ αñ¢αñ╛αñ»αñ╛ αñ¼αñ¿αÑçαñùαÑÇ?"
++        English: "A drinking cup with a handle is sitting on a table. If you look at it directly from the TOP, what shape do you see?",
++        Hindi: "αñ«αÑçαñ£ αñ¬αñ░ αñ╣αÑêαñéαñíαñ▓ αñ╡αñ╛αñ▓αñ╛ αñÅαñò αñ¬αÑÇαñ¿αÑç αñòαñ╛ αñòαñ¬ αñ░αñûαñ╛ αñ╣αÑêαÑñ αñ»αñªαñ┐ αñåαñ¬ αñòαñ¬ αñòαÑï αñáαÑÇαñò αñèαñ¬αñ░ (TOP) αñ╕αÑç αñªαÑçαñûαññαÑç αñ╣αÑêαñé, αññαÑï αñåαñ¬αñòαÑï αñòαÑêαñ╕αÑÇ αñåαñòαÑâαññαñ┐ αñªαñ┐αñûαñ╛αñê αñªαÑçαñùαÑÇ?"
+       }
+     },
+     creative_uses: {
+       prompt: {
+-        English: "Imagine gravity pulls you SIDEWAYS at school instead of down! ≡ƒÿ« Write 3 funny things that would happen!",
+-        Hindi: "αñ╕αÑïαñÜαÑçαñé αñòαñ┐ αñåαñ¬αñòαÑç αñ╕αÑìαñòαÑéαñ▓ αñ«αÑçαñé αñùαÑüαñ░αÑüαññαÑìαñ╡αñ╛αñòαñ░αÑìαñ╖αñú αñ¿αÑÇαñÜαÑç αñòαÑç αñ¼αñ£αñ╛αñ» αñ¼αñùαñ▓ αñ«αÑçαñé αñòαñ╛αñ« αñòαñ░αñ¿αÑç αñ▓αñùαÑç! ≡ƒÿ« 3 αñ«αñ£αÑçαñªαñ╛αñ░ αñÜαÑÇαñ£αÑçαñé αñ▓αñ┐αñûαÑçαñé αñ£αÑï αñåαñ¬αñòαÑç αñ╕αñ╛αñÑ αñ╣αÑïαñéαñùαÑÇ!"
++        English: "Imagine you are given a large, empty cardboard box. Write down 3 completely different and creative things you could build or play with it!",
++        Hindi: "αñòαñ▓αÑìαñ¬αñ¿αñ╛ αñòαÑÇαñ£αñ┐αñÅ αñòαñ┐ αñåαñ¬αñòαÑï αñÅαñò αñ¼αñíαñ╝αñ╛, αñûαñ╛αñ▓αÑÇ αñòαñ╛αñ░αÑìαñíαñ¼αÑïαñ░αÑìαñí αñ¼αÑëαñòαÑìαñ╕ αñ«αñ┐αñ▓αñ╛ αñ╣αÑêαÑñ 3 αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñàαñ▓αñù αñöαñ░ αñ░αñÜαñ¿αñ╛αññαÑìαñ«αñò αñÜαÑÇαñ£αÑçαñé αñ▓αñ┐αñûαÑçαñé αñ£αÑï αñåαñ¬ αñçαñ╕αñ╕αÑç αñ¼αñ¿αñ╛ αñ╕αñòαññαÑç αñ╣αÑêαñé αñ»αñ╛ αñçαñ╕αñòαÑç αñ╕αñ╛αñÑ αñûαÑçαñ▓ αñ╕αñòαññαÑç αñ╣αÑêαñé!"
+       }
+     },
+     language_story_order: {
+-      title: { English: "Story Order", Hindi: "αñòαñ╣αñ╛αñ¿αÑÇ αñ£αñ«αñ╛αñÅαñé" },
++      title: { English: "Chronological Story Sequence", Hindi: "αñòαñ╣αñ╛αñ¿αÑÇ αñòαñ╛ αñ╕αñ╣αÑÇ αñòαÑìαñ░αñ«" },
+       prompt: {
+-        English: "Put these secret agent message pieces in the correct order to tell the exciting escape story!",
+-        Hindi: "αñçαñ¿ αñ╡αñ╛αñòαÑìαñ»αÑïαñé αñòαÑï αñ╕αñ╣αÑÇ αñòαÑìαñ░αñ« αñ«αÑçαñé αñ▓αñùαñ╛αñÅαñé αññαñ╛αñòαñ┐ αñÅαñò αñ«αñ£αÑçαñªαñ╛αñ░ αñ¡αñ╛αñùαñ¿αÑç αñòαÑÇ αñòαñ╣αñ╛αñ¿αÑÇ αñ¼αñ¿ αñ╕αñòαÑç!"
++        English: "Put these steps in the correct order to tell the story of a school race:",
++        Hindi: "αñ╕αÑìαñòαÑéαñ▓ αñòαÑÇ αñªαÑîαñíαñ╝ αñòαÑÇ αñòαñ╣αñ╛αñ¿αÑÇ αñòαÑï αñ╕αñ╣αÑÇ αñòαÑìαñ░αñ« αñ«αÑçαñé αñ╡αÑìαñ»αñ╡αñ╕αÑìαñÑαñ┐αññ αñòαñ░αÑçαñé:"
+       }
+     },
+     language_analogy: {
+-      title: { English: "Word Connection", Hindi: "αñ╢αñ¼αÑìαñªαÑïαñé αñòαñ╛ αñ«αÑçαñ▓" },
++      title: { English: "Explaining a Game", Hindi: "αñûαÑçαñ▓ αñ╕αñ«αñ¥αñ╛αñ¿αñ╛" },
+       prompt: {
+-        English: "Complete this word connection: A FEATHER is to a BIRD as a SCALE is to...?",
+-        Hindi: "αñ╢αñ¼αÑìαñªαÑïαñé αñòαñ╛ αñ╕αñéαñ¼αñéαñº αñ¬αÑéαñ░αñ╛ αñòαñ░αÑçαñé: αñÅαñò αñ¬αñéαñû (FEATHER) αñÜαñ┐αñíαñ╝αñ┐αñ»αñ╛ (BIRD) αñòαÑç αñ▓αñ┐αñÅ αñ╣αÑê, αññαÑï αñÅαñò αñ╢αñ▓αÑìαñò (SCALE) αñòαñ┐αñ╕αñòαÑç αñ▓αñ┐αñÅ αñ╣αÑê...?"
++        English: "You want to explain a game you love to a new friend who does not speak your language well. What is the best strategy?",
++        Hindi: "αñåαñ¬ αñÅαñò αñ¿αñÅ αñªαÑïαñ╕αÑìαññ αñòαÑï αñàαñ¬αñ¿αñ╛ αñ¬αñ╕αñéαñªαÑÇαñªαñ╛ αñûαÑçαñ▓ αñ╕αñ«αñ¥αñ╛αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñé αñ£αÑï αñåαñ¬αñòαÑÇ αñ¡αñ╛αñ╖αñ╛ αñ¿αñ╣αÑÇαñé αñ£αñ╛αñ¿αññαñ╛αÑñ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αÑÇ αñ░αñúαñ¿αÑÇαññαñ┐ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+       }
+     },
+     kinesthetic_motor_planning: {
+-      title: { English: "The Rope Bridge", Hindi: "αñ░αñ╕αÑìαñ╕αÑÇ αñòαñ╛ αñ¬αÑüαñ▓" },
++      title: { English: "Body Weight Stabilization", Hindi: "αñ╢αñ╛αñ░αÑÇαñ░αñ┐αñò αñ╕αñéαññαÑüαñ▓αñ¿" },
+       prompt: {
+-        English: "You are on a wobbling rope bridge. Strong wind blows from the right! What is the best way to balance?",
+-        Hindi: "αñåαñ¬ αñÅαñò αñ╣αñ┐αñ▓αññαÑç αñ╣αÑüαñÅ αñ░αñ╕αÑìαñ╕αÑÇ αñòαÑç αñ¬αÑüαñ▓ αñ¬αñ░ αñ╣αÑêαñéαÑñ αñªαñ╛αñêαñé αñôαñ░ αñ╕αÑç αññαÑçαñ£ αñ╣αñ╡αñ╛ αñÜαñ▓αññαÑÇ αñ╣αÑê! αñ╕αÑüαñ░αñòαÑìαñ╖αñ┐αññ αñ░αñ╣αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
++        English: "You are running fast in a tag game and need to turn left quickly without losing your balance. What is the best strategy?",
++        Hindi: "αñåαñ¬ αñ¬αñòαñíαñ╝αñ«-αñ¬αñòαñíαñ╝αñ╛αñê αñ«αÑçαñé αñ¼αñ╣αÑüαññ αññαÑçαñ£αñ╝ αñªαÑîαñíαñ╝ αñ░αñ╣αÑç αñ╣αÑêαñé αñöαñ░ αñ¼αñ┐αñ¿αñ╛ αñ╕αñéαññαÑüαñ▓αñ¿ αñûαÑïαñÅ αññαÑüαñ░αñéαññ αñ¼αñ╛αñêαñé αñôαñ░ αñ«αÑüαñíαñ╝αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñéαÑñ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αÑÇ αñ░αñúαñ¿αÑÇαññαñ┐ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
+       },
+       options: [
+-        { label: { English: "Bend knees, spread arms, and lean slightly right", Hindi: "αñÿαÑüαñƒαñ¿αÑïαñé αñòαÑï αñ«αÑïαñíαñ╝αÑçαñé, αñ╣αñ╛αñÑ αñ½αÑêαñ▓αñ╛αñÅαñé αñöαñ░ αñÑαÑïαñíαñ╝αñ╛ αñªαñ╛αñêαñé αñôαñ░ αñ¥αÑüαñòαÑçαñé" }, value: 4 },
+-        { label: { English: "Stand straight and close eyes", Hindi: "αñ¼αñ┐αñ▓αÑìαñòαÑüαñ▓ αñ╕αÑÇαñºαÑç αñûαñíαñ╝αÑç αñ░αñ╣αÑçαñé αñöαñ░ αñåαñéαñûαÑçαñé αñ¼αñéαñª αñòαñ░αÑçαñé" }, value: 0 },
+-        { label: { English: "Run fast to the other side", Hindi: "αñ£αñ┐αññαñ¿αÑÇ αññαÑçαñ£αÑÇ αñ╕αÑç αñ╣αÑï αñ╕αñòαÑç αñªαÑéαñ╕αñ░αÑÇ αññαñ░αñ½ αñªαÑîαñíαñ╝αÑçαñé" }, value: 1 },
+-        { label: { English: "Sit down and shout for help", Hindi: "αñ░αñ╕αÑìαñ╕αÑÇ αñòαÑç αñ¬αÑüαñ▓ αñ¬αñ░ αñ¼αÑêαñá αñ£αñ╛αñÅαñé αñöαñ░ αñ«αñªαñª αñòαÑç αñ▓αñ┐αñÅ αñÜαñ┐αñ▓αÑìαñ▓αñ╛αñÅαñé" }, value: 2 }
++        { label: { English: "Lower your body slightly, lean left, and push off firmly with your right foot", Hindi: "αñÿαÑüαñƒαñ¿αÑïαñé αñòαÑï αñ«αÑïαñíαñ╝αñòαñ░ αñàαñ¬αñ¿αÑç αñùαÑüαñ░αÑüαññαÑìαñ╡αñ╛αñòαñ░αÑìαñ╖αñú αñòαÑçαñéαñªαÑìαñ░ αñòαÑï αñòαñ« αñòαñ░αÑçαñé, αñ╕αñéαññαÑüαñ▓αñ¿ αñòαÑç αñ▓αñ┐αñÅ αñ╣αñ╛αñÑ αñ½αÑêαñ▓αñ╛αñÅαñé, αñöαñ░ αñÑαÑïαñíαñ╝αñ╛ αñªαñ╛αñêαñé αñôαñ░ αñ¥αÑüαñòαÑçαñé" }, value: 4 },
++        { label: { English: "Align body posture fully vertical, close eyes, and stiffen muscle groups", Hindi: "αñ╢αñ░αÑÇαñ░ αñòαÑÇ αñ«αÑüαñªαÑìαñ░αñ╛ αñòαÑï αñ╕αÑÇαñºαñ╛ αñ░αñûαÑçαñé, αñåαñéαñûαÑçαñé αñ¼αñéαñª αñòαñ░αÑçαñé αñöαñ░ αñàαñ¬αñ¿αÑÇ αñ«αñ╛αñéαñ╕αñ¬αÑçαñ╢αñ┐αñ»αÑïαñé αñòαÑï αñòαñíαñ╝αñ╛ αñòαñ░αÑçαñé" }, value: 0 },
++        { label: { English: "Increase speed to run through without turning", Hindi: "αñ¼αñ┐αñ¿αñ╛ αñ«αÑüαñíαñ╝αÑç αñ╕αÑÇαñºαÑç αñöαñ░ αññαÑçαñ£αñ╝ αñªαÑîαñíαñ╝αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑçαñé" }, value: 1 },
++        { label: { English: "Drop to your knees to slide", Hindi: "αñ½αñ┐αñ╕αñ▓αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñàαñ¬αñ¿αÑç αñÿαÑüαñƒαñ¿αÑïαñé αñ¬αñ░ αñ¼αÑêαñá αñ£αñ╛αñÅαñé" }, value: 2 }
+       ]
+     },
+     social_response: {
+-      title: { English: "Helping a Teammate", Hindi: "αñ╕αñ╛αñÑαÑÇ αñòαÑÇ αñ«αñªαñª" },
++      title: { English: "Managing Team Cooperation", Hindi: "αñ╕αñ╣αñ»αÑïαñùαñ╛αññαÑìαñ«αñò αñòαñ╛αñ░αÑìαñ»" },
+       prompt: {
+-        English: "10 minutes left for a group project. A friend is upset because their drawing was left out. What do you do?",
+-        Hindi: "αñ¬αÑìαñ░αÑïαñ£αÑçαñòαÑìαñƒ αñ£αñ«αñ╛ αñòαñ░αñ¿αÑç αñ«αÑçαñé 10 αñ«αñ┐αñ¿αñƒ αñ¼αñÜαÑç αñ╣αÑêαñéαÑñ αñÅαñò αñªαÑïαñ╕αÑìαññ αñ░αÑï αñ░αñ╣αñ╛ αñ╣αÑê αñòαÑìαñ»αÑïαñéαñòαñ┐ αñëαñ╕αñòαñ╛ αñÜαñ┐αññαÑìαñ░ αñ¡αÑéαñ▓ αñùαñÅαÑñ αñ¼αñ╛αñòαÑÇ αñ£αñ«αñ╛ αñòαñ░αñ¿αñ╛ αñÜαñ╛αñ╣αññαÑç αñ╣αÑêαñéαÑñ αñåαñ¬ αñòαÑìαñ»αñ╛ αñòαñ░αÑçαñéαñùαÑç?"
++        English: "Your group of friends is building a big sandcastle in the playground. A friend accidentally steps on it and breaks a corner. They look very sorry. How do you resolve this?",
++        Hindi: "αñåαñ¬αñòαñ╛ αñªαÑïαñ╕αÑìαññαÑïαñé αñòαñ╛ αñ╕αñ«αÑéαñ╣ αñ«αÑêαñªαñ╛αñ¿ αñ«αÑçαñé αñ░αÑçαññ αñòαñ╛ αñòαñ┐αñ▓αñ╛ αñ¼αñ¿αñ╛ αñ░αñ╣αñ╛ αñ╣αÑêαÑñ αñÅαñò αñªαÑïαñ╕αÑìαññ αñòαñ╛ αñ¬αÑêαñ░ αñùαñ▓αññαÑÇ αñ╕αÑç αñëαñ╕ αñ¬αñ░ αñ¬αñíαñ╝αññαñ╛ αñ╣αÑê αñöαñ░ αñÅαñò αñòαÑïαñ¿αñ╛ αñƒαÑéαñƒ αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñ╡αñ╣ αñ¼αñ╣αÑüαññ αñëαñªαñ╛αñ╕ αñ╣αÑêαÑñ αñåαñ¬ αñçαñ╕αÑç αñòαÑêαñ╕αÑç αñ╣αñ▓ αñòαñ░αÑçαñéαñùαÑç?"
+       },
+       options: [
+-        { label: { English: "Submit now and highlight their drawing later", Hindi: "αñ¬αÑìαñ░αÑïαñ£αÑçαñòαÑìαñƒ αñ£αñ«αñ╛ αñòαñ░ αñªαÑçαñé, αñ½αñ┐αñ░ αñ¬αÑìαñ░αÑçαñ£αÑçαñéαñƒαÑçαñ╢αñ¿ αñ«αÑçαñé αñªαÑïαñ╕αÑìαññ αñòαÑç αñÜαñ┐αññαÑìαñ░ αñòαÑÇ αñ¼αñ╛αññ αñòαñ░αÑçαñé" }, value: 4 },
+-        { label: { English: "Delay to add the drawing because friendship matters most", Hindi: "αñªαÑçαñ░ αñ╣αÑï αñ£αñ╛αñÅ αññαÑï αñ¡αÑÇ αñÜαñ┐αññαÑìαñ░ αñÜαñ┐αñ¬αñòαñ╛αñÅαñé αñòαÑìαñ»αÑïαñéαñòαñ┐ αñªαÑïαñ╕αÑìαññ αñòαÑÇ αñûαÑüαñ╢αÑÇ αñ£αñ░αÑéαñ░αÑÇ αñ╣αÑê" }, value: 4 },
+-        { label: { English: "Tape the drawing to the back quickly to save time", Hindi: "αñÜαñ┐αññαÑìαñ░ αñòαÑï αñ¬αÑïαñ╕αÑìαñƒαñ░ αñòαÑç αñ¬αÑÇαñ¢αÑç αñÜαñ┐αñ¬αñòαñ╛ αñªαÑçαñé αññαñ╛αñòαñ┐ αñ╕αñ«αñ» αñ¼αñÜ αñ╕αñòαÑç" }, value: 4 },
+-        { label: { English: "Do nothing and let others decide", Hindi: "αñÜαÑüαñ¬ αñ░αñ╣αÑçαñé αñöαñ░ αñªαÑéαñ╕αñ░αÑïαñé αñòαÑï αñ½αÑêαñ╕αñ▓αñ╛ αñòαñ░αñ¿αÑç αñªαÑçαñé" }, value: 1 }
++        { label: { English: "Acknowledge it was an accident and invite them to rebuild it together", Hindi: "αñ╕αÑìαñ╡αÑÇαñòαñ╛αñ░ αñòαñ░αÑçαñé αñòαñ┐ αñ»αñ╣ αñùαñ▓αññαÑÇ αñ╕αÑç αñ╣αÑüαñå αñöαñ░ αñëαñ╕αÑç αñ╣αñ«αñ╛αñ░αÑç αñ╕αñ╛αñÑ αñªαÑïαñ¼αñ╛αñ░αñ╛ αñòαñ┐αñ▓αñ╛ αñ¼αñ¿αñ╛αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñòαñ╣αÑçαñé" }, value: 4 },
++        { label: { English: "React in anger and damage their possessions", Hindi: "αñùαÑüαñ╕αÑìαñ╕αñ╛ αñ╡αÑìαñ»αñòαÑìαññ αñòαñ░αÑçαñé αñöαñ░ αñëαñ¿αñòαÑç αñûαñ┐αñ▓αÑîαñ¿αÑïαñé αñòαÑï αñ¿αÑüαñòαñ╕αñ╛αñ¿ αñ¬αñ╣αÑüαñüαñÜαñ╛αñÅαñü" }, value: 0 },
++        { label: { English: "Refuse to continue building and leave the game", Hindi: "αñòαñ┐αñ▓αñ╛ αñ¼αñ¿αñ╛αñ¿αÑç αñòαñ╛ αñòαñ╛αñ« αñ░αÑïαñò αñªαÑçαñé αñöαñ░ αñûαÑçαñ▓ αñ╕αÑç αñ╣αñƒ αñ£αñ╛αñÅαñé" }, value: 1 },
++        { label: { English: "Ignore the friend and repair the structure independently", Hindi: "αñªαÑïαñ╕αÑìαññ αñòαÑï αñ¿αñ£αñ░αñàαñéαñªαñ╛αñ£ αñòαñ░αÑçαñé αñöαñ░ αñàαñòαÑçαñ▓αÑç αñ╣αÑÇ αñóαñ╛αñéαñÜαÑç αñòαÑÇ αñ«αñ░αñ«αÑìαñ«αññ αñòαñ░αÑçαñé" }, value: 2 }
++      ]
++    },
++    social_conflict_resolution: {
++      title: { English: "Group Conflict Resolution", Hindi: "αñ╕αñ«αÑéαñ╣ αñ╡αñ┐αñ╡αñ╛αñª αñ╕αñ«αñ╛αñºαñ╛αñ¿" },
++      prompt: {
++        English: "During a football match, two classmates start arguing loudly about a goal. Everyone is shouting and the game has stopped. How do you help them resolve this?",
++        Hindi: "αñÅαñò αñ½αÑüαñƒαñ¼αÑëαñ▓ αñ«αÑêαñÜ αñòαÑç αñªαÑîαñ░αñ╛αñ¿, αñªαÑï αñ╕αñ╣αñ¬αñ╛αñáαñ┐αñ»αÑïαñé αñòαÑç αñ¼αÑÇαñÜ αñùαÑïαñ▓ αñòαÑï αñ▓αÑçαñòαñ░ αñ╡αñ┐αñ╡αñ╛αñª αñ╣αÑï αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñûαÑçαñ▓ αñ░αÑüαñò αñ£αñ╛αññαñ╛ αñ╣αÑêαÑñ αñåαñ¬ αñçαñ╕αÑç αñòαÑêαñ╕αÑç αñ╕αÑüαñ▓αñ¥αñ╛αñÅαñéαñùαÑç?"
++      },
++      options: [
++        { label: { English: "Suggest a coin flip to decide, reminding everyone that fun is the primary goal", Hindi: "αñ½αÑêαñ╕αñ▓αñ╛ αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñ╕αñ┐αñòαÑìαñòαñ╛ αñëαñ¢αñ╛αñ▓αñ¿αÑç αñòαñ╛ αñ╕αÑüαñ¥αñ╛αñ╡ αñªαÑçαñé, αñöαñ░ αñ»αñ╛αñª αñªαñ┐αñ▓αñ╛αñÅαñé αñòαñ┐ αñûαÑçαñ▓ αñòαñ╛ αñ«αñ£αñ╝αñ╛ αñ╕αñ¼αñ╕αÑç αñèαñ¬αñ░ αñ╣αÑê" }, value: 4 },
++        { label: { English: "Raise your voice louder to force compliance", Hindi: "αñàαñ¬αñ¿αÑÇ αñåαñ╡αñ╛αñ£αñ╝ αñëαñáαñ╛αñÅαñé αñöαñ░ αñëαñ¿αÑìαñ╣αÑçαñé αñ╢αñ╛αñéαññ αñòαñ░αñ¿αÑç αñòαñ╛ αñªαñ¼αñ╛αñ╡ αñ¼αñ¿αñ╛αñÅαñé" }, value: 0 },
++        { label: { English: "Leave the game and remove the ball", Hindi: "αñûαÑçαñ▓ αñ¢αÑïαñíαñ╝ αñªαÑçαñé αñöαñ░ αñ¼αÑëαñ▓ αñòαÑï αñàαñ¬αñ¿αÑç αñ╕αñ╛αñÑ αñ▓αÑç αñ£αñ╛αñÅαñé" }, value: 1 },
++        { label: { English: "Assign blame to one teammate to end the dispute quickly", Hindi: "αñ¥αñùαñíαñ╝αñ╛ αñ£αñ▓αÑìαñªαÑÇ αñûαññαÑìαñ« αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αññαÑüαñ░αñéαññ αñÅαñò αñ╕αñ╣αñ¬αñ╛αñáαÑÇ αñòαÑï αñªαÑïαñ╖αÑÇ αñáαñ╣αñ░αñ╛αñÅαñé" }, value: 0 }
++      ]
++    },
++    naturalist_weather_pattern: {
++      prompt: {
++        English: "You observe a sudden decrease in air temperature, low-flying birds, and dark clouds. What does this tell you?",
++        Hindi: "αñåαñ¬ αññαñ╛αñ¬αñ«αñ╛αñ¿ αñ«αÑçαñé αñàαñÜαñ╛αñ¿αñò αñùαñ┐αñ░αñ╛αñ╡αñƒ, αñ¬αñòαÑìαñ╖αñ┐αñ»αÑïαñé αñòαÑï αñ¿αÑÇαñÜαÑç αñëαñíαñ╝αññαÑç αñ╣αÑüαñÅ αñöαñ░ αñòαñ╛αñ▓αÑç αñ¼αñ╛αñªαñ▓αÑïαñé αñòαÑï αñªαÑçαñûαññαÑç αñ╣αÑêαñéαÑñ αñ»αñ╣ αñòαÑìαñ»αñ╛ αñªαñ░αÑìαñ╢αñ╛αññαñ╛ αñ╣αÑê?"
++      },
++      options: [
++        { label: { English: "A heavy rain shower is coming very soon", Hindi: "αñ¼αñ╣αÑüαññ αñ£αñ▓αÑìαñª αñ¡αñ╛αñ░αÑÇ αñ¼αñ╛αñ░αñ┐αñ╢ αñ╣αÑïαñ¿αÑç αñ╡αñ╛αñ▓αÑÇ αñ╣αÑê" }, value: 4 },
++        { label: { English: "Clear sky and sunshine are expected", Hindi: "αñåαñ╕αñ«αñ╛αñ¿ αñ╕αñ╛αñ½ αñ╣αÑïαñ¿αÑç αñöαñ░ αñºαÑéαñ¬ αñûαñ┐αñ▓αñ¿αÑç αñòαÑÇ αñëαñ«αÑìαñ«αÑÇαñª αñ╣αÑê" }, value: 0 },
++        { label: { English: "Seismic movements", Hindi: "αñ¡αÑéαñòαñéαñ¬αÑÇαñ» αñ╣αñ▓αñÜαñ▓" }, value: 0 },
++        { label: { English: "Onset of a cold winter season", Hindi: "αñáαñéαñí αñòαÑç αñ«αÑîαñ╕αñ« αñòαÑÇ αñ╢αÑüαñ░αÑüαñåαññ" }, value: 1 }
++      ]
++    },
++    naturalist_wind_disperse: {
++      title: { English: "Caring for an Animal", Hindi: "αñ£αñ╛αñ¿αñ╡αñ░ αñòαÑÇ αñªαÑçαñûαñ¡αñ╛αñ▓" },
++      prompt: {
++        English: "You find a small, hungry, and scared puppy near your school. What is the best and safest way to care for it?",
++        Hindi: "αñåαñ¬αñòαÑï αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñòαÑç αñ¬αñ╛αñ╕ αñÅαñò αñ¢αÑïαñƒαñ╛, αñ¡αÑéαñûαñ╛ αñöαñ░ αñíαñ░αñ╛ αñ╣αÑüαñå αñ¬αñ┐αñ▓αÑìαñ▓αñ╛ αñ«αñ┐αñ▓αññαñ╛ αñ╣αÑêαÑñ αñëαñ╕αñòαÑÇ αñªαÑçαñûαñ¡αñ╛αñ▓ αñòαñ░αñ¿αÑç αñòαñ╛ αñ╕αñ¼αñ╕αÑç αñàαñÜαÑìαñ¢αñ╛ αñöαñ░ αñ╕αÑüαñ░αñòαÑìαñ╖αñ┐αññ αññαñ░αÑÇαñòαñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑê?"
++      },
++      options: [
++        { label: { English: "Provide clean water, safe food, and a shelter box with old cloth", Hindi: "αñ╕αñ╛αñ½ αñ¬αñ╛αñ¿αÑÇ, αñûαñ╛αñ¿αñ╛ αñªαÑçαñé αñöαñ░ αñ¬αñ╛αñ╕ αñ«αÑçαñé αñÅαñò αñòαñ¬αñíαñ╝αÑç αñòαÑç αñ╕αñ╛αñÑ αñíαñ┐αñ¼αÑìαñ¼αñ╛ αñ░αñû αñªαÑçαñé" }, value: 4 },
++        { label: { English: "Chase the animal away to clear the area", Hindi: "αñòαÑìαñ╖αÑçαññαÑìαñ░ αñ╕αñ╛αñ½ αñòαñ░αñ¿αÑç αñòαÑç αñ▓αñ┐αñÅ αñëαñ╕αÑç αñªαÑéαñ░ αñ¡αñùαñ╛ αñªαÑçαñé" }, value: 0 },
++        { label: { English: "Adopt it immediately without family permission", Hindi: "αñ¬αñ░αñ┐αñ╡αñ╛αñ░ αñòαÑÇ αñàαñ¿αÑüαñ«αññαñ┐ αñòαÑç αñ¼αñ┐αñ¿αñ╛ αññαÑüαñ░αñéαññ αñëαñ╕αÑç αñÿαñ░ αñ▓αÑç αñåαñÅαñé" }, value: 1 },
++        { label: { English: "Place food in a hazardous location", Hindi: "αñòαñ┐αñ╕αÑÇ αñûαññαñ░αñ¿αñ╛αñò αñ╕αÑìαñÑαñ╛αñ¿ αñ¬αñ░ αñ¡αÑïαñ£αñ¿ αñ░αñû αñªαÑçαñé" }, value: 0 }
++      ]
++    },
++    intrapersonal_reflection: {
++      title: { English: "Growth & Agility", Hindi: "αñ╡αñ┐αñòαñ╛αñ╕ αñöαñ░ αñàαñ¡αÑìαñ»αñ╛αñ╕" },
++      prompt: {
++        English: "When faced with difficult learning challenges, do you believe you can improve with systematic practice?",
++        Hindi: "αñòαñáαñ┐αñ¿ αñÜαÑüαñ¿αÑîαññαñ┐αñ»αÑïαñé αñòαñ╛ αñ╕αñ╛αñ«αñ¿αñ╛ αñòαñ░αññαÑç αñ╕αñ«αñ», αñòαÑìαñ»αñ╛ αñåαñ¬ αñ«αñ╛αñ¿αññαÑç αñ╣αÑêαñé αñòαñ┐ αñ»αÑïαñ£αñ¿αñ╛αñ¼αñªαÑìαñº αñàαñ¡αÑìαñ»αñ╛αñ╕ αñ╕αÑç αñåαñ¬ αñ¼αÑçαñ╣αññαñ░ αñ╣αÑï αñ╕αñòαññαÑç αñ╣αÑêαñé?"
++      },
++      low: { English: "No, my ability is fixed and I feel discouraged", Hindi: "αñ¿αñ╣αÑÇαñé, αñ«αÑçαñ░αÑÇ αñòαÑìαñ╖αñ«αññαñ╛αñÅαñé αñ¿αñ┐αñ╢αÑìαñÜαñ┐αññ αñ╣αÑêαñé αñöαñ░ αñ«αÑêαñé αñ╣αññαÑïαññαÑìαñ╕αñ╛αñ╣αñ┐αññ αñ«αñ╣αñ╕αÑéαñ╕ αñòαñ░αññαñ╛ αñ╣αÑéαñü" },
++      high: { English: "Yes, I view challenges as opportunities to grow", Hindi: "αñ╣αñ╛αñü, αñ«αÑêαñé αñÜαÑüαñ¿αÑîαññαñ┐αñ»αÑïαñé αñòαÑï αñåαñùαÑç αñ¼αñóαñ╝αñ¿αÑç αñòαÑç αñàαñ╡αñ╕αñ░ αñòαÑç αñ░αÑéαñ¬ αñ«αÑçαñé αñªαÑçαñûαññαñ╛ αñ╣αÑéαñü" }
++    },
++    intrapersonal_frustration: {
++      title: { English: "Handling Frustration", Hindi: "αñÜαÑüαñ¿αÑîαññαñ┐αñ»αÑïαñé αñòαñ╛ αñ╕αñ╛αñ«αñ¿αñ╛" },
++      prompt: {
++        English: "You spent two days making a beautiful paper kite, but on its first flight it gets stuck high in a thorny tree. How do you respond?",
++        Hindi: "αñåαñ¬αñ¿αÑç αñªαÑï αñªαñ┐αñ¿ αñ▓αñùαñ╛αñòαñ░ αñÅαñò αñ╕αÑüαñéαñªαñ░ αñ¬αññαñéαñù αñ¼αñ¿αñ╛αñê, αñ▓αÑçαñòαñ┐αñ¿ αñ¬αñ╣αñ▓αÑÇ αñ¼αñ╛αñ░ αñëαñíαñ╝αñ╛αññαÑç αñ╣αÑÇ αñ╡αñ╣ αñÅαñò αñòαñ╛αñéαñƒαÑçαñªαñ╛αñ░ αñ¬αÑçαñíαñ╝ αñ«αÑçαñé αñ½αñéαñ╕ αñùαñêαÑñ αñåαñ¬αñòαÑÇ αñ¬αÑìαñ░αññαñ┐αñòαÑìαñ░αñ┐αñ»αñ╛ αñòαÑìαñ»αñ╛ αñ╣αÑïαñùαÑÇ?"
++      },
++      options: [
++        { label: { English: "Accept the loss, analyze the situation, and plan a better version", Hindi: "αñ¿αÑüαñòαñ╕αñ╛αñ¿ αñ╕αÑìαñ╡αÑÇαñòαñ╛αñ░ αñòαñ░αÑçαñé, αñ╕αÑìαñÑαñ┐αññαñ┐ αñ╕αñ«αñ¥αÑçαñé αñöαñ░ αñÅαñò αñ¿αñê αñ¬αññαñéαñù αñ¼αñ¿αñ╛αñ¿αÑç αñòαÑÇ αñ╕αÑïαñÜαÑçαñé" }, value: 4 },
++        { label: { English: "Retrieve it using tools while accepting the risk of damage", Hindi: "αñíαñéαñíαÑç αñ»αñ╛ αñƒαÑéαñ▓ αñòαÑÇ αñ«αñªαñª αñ╕αÑç αñëαñ╕αÑç αñ¿αñ┐αñòαñ╛αñ▓αñ¿αÑç αñòαÑÇ αñòαÑïαñ╢αñ┐αñ╢ αñòαñ░αÑçαñé, αñ¡αñ▓αÑç αñ╣αÑÇ αñ╡αñ╣ αñ½αñƒ αñ£αñ╛αñÅ" }, value: 4 },
++        { label: { English: "Brainstorm mechanical extraction methods with friends", Hindi: "αñªαÑïαñ╕αÑìαññαÑïαñé αñòαÑç αñ╕αñ╛αñÑ αñ«αñ┐αñ▓αñòαñ░ αñ¬αññαñéαñù αñòαÑï αñ╣αÑüαñò αñ¼αñ¿αñ╛αñòαñ░ αñ¿αñ┐αñòαñ╛αñ▓αñ¿αÑç αñòαñ╛ αñëαñ¬αñ╛αñ» αñ╕αÑïαñÜαÑçαñé" }, value: 4 },
++        { label: { English: "Cease the activity in frustration and abandon the project", Hindi: "αñòαÑìαñ░αÑïαñºαñ┐αññ αñ╣αÑïαñòαñ░ αñòαñ╛αñ« αñ░αÑïαñò αñªαÑçαñé αñöαñ░ αñ¬αññαñéαñù αñëαñíαñ╝αñ╛αñ¿αñ╛ αñ¬αÑéαñ░αÑÇ αññαñ░αñ╣ αñ¢αÑïαñíαñ╝ αñªαÑçαñé" }, value: 1 }
++      ]
++    },
++    deep_discovery_flow: {
++      prompt: {
++        English: "Tell us about a complex design, drawing, or activity that engages you so deeply that you lose track of time.",
++        Hindi: "αñ╣αñ«αÑçαñé αñòαñ┐αñ╕αÑÇ αñÉαñ╕αÑÇ αñòαñ▓αñ╛αñòαÑâαññαñ┐, αñÜαñ┐αññαÑìαñ░ αñ»αñ╛ αñùαññαñ┐αñ╡αñ┐αñºαñ┐ αñòαÑç αñ¼αñ╛αñ░αÑç αñ«αÑçαñé αñ¼αññαñ╛αñÅαñé αñ£αñ┐αñ╕αñ«αÑçαñé αñåαñ¬ αñ╕αñ«αñ» αñòαñ╛ αñºαÑìαñ»αñ╛αñ¿ αñ¡αÑéαñ▓ αñ£αñ╛αññαÑç αñ╣αÑêαñéαÑñ"
++      }
++    },
++    deep_discovery_pride: {
++      prompt: {
++        English: "Describe a project or creation that you are proud of. What problems did you solve to finish it?",
++        Hindi: "αñàαñ¬αñ¿αÑÇ αñòαñ┐αñ╕αÑÇ αñÉαñ╕αÑÇ αñ░αñÜαñ¿αñ╛ αñ»αñ╛ αñòαñ╛αñ« αñòαñ╛ αñ╡αñ░αÑìαñúαñ¿ αñòαñ░αÑçαñé αñ£αñ┐αñ╕ αñ¬αñ░ αñåαñ¬αñòαÑï αñùαñ░αÑìαñ╡ αñ╣αÑêαÑñ αñçαñ╕αÑç αñ¬αÑéαñ░αñ╛ αñòαñ░αñ¿αÑç αñ«αÑçαñé αñåαñ¬αñ¿αÑç αñòαñ┐αñ¿ αñ╕αñ«αñ╕αÑìαñ»αñ╛αñôαñé αñòαÑï αñ╣αñ▓ αñòαñ┐αñ»αñ╛?"
++      }
++    },
++    deep_discovery_curiosity: {
++      prompt: {
++        English: "If you could spend a whole year learning any subject or skill you want, what would it be and why?",
++        Hindi: "αñ»αñªαñ┐ αñåαñ¬ αñàαñ¬αñ¿αÑÇ αñ¬αñ╕αñéαñª αñòαñ╛ αñòαÑïαñê αñ¡αÑÇ αñ╡αñ┐αñ╖αñ» αñ»αñ╛ αñòαÑîαñ╢αñ▓ αñ╕αÑÇαñûαñ¿αÑç αñ«αÑçαñé αñÅαñò αñ¬αÑéαñ░αñ╛ αñ╡αñ░αÑìαñ╖ αñ¼αñ┐αññαñ╛ αñ╕αñòαÑçαñé, αññαÑï αñ╡αñ╣ αñòαÑìαñ»αñ╛ αñ╣αÑïαñùαñ╛ αñöαñ░ αñòαÑìαñ»αÑïαñé?"
++      }
++    },
++    deep_discovery_vision: {
++      prompt: {
++        English: "Identify one big problem in your school or neighborhood, and explain how you would design a solution.",
++        Hindi: "αñàαñ¬αñ¿αÑç αñ╕αÑìαñòαÑéαñ▓ αñ»αñ╛ αñ«αÑïαñ╣αñ▓αÑìαñ▓αÑç αñòαÑÇ αñÅαñò αñ¼αñíαñ╝αÑÇ αñ╕αñ«αñ╕αÑìαñ»αñ╛ αñòαÑÇ αñ¬αñ╣αñÜαñ╛αñ¿ αñòαñ░αÑçαñé, αñöαñ░ αñ¼αññαñ╛αñÅαñé αñòαñ┐ αñåαñ¬ αñçαñ╕αñòαñ╛ αñ╕αñ«αñ╛αñºαñ╛αñ¿ αñòαÑêαñ╕αÑç αññαÑêαñ»αñ╛αñ░ αñòαñ░αÑçαñéαñùαÑçαÑñ"
++      }
++    }
++  };
++
++  const overrides = level === "PRIMARY" ? primaryOverrides : advancedOverrides;
++
++  return tasks.map(task => {
++    const override = overrides[task.key];
++    if (!override) return task;
++
++    const updated = { ...task };
++    if (override.title) {
++      updated.title = isHindi ? override.title.Hindi : override.title.English;
++    }
++    if (override.prompt) {
++      updated.prompt = isHindi ? override.prompt.Hindi : override.prompt.English;
++    }
++    if (override.low) {
++      updated.low = isHindi ? override.low.Hindi : override.low.English;
++    }
++    if (override.high) {
++      updated.high = isHindi ? override.high.Hindi : override.high.English;
++    }
++    if (override.options && Array.isArray(updated.options)) {
++      updated.options = updated.options.map((opt, idx) => {
++        const oOverride = override.options[idx];
++        if (!oOverride) return opt;
++        return {
++          ...opt,
++          label: isHindi ? oOverride.label.Hindi : oOverride.label.English
++        };
++      });
++    }
++    return updated;
++  });
++}
++αñöαñ░ αñªαÑéαñ╕αñ░αÑïαñé αñòαÑï αñ½αÑêαñ╕αñ▓αñ╛ αñòαñ░αñ¿αÑç αñªαÑçαñé" }, value: 1 }
+       ]
+     },
+     social_conflict_resolution: {
