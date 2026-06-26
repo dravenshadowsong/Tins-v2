@@ -287,13 +287,15 @@ function TaskRenderer({ task, answer, startedAt, setAnswer, selectedLanguage }) 
 
 
 function PatternChoice({ task, answer, startedAt, setAnswer, selectedLanguage }) {
+  const sequence = Array.isArray(task.sequence) ? task.sequence : [];
+  const options = Array.isArray(task.options) ? task.options : [];
   return (
     <>
       <div className="puzzle-sequence">
-        {task.sequence.map((item, i) => <span key={`${item}-${i}`}>{item}</span>)}
+        {sequence.map((item, i) => <span key={`${item}-${i}`}>{item}</span>)}
       </div>
       <div className="choice-grid compact-choice-grid">
-        {task.options.map(option => (
+        {options.map(option => (
           <button
             key={option}
             className={`choice-card${answer?.value === option ? " selected" : ""}`}
@@ -312,15 +314,17 @@ function PatternChoice({ task, answer, startedAt, setAnswer, selectedLanguage })
 
 function SymbolScan({ task, answer, startedAt, setAnswer, selectedLanguage }) {
   const [count, setCount] = useState(answer?.value !== undefined ? answer.value : "");
+  const symbols = Array.isArray(task.symbols) ? task.symbols : [];
 
   const handleChange = (val) => {
     setCount(val);
     if (val !== "") {
       const numeric = Number(val);
-      const difference = Math.abs(numeric - task.answer);
+      const expected = task.answer || 0;
+      const difference = Math.abs(numeric - expected);
       setAnswer(baseAnswer(task, numeric, {
         correct: difference === 0,
-        accuracy: Math.max(0, 1 - difference / task.answer),
+        accuracy: expected > 0 ? Math.max(0, 1 - difference / expected) : numeric === 0 ? 1 : 0,
         response_ms: Date.now() - startedAt,
       }));
     } else {
@@ -330,17 +334,17 @@ function SymbolScan({ task, answer, startedAt, setAnswer, selectedLanguage }) {
 
   const strings = {
     English: {
-      placeholder: `Number of ${task.target}`
+      placeholder: `Number of ${task.target || "items"}`
     },
     Hindi: {
-      placeholder: `${task.target} की संख्या`
+      placeholder: `${task.target || "चीज़ें"} की संख्या`
     }
   }[selectedLanguage];
 
   return (
     <div className="task-stack">
       <div className="symbol-grid">
-        {task.symbols.map((symbol, i) => <span key={`${symbol}-${i}`}>{symbol}</span>)}
+        {symbols.map((symbol, i) => <span key={`${symbol}-${i}`}>{symbol}</span>)}
       </div>
       <div className="form-row" style={{ justifyContent: "center" }}>
         <input
@@ -357,6 +361,13 @@ function SymbolScan({ task, answer, startedAt, setAnswer, selectedLanguage }) {
 }
 
 function MemoryGrid({ task, answer, setAnswer, selectedLanguage }) {
+  // Support both 'highlights' (component name) and 'path' (base data field)
+  const highlights = Array.isArray(task.highlights) ? task.highlights
+    : Array.isArray(task.path) ? task.path
+    : [];
+  const gridSize = task.gridSize || 9;
+  const revealMs = task.revealMs || 2000;
+
   const [revealing, setRevealing] = useState(true);
   const [selected, setSelected] = useState(answer?.selected || []);
   const started = useMemo(() => Date.now(), [task.key]);
@@ -364,7 +375,7 @@ function MemoryGrid({ task, answer, setAnswer, selectedLanguage }) {
   useEffect(() => {
     setRevealing(true);
     setSelected([]);
-    const timer = setTimeout(() => setRevealing(false), task.revealMs);
+    const timer = setTimeout(() => setRevealing(false), revealMs);
     return () => clearTimeout(timer);
   }, [task]);
 
@@ -375,12 +386,18 @@ function MemoryGrid({ task, answer, setAnswer, selectedLanguage }) {
       : [...selected, idx];
     setSelected(next);
 
-    const correctSelected = next.filter(i => task.highlights.includes(i)).length;
-    const extraSelected = next.filter(i => !task.highlights.includes(i)).length;
-    const score = Math.max(0, correctSelected - extraSelected) / task.highlights.length;
+    const correctSelected = highlights.length > 0
+      ? next.filter(i => highlights.includes(i)).length
+      : next.length;
+    const extraSelected = highlights.length > 0
+      ? next.filter(i => !highlights.includes(i)).length
+      : 0;
+    const score = highlights.length > 0
+      ? Math.max(0, correctSelected - extraSelected) / highlights.length
+      : 1;
     setAnswer(baseAnswer(task, score * 4, {
       selected: next,
-      correct: score === 1,
+      correct: highlights.length > 0 ? score === 1 : true,
       memory_score: score,
       response_ms: Date.now() - started,
     }));
@@ -401,8 +418,8 @@ function MemoryGrid({ task, answer, setAnswer, selectedLanguage }) {
     <div className="task-stack">
       <p className="text-light">{revealing ? strings.memorise : strings.select}</p>
       <div className="memory-grid">
-        {Array.from({ length: task.gridSize }, (_, idx) => {
-          const active = revealing ? task.highlights.includes(idx) : selected.includes(idx);
+        {Array.from({ length: gridSize }, (_, idx) => {
+          const active = revealing ? highlights.includes(idx) : selected.includes(idx);
           return (
             <button
               key={idx}
@@ -420,10 +437,10 @@ function MemoryGrid({ task, answer, setAnswer, selectedLanguage }) {
 function OrderSteps({ task, answer, startedAt, setAnswer, selectedLanguage }) {
   const stepsList = Array.isArray(task.steps)
     ? task.steps
-    : (task.steps[selectedLanguage] || task.steps["English"]);
+    : (task.steps?.[selectedLanguage] || task.steps?.["English"] || []);
   const shuffledList = Array.isArray(task.shuffled)
     ? task.shuffled
-    : (task.shuffled[selectedLanguage] || task.shuffled["English"]);
+    : (task.shuffled?.[selectedLanguage] || task.shuffled?.["English"] || [...stepsList]);
 
   const [ordered, setOrdered] = useState(answer?.ordered || shuffledList);
 
@@ -509,7 +526,7 @@ function IdeaList({ task, answer, startedAt, setAnswer, selectedLanguage }) {
       setAnswer(baseAnswer(task, Math.min(4, uniqueCount), {
         text: filtered.join("\n"),
         idea_count: uniqueCount,
-        fluency_score: Math.min(1, uniqueCount / task.minIdeas),
+        fluency_score: Math.min(1, uniqueCount / (task.minIdeas || 1)),
         response_ms: Date.now() - startedAt,
       }));
     } else {
@@ -635,9 +652,10 @@ function IdeaList({ task, answer, startedAt, setAnswer, selectedLanguage }) {
 }
 
 function JudgementChoice({ task, answer, startedAt, setAnswer, selectedLanguage }) {
+  const options = Array.isArray(task.options) ? task.options : [];
   return (
     <div className="choice-grid">
-      {task.options.map(option => {
+      {options.map(option => {
         const labelStr = typeof option.label === "object"
           ? (option.label[selectedLanguage] || option.label["English"])
           : option.label;
