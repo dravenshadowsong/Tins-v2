@@ -4410,9 +4410,12 @@ def approve_user_tms(uid):
             center = db.execute("SELECT organization_id FROM centers WHERE id = ?", (center_id,)).fetchone()
             if role != "master_admin" and (not center or center["organization_id"] != org_id):
                 return jsonify({"error": "Forbidden: Center belongs to another organization"}), 403
-            db.execute("UPDATE users SET role=?, center_id=? WHERE id=?", (approved_role, center_id, uid))
+            db.execute("UPDATE users SET role=?, center_id=?, organization_id=? WHERE id=?", (approved_role, center_id, center["organization_id"], uid))
         else:
-            db.execute("UPDATE users SET role=? WHERE id=?", (approved_role, uid))
+            if role != "master_admin":
+                db.execute("UPDATE users SET role=?, organization_id=? WHERE id=?", (approved_role, org_id, uid))
+            else:
+                db.execute("UPDATE users SET role=? WHERE id=?", (approved_role, uid))
         db.commit()
         
         # Supabase sync
@@ -4422,8 +4425,19 @@ def approve_user_tms(uid):
             try:
                 from supabase import create_client
                 sp_client = create_client(supabase_url, supabase_key)
-                sp_client.table("profiles").update({"role": approved_role, "is_approved": True}).eq("email", user_row["email"]).execute()
-                print(f"[SUPABASE SYNC] Approved user role {approved_role} for {user_row['email']}")
+                
+                sync_payload = {
+                    "role": approved_role,
+                    "is_approved": True
+                }
+                if center_id:
+                    sync_payload["center_id"] = center_id
+                    sync_payload["organization_id"] = center["organization_id"]
+                elif role != "master_admin":
+                    sync_payload["organization_id"] = org_id
+                    
+                sp_client.table("profiles").update(sync_payload).eq("email", user_row["email"]).execute()
+                print(f"[SUPABASE SYNC] Approved user role {approved_role} and synced center/org for {user_row['email']}")
             except Exception as e:
                 print(f"[SUPABASE WARNING] Failed to sync approved user role: {e}")
     except Exception as e:
