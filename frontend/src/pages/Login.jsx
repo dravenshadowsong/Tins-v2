@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { supabase } from "../supabaseClient";
+
+// Clear all stale assessment/session cache on login page load
+// This ensures talent assessments always start fresh
+function clearAssessmentCache() {
+  const keysToKeep = []; // nothing to keep — full clean slate
+  sessionStorage.clear();
+  // Clear any lingering Supabase auth session so a fresh login is forced
+  localStorage.removeItem("sb-ubsjcfaokemckctswnzi-auth-token");
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,6 +24,23 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [cacheCleared, setCacheCleared] = useState(false);
+
+  // Clear assessment cache on page mount for a fresh session
+  useEffect(() => {
+    clearAssessmentCache();
+    setCacheCleared(true);
+  }, []);
+
+  const doNavigate = (result) => {
+    sessionStorage.setItem("goat_token", result.token);
+    sessionStorage.setItem("goat_user", JSON.stringify(result.user));
+    if (redirect) {
+      navigate(redirect);
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,31 +48,18 @@ export default function Login() {
     setErrorMsg("");
     setSuccessMsg("");
     try {
-      // 1. Sign in via Supabase Auth client
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-
-      // 2. Exchange Supabase session token for local session
-      const result = await api.loginSupabase({ token: data.session.access_token });
-      sessionStorage.setItem("goat_token", result.token);
-      sessionStorage.setItem("goat_user", JSON.stringify(result.user));
-      if (redirect) {
-        navigate(redirect);
-      } else {
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      console.error("Supabase login failed, trying fallback:", err);
-      // Fallback for offline testing or legacy seeded accounts
+      // Fast path: send credentials directly to backend.
+      // The backend handles Supabase auth internally, saving one extra round-trip.
+      const result = await api.login({ email, password });
+      doNavigate(result);
+    } catch (backendErr) {
+      // If backend direct login fails (e.g. Supabase-only account not yet in local DB),
+      // fall back to the frontend Supabase → token exchange flow.
       try {
-        const result = await api.login({ email, password });
-        sessionStorage.setItem("goat_token", result.token);
-        sessionStorage.setItem("goat_user", JSON.stringify(result.user));
-        if (redirect) {
-          navigate(redirect);
-        } else {
-          navigate("/dashboard");
-        }
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        const result = await api.loginSupabase({ token: data.session.access_token });
+        doNavigate(result);
       } catch (fallbackErr) {
         setErrorMsg("Login failed. Please check your credentials.");
       }
@@ -107,6 +120,12 @@ export default function Login() {
             {isRegister ? "Create a Facilitator or Mentor Account" : "Talent Identification, Validation, Nurturing & Tracking"}
           </p>
 
+          {cacheCleared && !isRegister && (
+            <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", color: "#166534", padding: "8px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, marginBottom: "14px", display: "flex", alignItems: "center", gap: "6px" }}>
+              ✅ Assessment cache cleared — ready for fresh talent evaluation
+            </div>
+          )}
+
           {errorMsg && (
             <div style={{ background: "#FFF5F5", border: "1px solid #FFCCC7", color: "#FF4D4F", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, marginBottom: "16px" }}>
               ⚠️ {errorMsg}
@@ -139,6 +158,7 @@ export default function Login() {
               value={email} 
               onChange={e => setEmail(e.target.value)} 
               required 
+              autoComplete="email"
               style={{ border: "1.5px solid rgba(0,0,0,0.1)", borderRadius: "8px", fontSize: "14px" }}
             />
           </div>
@@ -150,6 +170,7 @@ export default function Login() {
               value={password} 
               onChange={e => setPassword(e.target.value)} 
               required 
+              autoComplete={isRegister ? "new-password" : "current-password"}
               style={{ border: "1.5px solid rgba(0,0,0,0.1)", borderRadius: "8px", fontSize: "14px" }}
             />
           </div>

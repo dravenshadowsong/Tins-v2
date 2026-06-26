@@ -7,7 +7,8 @@ import sqlite3
 import json
 import hashlib
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
+import threading
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
@@ -512,6 +513,36 @@ def check_password(password, stored):
     salt, expected = stored.split("$", 1)
     return secrets.compare_digest(hash_password(password, salt), f"{salt}${expected}")
 
+# ── In-memory JWT token cache (avoids calling supabase.auth.get_user on every request) ──
+_token_cache = {}  # token -> {user_dict, expires_at}
+_token_cache_lock = threading.Lock()
+TOKEN_CACHE_TTL_SECONDS = 300  # 5 minutes
+
+def _get_cached_user(token):
+    with _token_cache_lock:
+        entry = _token_cache.get(token)
+        if entry and datetime.utcnow() < entry["expires_at"]:
+            return entry["user"]
+        elif entry:
+            del _token_cache[token]
+    return None
+
+def _set_cached_user(token, user_dict):
+    with _token_cache_lock:
+        _token_cache[token] = {
+            "user": user_dict,
+            "expires_at": datetime.utcnow() + timedelta(seconds=TOKEN_CACHE_TTL_SECONDS)
+        }
+        # Evict expired entries to prevent memory growth
+        now = datetime.utcnow()
+        expired = [k for k, v in _token_cache.items() if now >= v["expires_at"]]
+        for k in expired:
+            del _token_cache[k]
+
+def _invalidate_token_cache(token):
+    with _token_cache_lock:
+        _token_cache.pop(token, None)
+
 def current_user():
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
@@ -523,6 +554,11 @@ def current_user():
 
     # Check if this is a Supabase JWT token
     if token.startswith("eyJ") and supabase:
+        # Fast path: return cached user if still valid (avoids Supabase network round-trip)
+        cached = _get_cached_user(token)
+        if cached:
+            return cached
+
         try:
             sb_user_resp = supabase.auth.get_user(token)
             if sb_user_resp and sb_user_resp.user:
@@ -540,7 +576,9 @@ def current_user():
                         db.execute("UPDATE users SET role = ?, organization_id = ?, center_id = ? WHERE email = ?", (role, org_id, center_id, email))
                         db.commit()
                         row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
-                    return dict(row)
+                    user_dict = dict(row)
+                    _set_cached_user(token, user_dict)
+                    return user_dict
                 else:
                     db_url = os.environ.get("DATABASE_URL")
                     is_postgres = db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")) and HAS_POSTGRES
@@ -551,7 +589,9 @@ def current_user():
                     db.commit()
                     row = db.execute("SELECT id, name, email, role, organization_id, center_id FROM users WHERE email=?", (email,)).fetchone()
                     if row:
-                        return dict(row)
+                        user_dict = dict(row)
+                        _set_cached_user(token, user_dict)
+                        return user_dict
             else:
                 return None
         except Exception as e:
@@ -1160,6 +1200,8 @@ def logout():
     auth = request.headers.get("Authorization", "")
     token = auth.replace("Bearer ", "", 1).strip() if auth.startswith("Bearer ") else ""
     if token:
+        # Invalidate cached token entry so revoked tokens are not served from cache
+        _invalidate_token_cache(token)
         db = get_db()
         db.execute("DELETE FROM auth_sessions WHERE token=?", (token,))
         db.commit()

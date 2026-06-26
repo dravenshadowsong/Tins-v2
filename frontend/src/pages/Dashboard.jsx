@@ -4,6 +4,17 @@ import { api, BASE } from "../api";
 import { DOMAINS } from "../data/questions";
 import { supabase } from "../supabaseClient";
 
+function clearAllCache() {
+  // Clear backend session token + user profile
+  sessionStorage.clear();
+  // Clear any Supabase browser-persisted auth state
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith("sb-") || key.includes("supabase")) {
+      localStorage.removeItem(key);
+    }
+  });
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -91,36 +102,8 @@ export default function Dashboard() {
     loadData();
   }, [navigate]);
 
-  if (loading) {
-    return <div style={{ textAlign: "center", marginTop: 80, color: "#6b7280", fontSize: "16px", fontWeight: 500 }}>Loading Portal Workspace...</div>;
-  }
-
+  // ── Derived state: must be above all early returns (Rules of Hooks) ──────────
   const role = (user?.role || "facilitator").toLowerCase();
-
-  if (role.startsWith("pending_")) {
-    const reqRole = role.replace("pending_", "").toUpperCase();
-    return (
-      <div className="auth-layout" style={{ padding: "80px 10px", textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-        <div className="card" style={{ width: "100%", maxWidth: "500px", padding: "40px 30px", borderRadius: "16px", border: "1.5px solid rgba(91, 76, 240, 0.12)", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)" }}>
-          <div style={{ fontSize: "56px", marginBottom: "16px" }}>⏳</div>
-          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#1e1b4b", margin: "0 0 12px 0" }}>Account Pending Approval</h1>
-          <p className="text-light" style={{ fontSize: "14.5px", lineHeight: "1.6", marginBottom: "24px" }}>
-            Hello <strong>{user?.name}</strong>! Your request to join as a <strong style={{ color: "#5b4cf0" }}>{reqRole}</strong> is currently pending review. 
-            A system administrator must approve your account once before you can access the portal features.
-          </p>
-          <div style={{ padding: "12px", background: "#f5f3ff", borderRadius: "8px", color: "#6d28d9", fontSize: "13.5px", fontWeight: 600, marginBottom: "24px" }}>
-            Registered Email: {user?.email}
-          </div>
-          <button className="btn btn-outline btn-full" onClick={() => {
-            sessionStorage.clear();
-            navigate("/login");
-          }} style={{ fontWeight: 700 }}>
-            Sign Out & Back to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const aggregates = useMemo(() => {
     let highPotentialStudents = [];
@@ -224,6 +207,40 @@ export default function Dashboard() {
     };
   }, [children]);
 
+  const pendingUsers = users.filter(u => u.role && u.role.toLowerCase().startsWith("pending_"));
+  const activeUsers = users.filter(u => !u.role || !u.role.toLowerCase().startsWith("pending_"));
+
+  // ── Early returns (after all hooks) ─────────────────────────────────────────
+  if (loading) {
+    return <div style={{ textAlign: "center", marginTop: 80, color: "#6b7280", fontSize: "16px", fontWeight: 500 }}>Loading Portal Workspace...</div>;
+  }
+
+  if (role.startsWith("pending_")) {
+    const reqRole = role.replace("pending_", "").toUpperCase();
+    return (
+      <div className="auth-layout" style={{ padding: "80px 10px", textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
+        <div className="card" style={{ width: "100%", maxWidth: "500px", padding: "40px 30px", borderRadius: "16px", border: "1.5px solid rgba(91, 76, 240, 0.12)", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ fontSize: "56px", marginBottom: "16px" }}>⏳</div>
+          <h1 style={{ fontSize: "24px", fontWeight: 800, color: "#1e1b4b", margin: "0 0 12px 0" }}>Account Pending Approval</h1>
+          <p className="text-light" style={{ fontSize: "14.5px", lineHeight: "1.6", marginBottom: "24px" }}>
+            Hello <strong>{user?.name}</strong>! Your request to join as a <strong style={{ color: "#5b4cf0" }}>{reqRole}</strong> is currently pending review. 
+            A system administrator must approve your account once before you can access the portal features.
+          </p>
+          <div style={{ padding: "12px", background: "#f5f3ff", borderRadius: "8px", color: "#6d28d9", fontSize: "13.5px", fontWeight: 600, marginBottom: "24px" }}>
+            Registered Email: {user?.email}
+          </div>
+          <button className="btn btn-outline btn-full" onClick={async () => {
+            await supabase.auth.signOut().catch(() => {});
+            clearAllCache();
+            navigate("/login");
+          }} style={{ fontWeight: 700 }}>
+            Sign Out & Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   function getClusterNarrative(sortedDomains) {
     if (!sortedDomains || sortedDomains.length === 0) {
       return "Complete assessments to analyze student talent clusters and generate custom curriculum strategies.";
@@ -259,9 +276,6 @@ export default function Dashboard() {
     return `Multi-disciplinary Opportunities: The dominant talent clusters are ${label1} and ${label2}. Consider hosting collaborative workshops that blend these two domains to encourage peer learning and cross-domain development.`;
   }
 
-  const pendingUsers = users.filter(u => u.role && u.role.toLowerCase().startsWith("pending_"));
-  const activeUsers = users.filter(u => !u.role || !u.role.toLowerCase().startsWith("pending_"));
-
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px 15px" }}>
       {/* Header Banner */}
@@ -282,8 +296,23 @@ export default function Dashboard() {
             <button className="btn btn-outline" onClick={() => setShowPassModal(true)}>
               🔑 Change Password
             </button>
-            <button className="btn btn-outline" onClick={() => {
-              sessionStorage.clear();
+            <button
+              className="btn btn-outline"
+              title="Clear all cached assessment data for a fresh talent evaluation session"
+              style={{ color: "#059669", borderColor: "#059669" }}
+              onClick={async () => {
+                if (confirm("This will clear all cached assessment data and sign you out. Proceed with a fresh talent assessment session?")) {
+                  await supabase.auth.signOut().catch(() => {});
+                  clearAllCache();
+                  navigate("/login");
+                }
+              }}
+            >
+              🗑️ Clear Cache
+            </button>
+            <button className="btn btn-outline" onClick={async () => {
+              await supabase.auth.signOut().catch(() => {});
+              clearAllCache();
               navigate("/login");
             }}>
               Sign Out
