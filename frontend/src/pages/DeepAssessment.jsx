@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ASSESSMENT_TASKS, DOMAINS, getAdaptedDeepTasks } from "../data/questions";
 import { api } from "../api";
+import useAssessmentTimer from "../hooks/useAssessmentTimer";
+import AssessmentProgressBar from "../components/AssessmentProgressBar";
 
 const SCALE_LABELS = {
   English: ["Not at all", "A little", "Sometimes", "Mostly", "Always / Easily"],
@@ -33,17 +35,28 @@ export default function DeepAssessment() {
   const cid = params.get("cid");
   const navigate = useNavigate();
 
+  // ── Persistent authentication ─────────────────────────────────────────────
+  // Validates the existing JWT session via api.me() instead of prompting again.
+  // If the token is missing or expired, redirect to login with a return URL.
   useEffect(() => {
-    const token = sessionStorage.getItem("goat_token");
-    if (!token) {
+    api.me().catch(() => {
       navigate(`/login?redirect=${encodeURIComponent(`/assess/${sid}?cid=${cid}`)}`);
-    }
+    });
   }, [navigate, sid, cid]);
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [startedAt, setStartedAt] = useState(Date.now());
   const [submitting, setSubmitting] = useState(false);
+
+  // ── Assessment timer ──────────────────────────────────────────────────────
+  const {
+    elapsedFormatted,
+    recordQuestionStart,
+    recordQuestionEnd,
+    getSessionTimingPayload,
+    clearTimerStorage,
+  } = useAssessmentTimer(sid);
   
   // Multilingual Child & Session States
   const [child, setChild] = useState(null);
@@ -90,7 +103,11 @@ export default function DeepAssessment() {
 
   useEffect(() => {
     setStartedAt(Date.now());
-  }, [task?.key]);
+    // Record question-level timing start whenever the active task changes
+    if (task?.key) {
+      recordQuestionStart(task.key);
+    }
+  }, [task?.key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setAnswer = (answer) => {
     setAnswers(prev => ({ ...prev, [task.key]: answer }));
@@ -98,6 +115,9 @@ export default function DeepAssessment() {
 
   const next = async () => {
     if (!currentAnswer) return;
+
+    // Record time spent on current question before moving
+    if (task?.key) recordQuestionEnd(task.key);
 
     if (step === 19 && taskList.length === 20) {
       setSubmitting(true);
@@ -126,12 +146,20 @@ export default function DeepAssessment() {
       return;
     }
 
+    // ── Final submission ────────────────────────────────────────────────────
     setSubmitting(true);
+    const timingPayload = getSessionTimingPayload();
     try {
       await api.analyzeSession(parseInt(sid), {
         child_id: parseInt(cid),
         responses: answers,
+        timing: timingPayload,      // attached to the analyze call for atomic save
       });
+
+      // Best-effort secondary timing save (fire-and-forget; never blocks navigation)
+      api.submitTiming(parseInt(sid), timingPayload).catch(() => {});
+
+      clearTimerStorage();
       navigate(`/results/${sid}?cid=${cid}`);
     } catch (e) {
       alert("Submission failed. Check the backend is running.");
@@ -176,7 +204,16 @@ export default function DeepAssessment() {
   const taskPrompt = typeof task.prompt === "object" ? (task.prompt[selectedLanguage] || task.prompt["English"]) : task.prompt;
 
   return (
-    <div>
+    <div style={{ paddingTop: 0 }}>
+      {/* ── Live assessment progress strip ── */}
+      <AssessmentProgressBar
+        step={step}
+        total={total}
+        elapsedFormatted={elapsedFormatted}
+      />
+      {/* 48px spacer to prevent content from sliding under the fixed strip */}
+      <div style={{ height: 56 }} aria-hidden="true" />
+
       <div className="page-header">
         <h1>{layoutStrings.title}</h1>
         <p>{layoutStrings.subtitle}</p>

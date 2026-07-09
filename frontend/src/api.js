@@ -37,6 +37,7 @@ export const api = {
   createSession:  (child_id)  => req("POST", "/sessions", { child_id }),
   submitSession:  (id, data)  => req("POST", `/sessions/${id}/submit`, data),
   analyzeSession: (id, data)  => req("POST", `/sessions/${id}/analyze`, data),
+  submitTiming:   (id, data)  => req("POST", `/sessions/${id}/timing`, data),
   getSession:     (id)        => req("GET",  `/sessions/${id}`),
   submitDiscovery:(id, data)  => req("POST", `/sessions/${id}/discovery`, data),
 

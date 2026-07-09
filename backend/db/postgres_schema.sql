@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     top_domain VARCHAR(100),
     generated_tasks TEXT,
     status VARCHAR(50) DEFAULT 'in_progress',
+    timing_data TEXT,           -- JSON; session+question timing for research & AI analytics
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP
 );

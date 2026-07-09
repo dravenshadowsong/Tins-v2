@@ -32,7 +32,10 @@ export default function Facilitator() {
 
   useEffect(() => {
     async function load() {
-      if (!sessionStorage.getItem("goat_token")) {
+      // Validate the existing JWT session — never prompt for a second login
+      try {
+        await api.me();
+      } catch (_) {
         navigate("/login");
         return;
       }

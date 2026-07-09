@@ -664,6 +664,14 @@ def init_db():
             except Exception as e_alter:
                 print(f"[DATABASE WARNING] Failed to dynamically alter children on Postgres: {e_alter}")
                 conn.rollback()
+
+            # Migration check: Add timing_data to sessions if not exists
+            try:
+                cursor.execute("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS timing_data TEXT")
+                conn.commit()
+            except Exception as e_alter:
+                print(f"[DATABASE WARNING] Failed to add timing_data to sessions on Postgres: {e_alter}")
+                conn.rollback()
                 
             cursor.close()
             
@@ -834,6 +842,7 @@ def init_db():
             integrated_score TEXT,
             top_domain      TEXT,
             generated_tasks TEXT,
+            timing_data     TEXT,
             status          TEXT    DEFAULT 'in_progress',
             created_at      TEXT    DEFAULT (datetime('now')),
             completed_at    TEXT
@@ -1013,6 +1022,7 @@ def init_db():
                 "integrated_score": "TEXT",
                 "top_domain": "TEXT",
                 "generated_tasks": "TEXT",
+                "timing_data": "TEXT",
                 "status": "TEXT DEFAULT 'in_progress'",
                 "completed_at": "TEXT"
             }
@@ -2318,6 +2328,66 @@ def analyze_session(sid):
     """
     return analyze_and_save_session(sid, request.json)
 
+@app.route("/api/sessions/<int:sid>/timing", methods=["POST"])
+@app.route("/api/sessions/<int:sid>/timing/", methods=["POST"])
+def save_session_timing(sid):
+    """
+    Saves assessment timing data (session-level + question-level) for research,
+    psychometric analytics, and future AI improvements.
+
+    This endpoint NEVER modifies scoring, AI analysis, or report data.
+    It is purely additive and always returns 200 so that a client failure
+    never blocks the assessment flow.
+
+    Expected payload (all optional for forward-compatibility):
+    {
+      "session_start_iso": "...",
+      "session_end_iso":   "...",
+      "total_seconds":     1236,
+      "total_formatted":   "00:20:36",
+      "question_timings":  [...],
+      "analytics":         {...}
+    }
+    """
+    try:
+        data = request.json or {}
+        if not data:
+            return jsonify({"status": "skipped", "reason": "empty payload"}), 200
+
+        db = get_db()
+        # Verify session exists
+        row = db.execute("SELECT id FROM sessions WHERE id=?", (sid,)).fetchone()
+        if not row:
+            return jsonify({"status": "skipped", "reason": "session not found"}), 200
+
+        timing_json = json.dumps(data)
+
+        # Save to local DB
+        try:
+            db.execute(
+                "UPDATE sessions SET timing_data = ? WHERE id = ?",
+                (timing_json, sid)
+            )
+            db.commit()
+        except Exception as e:
+            print(f"[TIMING] SQLite save failed for session {sid}: {e}")
+
+        # Save to Supabase if available
+        if supabase_client:
+            try:
+                supabase_client.table("sessions").update(
+                    {"timing_data": timing_json}
+                ).eq("id", sid).execute()
+            except Exception as e:
+                print(f"[TIMING] Supabase save failed for session {sid}: {e}")
+
+        return jsonify({"status": "saved"}), 200
+
+    except Exception as e:
+        # Graceful failure — never block the client
+        print(f"[TIMING] Unexpected error for session {sid}: {e}")
+        return jsonify({"status": "error", "reason": str(e)}), 200
+
 def analyze_and_save_session(sid, data):
     user = current_user()
     
@@ -2331,6 +2401,8 @@ def analyze_and_save_session(sid, data):
         
     data = data or {}
     responses = dict(data.get("responses", {}))
+    # Extract optional timing payload (never required; does not affect scoring)
+    timing_payload = data.get("timing")
     # Ensure both V5 and V4 keys are present in responses for backward/forward compatibility
     key_mapping = {
         "reflection_flow": "deep_discovery_flow",
@@ -2574,12 +2646,26 @@ def analyze_and_save_session(sid, data):
                 "status": "complete",
                 "completed_at": completed_now
             }
+            # Save timing data if provided by the frontend (never required)
+            if timing_payload:
+                try:
+                    update_data["timing_data"] = json.dumps(timing_payload)
+                except Exception:
+                    pass
             print(f"DEBUG: Attempting Supabase update for session ID: {sid}")
             # print(f"DEBUG: Supabase update payload: {json.dumps(update_data)}")
             res = supabase_client.table("sessions").update(update_data).eq("id", sid).execute()
             # print(f"DEBUG: Supabase update response data: {res.data}")
         except Exception as e:
             print(f"DEBUG: EXCEPTION caught during Supabase update: {str(e)[:200]}")
+
+    # Build the timing data value (None if not provided)
+    timing_data_value = None
+    if timing_payload:
+        try:
+            timing_data_value = json.dumps(timing_payload)
+        except Exception:
+            pass
 
     # Permanently write the results to database
     db.execute("""
@@ -2592,6 +2678,7 @@ def analyze_and_save_session(sid, data):
             personality_data = ?,
             integrated_score = ?,
             top_domain       = ?,
+            timing_data      = ?,
             phase            = 'complete',
             status           = 'complete',
             completed_at     = ?
@@ -2605,6 +2692,7 @@ def analyze_and_save_session(sid, data):
         personality_data,
         json.dumps(final_scores), # integrated score matches final stretched scores
         top_domain,
+        timing_data_value,
         completed_now,
         sid
     ))

@@ -774,3 +774,97 @@ label { font-size: 13px; font-weight: 500; color: var(--text-mid); margin-bottom
 }
 
 
+
+/* ── Assessment Progress Strip ──────────────────────────────────────────────
+   Fixed 48px bar just below the sticky nav. Glassmorphism surface.
+   Never covers assessment content — body gets a top padding offset.
+────────────────────────────────────────────────────────────────────────── */
+.assessment-progress-strip {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.06);
+}
+.aps-question-label {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-mid);
+  font-weight: 600;
+  min-width: 120px;
+}
+.aps-q-current {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--blue);
+}
+.aps-q-sep, .aps-q-total {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-mid);
+}
+.aps-q-word {
+  font-size: 12px;
+  color: var(--text-light);
+}
+.aps-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  min-width: 60px;
+}
+.aps-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.aps-timer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  min-width: 90px;
+  justify-content: flex-end;
+}
+.aps-timer-icon {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.aps-timer-value {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blue);
+  letter-spacing: 0.03em;
+}
+.app-main.with-assessment-strip {
+  padding-top: calc(28px + 48px);
+}
+@media (max-width: 600px) {
+  .assessment-progress-strip {
+    padding: 0 12px;
+    gap: 8px;
+    height: 44px;
+    top: 0;
+  }
+  .aps-question-label { min-width: unset; }
+  .aps-q-word { display: none; }
+  .aps-timer-value { font-size: 13px; }
+  .app-main.with-assessment-strip { padding-top: calc(20px + 44px); }
+}
