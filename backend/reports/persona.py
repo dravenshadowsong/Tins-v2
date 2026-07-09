@@ -3,211 +3,165 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.styles import ParagraphStyle
 
-def build_behaviour_profile_page(story, data, styles):
+def build_hidden_opportunities_page(story, data, styles):
     section_header_style = styles.section_header_style
     h1_style = styles.h1_style
+    h2_style = styles.h2_style
     body_style = styles.body_style
-    card_body_style = styles.card_body_style
+    card_label_style = styles.card_label_style
     border_color = styles.border_color
-    light_bg = styles.light_bg
+    
+    child = data["child"]
+    integ = data["integ"]
+    sorted_scores = data["sorted_scores"]
+    untapped_potential = data["untapped_potential"]
 
-    primary_domain = data["primary_domain"]
-    unique_exp = styles.DOMAIN_UNIQUE_EXPLANATIONS.get(primary_domain, styles.DOMAIN_UNIQUE_EXPLANATIONS["creative"])
+    story.append(Spacer(1, 15))
+    story.append(Paragraph("Hidden Opportunities", section_header_style))
+    story.append(Paragraph("HIDDEN COGNITIVE OPPORTUNITIES", h1_style))
+    story.append(Paragraph("This section highlights high-potential domains where the child demonstrated strong problem-solving capabilities despite very limited prior exposure or access. We define these as 'Untapped Potential'.", body_style))
+    
+    # Untapped potential display
+    if untapped_potential:
+        for u_key in untapped_potential:
+            u_lbl = styles.DOMAINS_MAP.get(u_key, u_key)
+            u_score = integ.get(u_key, 0)
+            exp_val = child.get(f"exp_{u_key}", 0)
+            exp_lbl = ["Never tried it", "Tried a few times", "Sometimes", "Regularly"][exp_val]
+            
+            untapped_data = [
+                [
+                    Paragraph(f"<b>🔥 UNTAPPED POTENTIAL: {u_lbl.upper()}</b>", card_label_style),
+                    Paragraph("<b>HIGH POTENTIAL &middot; LOW EXPOSURE</b>", ParagraphStyle('GoldBadge', parent=styles.styles['Normal'], fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor("#B7791F"), alignment=2))
+                ],
+                [
+                    Paragraph(f"{child.get('name', 'The student')} scored an impressive <b>{u_score}%</b> in cognitive puzzles for <b>{u_lbl}</b>, despite having very limited access opportunities in the past (Exposure Preference: '{exp_lbl}'). Actionable introductory workshops are highly recommended.", body_style),
+                    ""
+                ]
+            ]
+            untapped_table = Table(untapped_data, colWidths=[4.5 * inch, 2.5 * inch])
+            untapped_table.setStyle(TableStyle([
+                ('SPAN', (0,1), (1,1)),
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFF9EE")),
+                ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#F7B731")),
+                ('TOPPADDING', (0,0), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+                ('LEFTPADDING', (0,0), (-1,-1), 12),
+                ('RIGHTPADDING', (0,0), (-1,-1), 12),
+            ]))
+            story.append(untapped_table)
+            story.append(Spacer(1, 15))
+    else:
+        empty_box = Table([[
+            Paragraph("🌿 <b>No Untapped Potential Flags Detected</b><br/>All high-scoring cognitive domains align with positive prior exposure records. Keep supporting current nurturing tracks.", body_style)
+        ]], colWidths=[7.0 * inch])
+        empty_box.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E2F9F6")),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#00B8A9")),
+            ('TOPPADDING', (0,0), (-1,-1), 12),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+            ('LEFTPADDING', (0,0), (-1,-1), 14),
+        ]))
+        story.append(empty_box)
+        story.append(Spacer(1, 20))
+        
+    story.append(Paragraph("DOMAIN POTENTIAL TIERS", h2_style))
+    
+    # Categorize domains by tier
+    strong_list = [Paragraph(f"&bull; {styles.DOMAINS_MAP[d]}", body_style) for d, s in sorted_scores if s >= 75]
+    emerging_list = [Paragraph(f"&bull; {styles.DOMAINS_MAP[d]}", body_style) for d, s in sorted_scores if 50 <= s < 75]
+    explore_list = [Paragraph(f"&bull; {styles.DOMAINS_MAP[d]}", body_style) for d, s in sorted_scores if s < 50]
 
-    story.append(Spacer(1, 10))
-    story.append(Paragraph("Behavioural Profile", section_header_style))
-    story.append(Paragraph("OBSERVED COGNITIVE BEHAVIOURS", h1_style))
-    story.append(Paragraph("This profile logs behavioral observations tracked during problem-solving tasks. We map these parameters to establish learning and execution habits.", body_style))
-    story.append(Spacer(1, 8))
-
-    # 10 Behaviors list with unique supporting evidence
-    behaviours = [
-        ("Curious & Inquisitive", unique_exp["behaviour"], "★★★★☆"),
-        ("Task Persistence", "Sustains puzzle attempts across multiple complexity steps without giving up.", "★★★★★"),
-        ("Reflective Pacing", "Pauses thoughtfully before executing pattern rotations, indicating mental planning.", "★★★★☆"),
-        ("Independent Method", "Formulates execution steps without requiring constant facilitator prompts.", "★★★★☆"),
-        ("Collaborative Mindset", "Shares tools and collaborates in group engineering tasks.", "★★★☆☆"),
-        ("Verbal Articulation", unique_exp.get("behaviour_verbal", "Explains logical patterns and choices with high vocabulary precision."), "★★★★☆"),
-        ("Analytical Precision", "Verifies shape alignment before locking, keeping error rates low.", "★★★★★"),
-        ("Divergent Play", "Attempts non-traditional visual layouts in creative sandbox modules.", "★★★★☆"),
-        ("Steady Focus", "Maintains a uniform task speed; shows no signs of rushing or key-spamming.", "★★★★☆"),
-        ("Team Leadership", "Coordinates build stages when working in collaborative peer groups.", "★★★☆☆")
+    tiers_data = [
+        [
+            Paragraph("<b>Strong Potential (>=75%)</b>", card_label_style),
+            Paragraph("<b>Emerging Potential (50-74%)</b>", card_label_style),
+            Paragraph("<b>Further Observation (<50%)</b>", card_label_style)
+        ],
+        [
+            strong_list or [Paragraph("None", body_style)],
+            emerging_list or [Paragraph("None", body_style)],
+            explore_list or [Paragraph("None", body_style)]
+        ]
     ]
-
-    behaviour_rows = [[
-        Paragraph("<b>Observed Behaviour</b>", styles.table_header_style),
-        Paragraph("<b>Supporting Cognitive Evidence</b>", styles.table_header_style),
-        Paragraph("<b>Confidence</b>", styles.table_header_style)
-    ]]
-
-    for name, desc, stars in behaviours:
-        behaviour_rows.append([
-            Paragraph(f"<b>{name}</b>", styles.table_cell_style),
-            Paragraph(desc, card_body_style),
-            Paragraph(f"<font color='#5B4CF0'><b>{stars}</b></font>", ParagraphStyle('StarCol', parent=styles.table_cell_style, alignment=1))
-        ])
-
-    behaviours_table = Table(behaviour_rows, colWidths=[1.8 * inch, 4.0 * inch, 1.2 * inch])
-    behaviours_table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), styles.primary_color),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
-        ('TOPPADDING', (0,0), (-1,-1), 5),
+    tiers_table = Table(tiers_data, colWidths=[2.3 * inch, 2.3 * inch, 2.4 * inch])
+    tiers_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#EEEDFE")),
+        ('BOX', (0,0), (-1,-1), 0.5, border_color),
         ('GRID', (0,0), (-1,-1), 0.5, border_color),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_bg]),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('LEFTPADDING', (0,0), (-1,-1), 10),
     ]))
-    story.append(behaviours_table)
+    story.append(tiers_table)
 
 def build_persona_page(story, data, styles):
     section_header_style = styles.section_header_style
     h1_style = styles.h1_style
     body_style = styles.body_style
     card_label_style = styles.card_label_style
-    card_body_style = styles.card_body_style
     primary_color = styles.primary_color
     secondary_color = styles.secondary_color
     border_color = styles.border_color
-    light_bg = styles.light_bg
     
     primary_domain = data["primary_domain"]
     persona = styles.PERSONAS.get(primary_domain, styles.PERSONAS["creative"])
-    guide = styles.parentGuides.get(primary_domain, styles.parentGuides["creative"])
 
-    # Unique persona parameters mapping
-    persona_configs = {
-        "creative": {
-            "style": "Visual, exploratory, sandbox-style trial-and-error.",
-            "comm": "Uses drawings, structural layouts, and narratives rather than prose.",
-            "env": "Open-ended, sensory-rich spaces with diverse visual materials.",
-            "help": "Provide drafting logs, clay kits, and design tasks without strict rules."
-        },
-        "logical": {
-            "style": "Analytical, sequential, structured rules decoding.",
-            "comm": "Uses numeric indicators, flow charts, and step sequences.",
-            "env": "Quiet, predictable settings with explicit parameters.",
-            "help": "Introduce coding games, logical board games, and multi-week projects."
-        },
-        "spatial": {
-            "style": "Hands-on structural assembly and mental rotation.",
-            "comm": "Uses 3D blueprints and physical coordinates.",
-            "env": "Maker spaces, crafting tables, and visual workspaces.",
-            "help": "Offer LEGO engineering, complex origami, and 3D modeling grids."
-        },
-        "social": {
-            "style": "Interactive feedback and collaborative group loops.",
-            "comm": "Uses descriptive spoken explanations and active verbal listening.",
-            "env": "High-collaboration classrooms and group workshop roundtables.",
-            "help": "Involve in peer tutoring, group design sessions, and sports roles."
-        },
-        "language": {
-            "style": "Narrative comprehension and conceptual debate.",
-            "comm": "Uses semantic vocabulary, text logs, and verbal arguments.",
-            "env": "Library zones, speech clubs, and narrative classrooms.",
-            "help": "Discuss complex topics together, write story diaries, and debate prompts."
-        },
-        "naturalist": {
-            "style": "Ecosystem observation and taxonomic classification.",
-            "comm": "Uses features categorization and botanical logs.",
-            "env": "Nature walks, gardens, and outdoor workspaces.",
-            "help": "Supply plant care tools, insect catalog sets, and nature mapping journals."
-        },
-        "kinesthetic": {
-            "style": "Proprioceptive tactile feedback and trial-and-error tasks.",
-            "comm": "Uses physical gestures, body posture, and tactile manipulation.",
-            "env": "Athletic courts, dance halls, and physical craft rooms.",
-            "help": "Schedule regular physical movement breaks and hand-craft tasks."
-        },
-        "intrapersonal": {
-            "style": "Self-paced reflective goal-setting.",
-            "comm": "Uses introspective writing and goal spreadsheets.",
-            "env": "Isolated quiet corners with no distracting background noise.",
-            "help": "Teach diary goal tracking and offer self-paced online courses."
-        }
-    }
-    
-    cfg = persona_configs.get(primary_domain, persona_configs["creative"])
-
-    story.append(Spacer(1, 10))
-    story.append(Paragraph("Persona Profile", section_header_style))
+    story.append(Spacer(1, 15))
+    story.append(Paragraph("Child Persona Profile", section_header_style))
     story.append(Paragraph("CHILD COGNITIVE PERSONA", h1_style))
-    story.append(Spacer(1, 10))
 
     # Archetype Card
     persona_card_data = [
-        [
-            Paragraph(f"<font size='28'>{persona['emoji']}</font>", styles.styles['Normal']),
-            Paragraph(f"<b>COGNITIVE ARCHETYPE: {persona['title']}</b><br/><font color='#4A4A4A'>{persona['desc']}</font>", styles.styles['Normal'])
-        ]
+        [Paragraph(f"<font size='44'>{persona['emoji']}</font>", styles.styles['Normal'])],
+        [Paragraph(f"<b>{persona['title']}</b>", ParagraphStyle('ArcTitle', parent=styles.styles['Heading2'], textColor=primary_color, alignment=1, fontSize=16))],
+        [Paragraph(persona['desc'], ParagraphStyle('ArcDesc', parent=body_style, alignment=1, fontSize=10, leading=15))]
     ]
-    persona_card = Table(persona_card_data, colWidths=[0.8 * inch, 6.2 * inch])
+    persona_card = Table(persona_card_data, colWidths=[7.0 * inch])
     persona_card.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#EEECFF")),
         ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#C3C0F9")),
-        ('LINELEFT', (0,0), (0,-1), 4, primary_color),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('TOPPADDING', (0,0), (-1,-1), 8),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-        ('LEFTPADDING', (0,0), (-1,-1), 12),
-        ('RIGHTPADDING', (0,0), (-1,-1), 12),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('TOPPADDING', (0,0), (-1,-1), 12),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+        ('LEFTPADDING', (0,0), (-1,-1), 20),
+        ('RIGHTPADDING', (0,0), (-1,-1), 20),
     ]))
     story.append(persona_card)
-    story.append(Spacer(1, 15))
-
-    # High Density Matrix (3 Columns: Left, Spacer, Right)
-    matrix_data = [
+    story.append(Spacer(1, 20))
+    
+    # Strengths / Growth Columns
+    strengths_items = [Paragraph(f"&bull; <b>{s}</b>", body_style) for s in persona["strengths"]]
+    growth_items = [Paragraph(f"&bull; <b>{g}</b>", body_style) for g in persona["growth"]]
+    
+    columns_data = [
         [
-            Paragraph("<b>LEARNING STYLE</b>", card_label_style),
+            Paragraph("<b>PRIMARY STRENGTHS</b>", card_label_style),
             "",
-            Paragraph("<b>COMMUNICATION STYLE</b>", card_label_style)
+            Paragraph("<b>TARGETED GROWTH AREAS</b>", ParagraphStyle('TealLabel', parent=card_label_style, textColor=secondary_color))
         ],
         [
-            Paragraph(cfg["style"], card_body_style),
+            strengths_items,
             "",
-            Paragraph(cfg["comm"], card_body_style)
-        ],
-        [
-            Paragraph("<b>BEST LEARNING ENVIRONMENT</b>", card_label_style),
-            "",
-            Paragraph("<b>NATURAL MOTIVATORS</b>", card_label_style)
-        ],
-        [
-            Paragraph(cfg["env"], card_body_style),
-            "",
-            Paragraph(guide["motivators"], card_body_style)
-        ],
-        [
-            Paragraph("<b>POSSIBLE CHALLENGES</b>", ParagraphStyle('GoldLbl', parent=card_label_style, textColor=styles.accent_gold)),
-            "",
-            Paragraph("<b>HOW PARENTS CAN HELP</b>", ParagraphStyle('TealLbl', parent=card_label_style, textColor=secondary_color))
-        ],
-        [
-            Paragraph(guide["challenges"], card_body_style),
-            "",
-            Paragraph(cfg["help"], card_body_style)
+            growth_items
         ]
     ]
-
-    matrix_table = Table(matrix_data, colWidths=[3.4 * inch, 0.2 * inch, 3.4 * inch])
-    matrix_table.setStyle(TableStyle([
+    columns_table = Table(columns_data, colWidths=[3.4 * inch, 0.2 * inch, 3.4 * inch])
+    columns_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (0,0), colors.HexColor("#EEEDFE")),
+        ('BACKGROUND', (2,0), (2,0), colors.HexColor("#E2F9F6")),
         ('BOX', (0,0), (0,-1), 0.5, border_color),
         ('BOX', (2,0), (2,-1), 0.5, border_color),
-        ('BACKGROUND', (0,0), (0,0), light_bg),
-        ('BACKGROUND', (2,0), (2,0), light_bg),
-        ('BACKGROUND', (0,2), (0,2), light_bg),
-        ('BACKGROUND', (2,2), (2,2), light_bg),
-        ('BACKGROUND', (0,4), (0,4), light_bg),
-        ('BACKGROUND', (2,4), (2,4), light_bg),
         ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('TOPPADDING', (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
         ('LEFTPADDING', (0,0), (-1,-1), 10),
-        ('RIGHTPADDING', (0,0), (-1,-1), 10),
     ]))
-    story.append(matrix_table)
-
+    story.append(columns_table)
 
 def build_page(story, data, styles):
-    build_behaviour_profile_page(story, data, styles)
+    build_hidden_opportunities_page(story, data, styles)
     story.append(PageBreak())
     build_persona_page(story, data, styles)
     story.append(PageBreak())
