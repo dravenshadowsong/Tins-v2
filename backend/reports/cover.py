@@ -1,123 +1,108 @@
 import os
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.lib.units import inch
-from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import Spacer, PageBreak
 
 def build_page(story, data, styles):
+    # PAGE 1: COVER PAGE (Drawn in background callback)
+    story.append(Spacer(1, 1))  # dummy flowable
+    story.append(PageBreak())
+
+def draw_cover_page(canvas, doc, data, styles_module):
     child = data.get("child", {})
     formatted_date = data.get("formatted_date", "")
     sid = data.get("sid", "")
     facilitator_name = data.get("facilitator_name", "")
-    session = data.get("session", {})
+
+    canvas.saveState()
+    # Left indigo stripe background
+    canvas.setFillColor(colors.HexColor("#5B4CF0"))
+    canvas.rect(0, 0, 160, 792, fill=1, stroke=0)
     
-    # 1. Spacer at top
-    story.append(Spacer(1, 40))
+    # Gold accent stripe
+    canvas.setFillColor(colors.HexColor("#F7B731"))
+    canvas.rect(160, 0, 5, 792, fill=1, stroke=0)
     
-    # 2. Centered Logos
+    # Concentric faint white decorative arcs
+    canvas.setStrokeColor(colors.HexColor("#7C6FFE"))
+    canvas.setLineWidth(1)
+    canvas.circle(0, 396, 100, fill=0, stroke=1)
+    canvas.circle(0, 396, 140, fill=0, stroke=1)
+    canvas.circle(0, 396, 180, fill=0, stroke=1)
+    
+    # Project WHY Logo (parent folder of backend/reports)
     base_dir = os.path.dirname(os.path.dirname(__file__))
     why_logo_path = os.path.join(base_dir, "why_logo.jpg")
-    goat_logo_path = os.path.join(base_dir, "goat_logo.png")
-    
-    # We will build a clean header table for logos
-    logo_cells = []
     if os.path.exists(why_logo_path):
-        from reportlab.platypus import Image
-        logo_cells.append(Image(why_logo_path, width=0.35*inch, height=0.35*inch))
+        canvas.drawImage(why_logo_path, 185, 685, width=30, height=30, mask='auto')
     else:
-        logo_cells.append(Paragraph("<b>PROJECT WHY</b>", styles.section_header_style))
-        
-    logo_cells.append(Paragraph("<font color='#64748B' size='14'>|</font>", styles.styles['Normal']))
+        canvas.setFillColor(colors.HexColor("#00B8A9"))
+        canvas.circle(200, 700, 15, fill=1, stroke=0)
+        canvas.setStrokeColor(colors.white)
+        canvas.setLineWidth(2.5)
+        canvas.line(200, 700, 200, 690)
+        canvas.line(200, 700, 192, 708)
+        canvas.line(200, 700, 208, 708)
     
+    canvas.setFillColor(colors.HexColor("#2D3436"))
+    canvas.setFont("Helvetica-Bold", 11)
+    canvas.drawString(225, 696, "PROJECT WHY")
+    
+    # GOAT Logo next to it
+    goat_logo_path = os.path.join(base_dir, "goat_logo.png")
     if os.path.exists(goat_logo_path):
-        from reportlab.platypus import Image
-        logo_cells.append(Image(goat_logo_path, width=0.35*inch, height=0.35*inch))
+        canvas.drawImage(goat_logo_path, 360, 685, width=30, height=30, mask='auto')
     else:
-        logo_cells.append(Paragraph("<b>GOAT LAB</b>", styles.section_header_style))
-        
-    header_table = Table([[logo_cells[0], logo_cells[1], logo_cells[2]]], colWidths=[1.8*inch, 0.4*inch, 1.8*inch])
-    header_table.setStyle(TableStyle([
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-    ]))
-    story.append(header_table)
-    story.append(Spacer(1, 60))
+        canvas.setFillColor(colors.HexColor("#5B4CF0"))
+        canvas.rect(360, 685, 30, 30, fill=1, stroke=0)
+        canvas.setStrokeColor(colors.white)
+        canvas.setLineWidth(3.0)
+        canvas.line(375, 690, 375, 710)
+        canvas.line(367, 710, 383, 710)
     
-    # 3. Report Title & Subtitle
-    story.append(Paragraph("TALENT INTELLIGENCE & NUTURING SYSTEM", styles.section_header_style))
-    story.append(Spacer(1, 10))
-    story.append(Paragraph("Talent Discovery &amp; Development Report", styles.title_style))
-    story.append(Paragraph("Standardized Psychometric &amp; Cognitive Potential Profile", styles.italic_style))
-    story.append(Spacer(1, 60))
+    canvas.setFillColor(colors.HexColor("#2D3436"))
+    canvas.setFont("Helvetica-Bold", 11)
+    canvas.drawString(400, 696, "GOAT TALENT LAB")
     
-    # 4. Thin divider line
-    line_table = Table([[""]], colWidths=[7.0*inch], rowHeights=[1])
-    line_table.setStyle(TableStyle([
-        ('LINEBELOW', (0,0), (-1,-1), 1, styles.border_color),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
-        ('TOPPADDING', (0,0), (-1,-1), 0),
-    ]))
-    story.append(line_table)
-    story.append(Spacer(1, 30))
+    # Report Title
+    canvas.setFillColor(colors.HexColor("#5B4CF0"))
+    canvas.setFont("Helvetica-Bold", 24)
+    canvas.drawString(200, 520, "Talent Discovery &")
+    canvas.drawString(200, 485, "Development Report")
     
-    # 5. Metadata Grid (3x2 Grid, Clean & Minimal)
-    metadata_data = [
-        [
-            Paragraph("<b>STUDENT PROFILE</b>", styles.section_header_style),
-            Paragraph("<b>ASSESSMENT METRICS</b>", styles.section_header_style),
-            Paragraph("<b>CERTIFICATION</b>", styles.section_header_style)
-        ],
-        [
-            Paragraph(f"<b>Name:</b> {child.get('name', 'N/A')}<br/><b>Age:</b> {child.get('age', 'N/A')} Years<br/><b>Class:</b> {child.get('school_year') or 'N/A'}", styles.table_cell_style),
-            Paragraph(f"<b>ID:</b> TINS-S{sid}<br/><b>Date:</b> {formatted_date}<br/><b>Version:</b> Report v5.0", styles.table_cell_style),
-            Paragraph(f"<b>Facilitator:</b> {facilitator_name}<br/><b>Status:</b> Verified Record<br/><b>Authority:</b> GOAT Labs", styles.table_cell_style)
-        ]
+    # Tagline
+    canvas.setFillColor(colors.HexColor("#2D3436"))
+    canvas.setFont("Helvetica-Oblique", 11)
+    canvas.drawString(200, 455, "Understanding Potential. Building Futures.")
+    
+    # Thin gold divider line
+    canvas.setStrokeColor(colors.HexColor("#F7B731"))
+    canvas.setLineWidth(1.5)
+    canvas.line(200, 435, 520, 435)
+    
+    # Metadata
+    metadata = [
+        ("STUDENT NAME", child.get("name", "N/A").upper()),
+        ("AGE", f"{child.get('age', 'N/A')} YEARS"),
+        ("CLASS / LEVEL", (child.get("school_year") or "N/A").upper()),
+        ("ASSESSMENT DATE", formatted_date.upper()),
+        ("ASSESSMENT ID", f"GOAT-SESS-{sid}"),
+        ("FACILITATOR", facilitator_name.upper())
     ]
     
-    metadata_table = Table(metadata_data, colWidths=[2.33*inch, 2.33*inch, 2.33*inch])
-    metadata_table.setStyle(TableStyle([
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('BOTTOMPADDING', (0,0), (-1,0), 6),
-        ('BOTTOMPADDING', (0,1), (-1,1), 12),
-        ('TOPPADDING', (0,1), (-1,1), 4),
-        ('BOX', (0,0), (-1,-1), 0.5, styles.border_color),
-        ('INNERGRID', (0,0), (-1,-1), 0.5, styles.border_color),
-        ('BACKGROUND', (0,0), (-1,-1), styles.light_bg),
-        ('LEFTPADDING', (0,0), (-1,-1), 10),
-        ('RIGHTPADDING', (0,0), (-1,-1), 10),
-    ]))
-    story.append(metadata_table)
-    story.append(Spacer(1, 80))
-    
-    # 6. Verification block at bottom
-    ver_data = [[
-        Paragraph("<font color='#64748B'><b>REPORT VERIFICATION</b><br/>This document is cryptographically certified. Scan the QR verification placeholder to authenticate the assessment session records and raw psychometric scoring telemetry.</font>", styles.card_body_style),
-        Paragraph("<font size='8' color='#64748B'><b>[ SECURE QR ]</b></font>", ParagraphStyle('QRLabel', parent=styles.styles['Normal'], fontName='Helvetica-Bold', fontSize=10, textColor=colors.HexColor("#64748B"), alignment=1))
-    ]]
-    ver_table = Table(ver_data, colWidths=[5.4*inch, 1.6*inch])
-    ver_table.setStyle(TableStyle([
-        ('BOX', (0,0), (-1,-1), 0.5, styles.border_color),
-        ('BACKGROUND', (0,0), (-1,-1), colors.white),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('TOPPADDING', (0,0), (-1,-1), 10),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
-        ('LEFTPADDING', (0,0), (-1,-1), 12),
-        ('RIGHTPADDING', (0,0), (-1,-1), 12),
-    ]))
-    story.append(ver_table)
-    
-    story.append(PageBreak())
-
-def draw_cover_page(canvas, doc, data, styles_module):
-    # Minimal running background callback - keeps the background completely white
-    canvas.saveState()
-    # Simple thin top gold divider accent on the cover
-    canvas.setStrokeColor(styles_module.accent_gold)
-    canvas.setLineWidth(1.5)
-    canvas.line(54, 750, letter[0]-54, 750)
-    
-    canvas.setFillColor(styles_module.slate_label)
+    y_pos = 380
+    for label, val in metadata:
+        canvas.setFillColor(colors.HexColor("#94A3B8"))
+        canvas.setFont("Helvetica-Bold", 8.5)
+        canvas.drawString(200, y_pos, label)
+        
+        canvas.setFillColor(colors.HexColor("#2D3436"))
+        canvas.setFont("Helvetica-Bold", 10.5)
+        canvas.drawString(200, y_pos - 15, val)
+        
+        y_pos -= 40
+        
+    canvas.setFillColor(colors.HexColor("#94A3B8"))
     canvas.setFont("Helvetica-Bold", 8.0)
-    canvas.drawRightString(letter[0]-54, 40, "CONFIDENTIAL & STANDARDIZED PSYCHOMETRIC RECORD")
+    canvas.drawRightString(letter[0]-54, 40, "CONFIDENTIAL & PROPRIETARY")
     canvas.restoreState()
