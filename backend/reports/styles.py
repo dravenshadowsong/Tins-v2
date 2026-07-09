@@ -291,6 +291,57 @@ pathways_dict = {
     }
 }
 
+DOMAIN_UNIQUE_EXPLANATIONS = {
+    "creative": {
+        "behaviour": "The student explores highly novel, non-traditional shapes and sandbox structures.",
+        "evidence": "Observed attempting multiple divergent task solutions and unique puzzle paths.",
+        "significance": "Indicates high cognitive plasticity, fluid design visualization, and original problem-solving strategies.",
+        "nurture": "Provide open-ended clay modelling, sketching tasks, and sandbox platforms without rigid blueprints."
+    },
+    "logical": {
+        "behaviour": "The student deducts abstract sequential rules and structural relationships rapidly.",
+        "evidence": "Low error rates and highly consistent, steady response pacing on pattern logic sequences.",
+        "significance": "Indicates strong inductive reasoning, pattern classification, and systematic rule extraction.",
+        "nurture": "Introduce Scratch programming, math Olympiad riddles, strategy board games, and coding puzzles."
+    },
+    "spatial": {
+        "behaviour": "The student excels in 3D mental rotation and structural layout visualizations.",
+        "evidence": "Rapid, accurate manipulation of three-dimensional shape templates and block placement.",
+        "significance": "Indicates high innate visual-spatial intelligence and intuitive mechanical engineering reasoning.",
+        "nurture": "Offer architectural grids, LEGO engineering, origami construction, and 3D modeling blocks."
+    },
+    "social": {
+        "behaviour": "The student guides peer focus and coordinates group task paths naturally.",
+        "evidence": "High collaborative feedback metrics and leadership initiative during peer group workshops.",
+        "significance": "Indicates advanced interpersonal intelligence, empathy, and team coordination capacities.",
+        "nurture": "Involve in group projects, local volunteering, team sports, and student leadership roles."
+    },
+    "language": {
+        "behaviour": "The student communicates logic patterns with high vocabulary and semantic precision.",
+        "evidence": "Comprehends complex textual guidelines rapidly and drafts descriptive narrative summaries.",
+        "significance": "Indicates exceptional verbal-linguistic fluency, expressive clarity, and logical articulation.",
+        "nurture": "Encourage speech and debate, library reading clubs, storytelling, and journaling."
+    },
+    "naturalist": {
+        "behaviour": "The student distinguishes micro-patterns and visual details in environmental settings.",
+        "evidence": "High accuracy on environmental categorization tasks and detailed plant/animal sorting.",
+        "significance": "Indicates strong taxonomic reasoning and keen observation of ecological structures.",
+        "nurture": "Provide opportunities for gardening, nature walks, plant care, and micro-pattern collections."
+    },
+    "kinesthetic": {
+        "behaviour": "The student integrates hand-eye feedback loops with high manual dexterity.",
+        "evidence": "Fast response times and precise adjustments on motor-sensory tasks.",
+        "significance": "Indicates advanced proprioceptive intelligence and tactile feedback logic.",
+        "nurture": "Incorporate fine-motor clay crafting, sports, dance, and physical model making."
+    },
+    "intrapersonal": {
+        "behaviour": "The student sets systematic personal goals and maintains high task-persistence.",
+        "evidence": "Highly uniform pacing on difficult tasks, demonstrating focus stability and self-checks.",
+        "significance": "Indicates deep metacognitive awareness, self-guided strategy formulation, and determination.",
+        "nurture": "Set up a quiet personal work corner, encourage self-paced online goals, and teach diary tracking."
+    }
+}
+
 def draw_bar(rating, max_rating=5, width=120, height=8):
     d = Drawing(width, height)
     # Background bar
