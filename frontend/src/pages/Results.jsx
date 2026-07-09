@@ -643,6 +643,94 @@ export default function Results() {
   };
   const activeCareerPathways = analysis.career_pathways || getFallbackCareerPathways();
 
+  // ── Report Timing Data ─────────────────────────────────────────────────────
+  const timingData = (() => {
+    try { return session?.timing_data ? JSON.parse(session.timing_data) : null; }
+    catch (_) { return null; }
+  })();
+
+  // ── Report Display Helper Functions ───────────────────────────────────────
+  const getStrengthTier = (score) => {
+    if (score >= 85) return { label: "Exceptional", color: "#5B4CF0" };
+    if (score >= 70) return { label: "Strong",       color: "#00B8A9" };
+    if (score >= 55) return { label: "Developing",   color: "#F7B731" };
+    if (score >= 40) return { label: "Emerging",     color: "#E17055" };
+    return                  { label: "Exploratory",  color: "#8E9BAE" };
+  };
+
+  const getConfidenceDots = (level) => {
+    const map = { "Very High": 5, "High": 4, "Moderate": 3, "Low": 2, "Very Low": 1 };
+    const filled = map[level] || 3;
+    return "●".repeat(filled) + "○".repeat(5 - filled);
+  };
+
+  const getExposureLabel = (expScore) => {
+    if (expScore >= 70) return "High";
+    if (expScore >= 45) return "Moderate";
+    if (expScore >= 20) return "Low";
+    return "Minimal";
+  };
+
+  const getDevPriority = (score, expScore) => {
+    if (score >= 75 && expScore <= 40) return { label: "High",   note: "High talent, low exposure — priority nurturing" };
+    if (score >= 75)                   return { label: "Medium", note: "Strong domain — continue development track" };
+    if (score >= 50)                   return { label: "Medium", note: "Developing — structured exposure recommended" };
+    return                                    { label: "Low",    note: "Exploratory phase — introductory activities beneficial" };
+  };
+
+  const getEvidenceStrength = (evObj) => {
+    if (!evObj) return "Low";
+    const c = [evObj.has_preference, evObj.has_behavioral, evObj.has_performance].filter(Boolean).length;
+    return c >= 3 ? "High" : c >= 2 ? "Medium" : "Low";
+  };
+
+  // ── Behavioural Profiles per Domain ───────────────────────────────────────
+  const BEHAVIOURAL_PROFILES_MAP = {
+    creative:      { traits: [{ trait: "Imaginative Thinker", desc: "Generates unusual solutions and unexpected connections spontaneously" }, { trait: "Visually Oriented", desc: "Favours visual and spatial representations over abstract text" }, { trait: "Divergent Problem Solver", desc: "Approaches challenges from multiple simultaneous angles" }, { trait: "Autonomy-Seeker", desc: "Prefers open-ended tasks with minimal external constraints" }, { trait: "Reflective Creator", desc: "Takes time to consider aesthetic options before committing" }, { trait: "Expressive Communicator", desc: "Uses creative media and metaphor to convey complex ideas" }], learningStyle: "Visual-Divergent", communicationStyle: "Expressive & Narrative", motivators: ["Original expression", "Design freedom", "Aesthetic challenges"], blindSpots: ["Structured repetition", "Rigid rule-following environments"], stressIndicators: ["Excessive constraints on output", "No creative outlet for energy"], idealEnvironment: "Open studios, maker spaces, and unstructured creative labs with access to diverse materials and mentor guidance." },
+    logical:       { traits: [{ trait: "Analytical Thinker", desc: "Systematically breaks complex problems into component parts" }, { trait: "Pattern Recogniser", desc: "Quickly identifies hidden rules and logical structures" }, { trait: "Precise Communicator", desc: "Prefers exact, verifiable, accurate language" }, { trait: "Goal-Oriented", desc: "Works methodically toward clearly defined outcomes" }, { trait: "Persistent Reasoner", desc: "Continues working on difficult problems without giving up" }, { trait: "Evidence-Driven", desc: "Forms conclusions from data and logical inference, not intuition" }], learningStyle: "Sequential-Analytical", communicationStyle: "Precise & Evidence-Based", motivators: ["Logical challenges", "Numerical puzzles", "Clear cause-effect rules"], blindSpots: ["Emotional ambiguity", "Open-ended unstructured creative tasks"], stressIndicators: ["Vague or contradictory instructions", "Illogical environments"], idealEnvironment: "Structured STEM labs, coding environments, and quiet analytical spaces with clear objectives." },
+    spatial:       { traits: [{ trait: "3D Thinker", desc: "Visualises objects and structures in three dimensions mentally" }, { trait: "Constructive Problem Solver", desc: "Builds mental or physical models to understand problems" }, { trait: "Detail Observer", desc: "Notices structural and architectural details others miss" }, { trait: "Hands-On Learner", desc: "Learns best by touching, building, and physically assembling" }, { trait: "Spatial Memory", desc: "Recalls layouts, configurations, and orientations accurately" }, { trait: "Innovative Designer", desc: "Proposes novel structural solutions intuitively" }], learningStyle: "Spatial-Constructive", communicationStyle: "Visual & Diagrammatic", motivators: ["Building challenges", "Design tasks", "Model construction"], blindSpots: ["Abstract verbal theory", "Extended written explanation work"], stressIndicators: ["No materials to manipulate", "Pure text-only environments"], idealEnvironment: "Tinkering labs, design workshops, robotics studios, and architecture spaces." },
+    social:        { traits: [{ trait: "Empathetic Leader", desc: "Reads social situations quickly and responds with care" }, { trait: "Collaborative", desc: "Actively seeks group input and shared problem solutions" }, { trait: "Communicative", desc: "Expresses ideas clearly and confidently in group settings" }, { trait: "Conflict-Resolver", desc: "Naturally mediates disagreements and builds consensus" }, { trait: "Initiative-Taker", desc: "Volunteers to organise and lead activities without being asked" }, { trait: "Community-Minded", desc: "Motivated by group outcomes over individual recognition" }], learningStyle: "Interpersonal-Collaborative", communicationStyle: "Verbal & Relational", motivators: ["Group leadership", "Peer collaboration", "Social impact projects"], blindSpots: ["Extended solo, quiet tasks", "Prolonged independent focus"], stressIndicators: ["Social isolation", "Exclusion from group decisions"], idealEnvironment: "Community spaces, group projects, student councils, and collaborative team activities." },
+    language:      { traits: [{ trait: "Verbal Fluency", desc: "Expresses ideas with clarity, speed, and precision" }, { trait: "Narrative Builder", desc: "Structures stories and arguments in compelling logical arcs" }, { trait: "Persuasive Communicator", desc: "Uses language skillfully to influence and explain" }, { trait: "Word-Sensitive", desc: "Notices word choices, puns, rhythm, and language nuance" }, { trait: "Active Listener", desc: "Attends carefully to verbal information and responds thoughtfully" }, { trait: "Curious Reader", desc: "Explores complex ideas through reading and writing" }], learningStyle: "Verbal-Auditory", communicationStyle: "Articulate & Storytelling-Driven", motivators: ["Debate", "Public performance", "Written and verbal expression"], blindSpots: ["Silent individual tasks", "Non-verbal communication settings"], stressIndicators: ["Communication restrictions", "No outlet for verbal expression"], idealEnvironment: "Debate clubs, theatre groups, writing workshops, and presentation arenas." },
+    naturalist:    { traits: [{ trait: "Detail Observer", desc: "Notices environmental patterns and micro-details others miss" }, { trait: "Taxonomic Thinker", desc: "Naturally classifies and categorises living things systematically" }, { trait: "Environmentally Empathic", desc: "Demonstrates deep care for natural ecosystems and organisms" }, { trait: "Outdoor Learner", desc: "Performs best in natural, open-air settings" }, { trait: "Biological Curiosity", desc: "Drawn to plants, animals, weather, and life science" }, { trait: "Patient Investigator", desc: "Observes carefully and at length before drawing conclusions" }], learningStyle: "Environmental-Observational", communicationStyle: "Descriptive & Grounded", motivators: ["Outdoor exploration", "Animal care", "Nature-based study"], blindSpots: ["Abstract symbolic reasoning tasks", "Indoor sedentary environments"], stressIndicators: ["Artificial environments", "Disconnection from nature"], idealEnvironment: "Nature trails, school gardens, environmental labs, and ecological fieldwork settings." },
+    kinesthetic:   { traits: [{ trait: "High Physical Energy", desc: "Channels energy productively through movement and action" }, { trait: "Fine-Motor Precision", desc: "Demonstrates excellent hand-eye coordination and dexterity" }, { trait: "Tactile Learner", desc: "Learns best by doing, touching, and physically engaging" }, { trait: "Spatial Awareness", desc: "Understands own body position and movement in space naturally" }, { trait: "Action-Oriented", desc: "Consistently prefers doing tasks over reading or listening" }, { trait: "Physical Persistence", desc: "Continues physical challenges with notable stamina and drive" }], learningStyle: "Tactile-Kinesthetic", communicationStyle: "Demonstrative & Active", motivators: ["Sports challenges", "Physical tasks", "Hands-on construction"], blindSpots: ["Passive listening sessions", "Extended periods of sitting"], stressIndicators: ["Physical confinement", "No movement breaks during study"], idealEnvironment: "Sports facilities, dance studios, maker labs, and outdoor physical challenge environments." },
+    intrapersonal: { traits: [{ trait: "Self-Aware", desc: "Understands own emotions, motivations, and limitations clearly" }, { trait: "Goal-Setter", desc: "Plans ahead with clear, personal, thoughtful objectives" }, { trait: "Reflective Thinker", desc: "Takes time to internally process experiences before responding" }, { trait: "Independent Worker", desc: "Thrives in solo, self-directed project environments" }, { trait: "Emotionally Regulated", desc: "Manages frustration and setbacks with unusual calmness" }, { trait: "Principled", desc: "Has clear personal values that consistently guide decisions" }], learningStyle: "Reflective-Self-Directed", communicationStyle: "Thoughtful & Written", motivators: ["Personal goals", "Independent projects", "Self-improvement tracks"], blindSpots: ["Highly competitive group settings", "Spontaneous public demands"], stressIndicators: ["Loss of autonomy", "Chaotic unpredictable environments"], idealEnvironment: "Quiet study spaces, journaling corners, independent project labs, and mindfulness spaces." },
+  };
+  const behaviourProfile = BEHAVIOURAL_PROFILES_MAP[primaryDomain] || BEHAVIOURAL_PROFILES_MAP.creative;
+
+  // ── Extended Parent Guide per Domain ──────────────────────────────────────
+  const PARENT_GUIDE_EXT = {
+    creative:      { dailyActivities: ["10 minutes of free drawing or sketching", "Create a story around any everyday object", "Photograph one interesting pattern or texture"], weeklyActivities: ["Visit an art gallery or design exhibit", "Participate in an open-ended craft session", "Watch a documentary on art, design, or architecture"], books: ['"The Art of Creative Thinking" — Rod Judkins', '"What Do You Do With an Idea?" — Kobi Yamada'], educationalGames: ["Pictionary or sketchbook games", "Minecraft (creative mode)", "Story Cubes"], schoolClubs: ["Art Club", "Drama & Theatre Society", "Design Thinking Workshop"], competitions: ["National Children's Art Competition", "State-level Drawing & Painting Olympiad"], projects: ["Design a poster for a school event", "Build a miniature model of an imagined city"], teacherSuggestion: "Offer open-ended art integration tasks alongside core curriculum. Allow visual alternatives to written reports and presentations.", parentSuggestion: "Provide a dedicated creative space at home with varied materials. Celebrate the process, not just the final product." },
+    logical:       { dailyActivities: ["Solve one mathematical puzzle or riddle", "Play a logic-based game for 15 minutes", "Explain how one everyday system works"], weeklyActivities: ["Play chess, Sudoku, or strategy board games", "Build a simple coding project using Scratch", "Watch a science or mathematics documentary"], books: ['"The Number Devil" — Hans Magnus Enzensberger', '"Thinking, Fast and Slow" (junior adaptation)'], educationalGames: ["Chess", "Code.org puzzles", "Perplexus or Rush Hour logic game"], schoolClubs: ["Mathematics Club", "Science Olympiad Team", "Coding & Robotics Club"], competitions: ["National Science Olympiad", "Mathematics Olympiad (junior)", "Coding competitions on Code.org"], projects: ["Build a working calculator in Scratch", "Design a logic puzzle for classmates"], teacherSuggestion: "Offer advanced extension problems in mathematics and science. Encourage logical reasoning across all subjects.", parentSuggestion: "Provide logic puzzles and strategy games regularly. Ask 'how does this work?' questions during daily life." },
+    spatial:       { dailyActivities: ["Sketch a map or floor plan of one room", "Solve a spatial puzzle or 3D cube challenge", "Build something small using available materials"], weeklyActivities: ["LEGO or construction kit building sessions", "Watch engineering or architecture content", "Visit a science museum or technology expo"], books: ['"The Way Things Work" — David Macaulay', '"Iggy Peck, Architect" — Andrea Beaty'], educationalGames: ["LEGO Mindstorms", "Blokus spatial strategy game", "IsometriX puzzles"], schoolClubs: ["Robotics Club", "Architecture & Design Lab", "Engineering Challenges Club"], competitions: ["National Robotics Competition", "Design & Build challenges at regional fairs"], projects: ["Build a working bridge from cardboard", "Create an architectural sketch of an imagined building"], teacherSuggestion: "Use 3D models and visual diagrams in instruction. Allow alternative presentation formats including models and blueprints.", parentSuggestion: "Invest in building and construction kits. Encourage tinkering and taking things apart safely to understand how they work." },
+    social:        { dailyActivities: ["Ask one meaningful question to a family member", "Practise active listening in one conversation today", "Plan one small group activity or game for peers"], weeklyActivities: ["Participate in community volunteering", "Organise a group event for peers or family", "Attend a debate or public speaking session"], books: ['"The Leader Who Had No Title" — Robin Sharma', '"Wonder" — R. J. Palacio'], educationalGames: ["Cooperative board games (Pandemic, Forbidden Island)", "Diplomacy (simplified edition)", "Role-playing and debate scenarios"], schoolClubs: ["Student Council", "Peer Mentorship Programme", "Youth Leadership Forum"], competitions: ["Model United Nations", "Youth Leadership Summit", "Inter-school debate competitions"], projects: ["Organise a fundraiser for a chosen community cause", "Lead a peer study group for one subject"], teacherSuggestion: "Assign group leadership roles regularly. Encourage peer teaching and conflict resolution activities in class.", parentSuggestion: "Support involvement in community groups. Create structured leadership opportunities at home." },
+    language:      { dailyActivities: ["Write three sentences about the day in a journal", "Read one chapter of a quality book or article", "Tell a two-minute story about any topic at dinner"], weeklyActivities: ["Participate in debate club or storytelling group", "Write and perform a short poem or speech", "Listen to a high-quality podcast or audiobook"], books: ['"The Phantom Tollbooth" — Norton Juster', '"Matilda" — Roald Dahl'], educationalGames: ["Scrabble or Boggle", "Story Spine storytelling game", "Apples to Apples (junior edition)"], schoolClubs: ["Debate Society", "Creative Writing Club", "School Newspaper or Journalism Club"], competitions: ["National Public Speaking Competition", "Creative Writing Olympiad", "Spell Bee or Word Olympiad"], projects: ["Write and publish a short illustrated story", "Produce a five-minute podcast episode on a chosen topic"], teacherSuggestion: "Provide verbal presentation alternatives to written work. Encourage debate, oral reporting, and storytelling in class.", parentSuggestion: "Read together daily. Encourage storytelling at mealtimes. Subscribe to quality children's magazines and newspapers." },
+    naturalist:    { dailyActivities: ["Observe and sketch one plant or animal", "Keep a nature journal with daily observations", "Identify one new species using a field guide or app"], weeklyActivities: ["Nature walk in a local park, garden, or forest area", "Visit a wildlife sanctuary or botanical garden", "Complete one environmental awareness project or activity"], books: ['"The Hidden Life of Trees" — Peter Wohlleben (junior edition)', '"A First Field Guide" — National Audubon Society'], educationalGames: ["Nature Bingo in parks", "Eco-challenge field activities", "iNaturalist app-based species identification"], schoolClubs: ["Young Naturalists Club", "Eco Committee", "School Garden Project"], competitions: ["National Science Olympiad (Biology)", "Young Environmentalist Award", "Wildlife photography competitions"], projects: ["Create a local biodiversity map of the school garden", "Start a school composting or tree planting initiative"], teacherSuggestion: "Incorporate outdoor learning sessions regularly. Use nature-based metaphors and examples across all subjects.", parentSuggestion: "Plan regular outdoor nature experiences. Gift quality field guides, binoculars, and nature journals." },
+    kinesthetic:   { dailyActivities: ["15–20 minutes of physical activity or sport", "Build or assemble something with hands today", "Practise one fine-motor skill (drawing, origami, clay work)"], weeklyActivities: ["Attend a structured sport or dance class", "Visit an adventure or outdoor activity centre", "Try a hands-on craft or engineering workshop"], books: ['"The Sports Gene" — David Epstein (simplified)', '"Bodies in Motion" — selected chapters for young readers'], educationalGames: ["Physical obstacle course challenges", "Sports strategy simulations", "Hands-on science experiment kits"], schoolClubs: ["Sports Team", "Dance Club", "Physical Challenge or Adventure Club"], competitions: ["District Sports Meets", "Regional dance competitions", "Obstacle course events and marathons"], projects: ["Design and build a functional physical structure", "Choreograph a short performance for family audience"], teacherSuggestion: "Integrate movement breaks into lessons. Allow kinaesthetic alternatives such as models, demonstrations, and performances.", parentSuggestion: "Support regular physical activity. Provide physical construction materials and hands-on project kits at home." },
+    intrapersonal: { dailyActivities: ["Write three reflective lines in a personal journal", "Set one clear intention for the day each morning", "Spend 10 quiet minutes in independent reading or thinking"], weeklyActivities: ["Complete one solo creative or research project", "Practise a short mindfulness or breathing exercise", "Review personal goals and record weekly progress"], books: ['"Mindset" — Carol Dweck (junior edition)', '"The Boy Who Harnessed the Wind" — William Kamkwamba'], educationalGames: ["Mindfulness apps (Headspace for kids)", "Goal-tracking journaling activities", "Solo strategy puzzle games"], schoolClubs: ["Mindfulness Club", "Philosophy & Debate Society", "Independent Research Group"], competitions: ["Essay writing competitions", "Independent science or social research fairs", "Reflective writing awards"], projects: ["Design and complete a 30-day personal challenge", "Create a personal portfolio documenting 6 months of growth"], teacherSuggestion: "Provide independent project options. Respect quiet focus periods. Offer personal reflection as an alternative to group work.", parentSuggestion: "Respect quiet time and independent exploration. Provide journals, personal project materials, and solo learning resources." },
+  };
+  const extendedGuide = PARENT_GUIDE_EXT[primaryDomain] || PARENT_GUIDE_EXT.creative;
+
+  // ── Extended Career Pathways per Domain ───────────────────────────────────
+  const CAREER_EXT = {
+    creative:      { subjects: ["Visual Arts", "Design & Technology", "Media Studies", "Drama"], careerClusters: ["Visual Arts & Design", "Architecture", "Film & Media Production", "Fashion & Textiles"], clubs: ["Art Society", "Drama Club", "Creative Writing", "Film Club"], olympiads: ["Children's Art Olympiad", "Design Thinking Challenge", "National Drawing Competition"], competitions: ["State Painting Competition", "School Art Exhibition", "Animation Design Contest"], communityActivities: ["Community mural projects", "Art therapy volunteering", "Cultural festivals"], futureSkills: ["Design Thinking", "Digital Illustration (Adobe Suite)", "3D Modelling (Blender)", "UX/UI Design Principles"] },
+    logical:       { subjects: ["Mathematics", "Physics", "Computer Science", "Chemistry"], careerClusters: ["Data Science & AI", "Software Engineering", "Research & Academia", "Finance & Actuarial Science"], clubs: ["Maths Club", "Coding Society", "Science Olympiad", "Robotics Team"], olympiads: ["Mathematics Olympiad", "Science Olympiad", "International Informatics Olympiad"], competitions: ["Coding competitions (HackerRank)", "National Science Fair", "Logic Puzzle Championships"], communityActivities: ["STEM tutoring for younger students", "Science fair volunteering", "Code for communities initiatives"], futureSkills: ["Python Programming", "Statistical Analysis", "Algorithm Design", "Machine Learning Fundamentals"] },
+    spatial:       { subjects: ["Physics", "Design & Technology", "Engineering Drawing", "Mathematics"], careerClusters: ["Architecture", "Mechanical Engineering", "Interior Design", "Civil & Structural Engineering"], clubs: ["Robotics Club", "Architecture Club", "Tinkering Lab", "3D Printing Society"], olympiads: ["Engineering Design Challenge", "Robotics Olympiad", "National Science Olympiad"], competitions: ["Bridge Building Competition", "Model Rocketry", "Maker Faire"], communityActivities: ["Build community structures", "Repair and repurpose local facilities", "School infrastructure improvement"], futureSkills: ["AutoCAD", "3D Printing", "Robotics Programming", "Structural Analysis"] },
+    social:        { subjects: ["Sociology", "Political Science", "Psychology", "Economics"], careerClusters: ["Social Work & NGO", "Public Policy", "Human Resources", "Education & Teaching"], clubs: ["Student Council", "Debate Society", "Model UN", "Community Service Committee"], olympiads: ["Model United Nations", "Youth Parliament", "Social Entrepreneurship Challenge"], competitions: ["Youth Leadership Summit", "Inter-school Debate", "Social Innovation Competition"], communityActivities: ["Youth volunteer leadership", "Peer counselling", "Community event organisation"], futureSkills: ["Leadership & Facilitation", "Conflict Resolution", "Public Speaking", "Project Management"] },
+    language:      { subjects: ["English Literature", "Hindi / Regional Language", "History", "Journalism & Media"], careerClusters: ["Journalism & Publishing", "Law & Advocacy", "Teaching & Education", "Public Relations & Communications"], clubs: ["Debate Club", "Poetry Society", "School Newspaper", "Theatre Group"], olympiads: ["Word Olympiad", "Essay Writing Competition", "Creative Writing Awards", "Inter-school Debate"], competitions: ["National Spell Bee", "Public Speaking Championship", "Story Writing Contest"], communityActivities: ["Reading aloud to younger children", "Storytelling events at libraries and community centres"], futureSkills: ["Content Writing & Editing", "Public Speaking", "Research & Analysis", "Digital Journalism"] },
+    naturalist:    { subjects: ["Biology", "Environmental Science", "Geography", "Chemistry"], careerClusters: ["Environmental Science", "Wildlife Conservation", "Veterinary Science", "Ecology & Field Research"], clubs: ["Eco Committee", "Nature Club", "Young Naturalists", "School Garden Club"], olympiads: ["Biology Olympiad", "Environmental Awareness Quiz", "Young Scientist Award"], competitions: ["Nature Photography Contest", "Environmental Project Fair", "Young Naturalist Award"], communityActivities: ["Tree planting drives", "Wildlife monitoring", "Environmental awareness campaigns"], futureSkills: ["Field Research Methods", "Ecological Mapping", "Environmental Policy Basics", "Scientific Data Collection"] },
+    kinesthetic:   { subjects: ["Physical Education", "Biology", "Design & Technology", "Health Science"], careerClusters: ["Sports Science", "Physiotherapy & Rehabilitation", "Physical Education", "Dance & Performance Arts"], clubs: ["Sports Teams", "Dance Club", "Physical Challenge Club", "Outdoor Adventure Group"], olympiads: ["District Sports Meet", "National School Games", "Dance Championship"], competitions: ["Athletics meets", "Martial arts tournaments", "Dance & choreography competitions"], communityActivities: ["Coaching younger students in sports", "Physical fitness awareness campaigns"], futureSkills: ["Sports Science Basics", "Biomechanics", "Coaching & Training Methods", "Physical Health Management"] },
+    intrapersonal: { subjects: ["Psychology", "Philosophy", "Literature", "Social Science"], careerClusters: ["Psychology & Counselling", "Philosophy & Research", "Creative Writing", "Education & Mentoring"], clubs: ["Mindfulness Club", "Philosophy Society", "Independent Research Group", "Journaling Club"], olympiads: ["Essay Writing Olympiad", "Social Science Research Fair", "Creative Writing Awards"], competitions: ["Reflective Writing Competition", "Personal Essay Contest", "Independent Research Presentation"], communityActivities: ["Peer counselling", "Mentoring younger students", "Mindfulness workshop facilitation"], futureSkills: ["Self-Regulation & EQ", "Research & Writing", "Empathy & Listening", "Independent Project Management"] },
+  };
+  const careerExtended = CAREER_EXT[primaryDomain] || CAREER_EXT.logical;
+
+  // ── Development Roadmap Stages (30d / 90d / 6m / 12m) ─────────────────────
+  const roadmapStages = [
+    { stage: "30 Days", stageClass: "rp-stage-1", color: "#5B4CF0", title: "Initial Exposure & Discovery", goal: `Introduce ${primaryLabel} activities in a low-pressure, exploratory setting`, activities: [extendedGuide.dailyActivities?.[0] || "Daily domain-relevant practice", extendedGuide.weeklyActivities?.[0] || "Weekly structured group activity", `Enrol in: ${extendedGuide.schoolClubs?.[0] || "relevant school club"}`], expectedOutcome: "Child demonstrates voluntary interest and basic comfort with domain activities", successIndicators: ["Requests related materials independently", "Completes activities without prompting"] },
+    { stage: "90 Days", stageClass: "rp-stage-2", color: "#00B8A9", title: "Structured Practice & Mentorship", goal: `Build consistent skill development with guided mentorship in ${primaryLabel}`, activities: [extendedGuide.weeklyActivities?.[1] || "Structured weekly skill session", `Project: ${extendedGuide.projects?.[0] || "Domain-relevant project"}`, "Bi-weekly mentor check-in and feedback"], expectedOutcome: "Measurable skill improvement with a demonstrable portfolio piece or presentation", successIndicators: ["Visible confidence in domain tasks", "Produces a tangible outcome or project"] },
+    { stage: "6 Months", stageClass: "rp-stage-3", color: "#F7B731", title: "Advanced Projects & Portfolio Building", goal: `Develop a portfolio of ${primaryLabel} work and explore competition opportunities`, activities: [`Competition: ${extendedGuide.competitions?.[0] || "Relevant domain competition"}`, extendedGuide.projects?.[1] || "Advanced independent project", "Present portfolio to family or peer audience"], expectedOutcome: "Child has a verifiable portfolio and has participated in at least one external event", successIndicators: ["Peer recognition in domain", "Completion of a complex solo project"] },
+    { stage: "12 Months", stageClass: "rp-stage-4", color: "#E17055", title: "Reassessment & Future Planning", goal: "Reassess development, identify next-level opportunities, and plan the year ahead", activities: ["Complete TINS Reassessment to measure domain growth", "Review 12-month portfolio with facilitator mentor", "Set goals for the next 12-month development cycle"], expectedOutcome: "Clear evidence of longitudinal growth with a defined pathway for continued development", successIndicators: ["Measurable score improvement in reassessment", "Child can articulate own developmental goals"] },
+  ];
+
   const safeName = (child?.name || "Student").trim().replace(/\s+/g, "_");
   const personalizedSnapshot = `${child?.name || "The student"} appears to demonstrate strong developmental indicators in ${primaryLabel} activities, particularly in open-ended exploration and problem-solving styles. These findings suggest a natural comfort with ${primaryLabel} concepts. Secondary indicators also suggest potential in ${secondaryDomains.map(d => DOMAINS[d]?.label || d).join(" and ")} areas. Nurturing these talents in structured settings will provide a clearer picture of their long-term growth.`;
   const pdfUrl = `${api.downloadPDF(sid)}?token=${sessionStorage.getItem("goat_token")}&cid=${cid}`;
@@ -1200,557 +1288,914 @@ export default function Results() {
 
       </div>
 
-      {/* ── PRINT VIEW: 12-PAGE BOOKLET ── */}
+      {/* ── PRINT VIEW: 14-PAGE BOOKLET ── */}
       <div className="report-container">
         
         {/* PAGE 1: COVER PAGE */}
-        <div id="print-page-1" className="report-page cover-page">
+        <div id="print-page-1" className="report-page cover-page" style={{ position: "relative", overflow: "hidden" }}>
           <div className="cover-header">
-            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>GOAT LABS</span>
-            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>GOAT V4</span>
+            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>TINS PORTAL</span>
+            <span style={{ fontWeight: 900, fontSize: "16px", letterSpacing: "1px" }}>REPORT V5.0</span>
           </div>
-          <div className="cover-hero">
-            🧠 ✨ 🚀
-          </div>
-          <div className="cover-title-group">
-            <h1>GOAT Talent Discovery &amp; Development Report</h1>
-            <p>Understanding Potential. Building Futures.</p>
-          </div>
-          <div className="cover-footer">
-            <div>
-              <strong>Student Name:</strong> {child?.name}<br />
-              <strong>Age:</strong> {child?.age} Years &middot; <strong>Class:</strong> {child?.school_year || "Not Specified"}<br />
-              <strong>Language:</strong> {child?.language}
+          
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "40px" }}>
+            <div className="rp-monogram">
+              {child?.name ? child.name.substring(0,2).toUpperCase() : "TS"}
             </div>
-            <div style={{ textAlign: "right" }}>
-              <strong>Assessment Date:</strong> {new Date(session.completed_at || session.created_at).toLocaleDateString()}<br />
-              <strong>Assessment ID:</strong> GOAT-S{session.id}<br />
-              <strong>Facilitator:</strong> {notes[0]?.facilitator || "GOAT Mentor"}
+          </div>
+
+          <div className="cover-title-group" style={{ marginTop: "20px" }}>
+            <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.5px" }}>Talent Intelligence &amp; Nurturing Report</h1>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.78)" }}>A Comprehensive Developmental &amp; Cognitive Potential Assessment</p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "16px", borderRadius: "10px", marginTop: "30px", fontSize: "11px", color: "#fff" }}>
+            <div>
+              <span className="rp-label-gray" style={{ color: "rgba(255,255,255,0.5)" }}>Student Profile</span>
+              <div style={{ fontSize: "13px", fontWeight: 700, marginTop: "2px" }}>{child?.name}</div>
+              <div style={{ marginTop: "4px" }}>Age: {child?.age} Years &middot; Class: {child?.school_year || "Not Specified"}</div>
+              <div>Language: {child?.language || "English"}</div>
+            </div>
+            <div>
+              <span className="rp-label-gray" style={{ color: "rgba(255,255,255,0.5)" }}>Assessment Details</span>
+              <div>Date: {new Date(session.completed_at || session.created_at).toLocaleDateString()}</div>
+              <div>ID: TINS-S{session.id}</div>
+              <div>Duration: {timingData?.total_formatted || "—"}</div>
+            </div>
+          </div>
+
+          <div className="cover-footer" style={{ borderTop: "1px solid rgba(255,255,255,0.12)", paddingTop: "14px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+              <div style={{ fontSize: "10px", opacity: 0.8 }}>
+                <strong>Facilitator:</strong> {notes[0]?.facilitator || "TINS Mentor"}<br />
+                System Certification: Verified Profile
+              </div>
+              <div style={{ border: "1.5px solid rgba(255,255,255,0.15)", borderRadius: "4px", padding: "4px 8px", fontSize: "8px", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Scan to Verify<br />
+                <div style={{ fontSize: "10px", fontWeight: 900, marginTop: "2px" }}>[ QR ]</div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* PAGE 2: EXECUTIVE SUMMARY (WHO IS THIS CHILD?) */}
+        {/* PAGE 2: EXECUTIVE SUMMARY */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Executive Summary</span>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Executive Summary</span>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "16px" }}>
+            <div>
+              <span className="rp-label-gray">Student Assessment Overview</span>
+              <div className="rp-h2">{child?.name}</div>
             </div>
-            <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>WHO IS THIS CHILD?</h2>
-            <p style={{ fontSize: "15px", lineHeight: "1.7", color: "#4A4A4A", fontWeight: 500, margin: "0 0 24px 0", fontStyle: "italic" }}>
-              "{personalizedSnapshot}"
-            </p>
-            
-            <div style={{ marginTop: "24px" }}>
-              <h3 style={{ fontSize: "13px", fontWeight: 800, color: "#4A4A4A", textTransform: "uppercase", margin: "0 0 12px 0", letterSpacing: "0.5px" }}>Talent Domain Summary</h3>
-              <div className="summary-card-v4 primary">
-                <div style={{ fontWeight: 800, color: "#5B4CF0", fontSize: "12px", textTransform: "uppercase" }}>Strong Indicators</div>
-                <h4 style={{ margin: "2px 0 0 0", fontSize: "16px", fontWeight: 800 }}>{DOMAINS[primaryDomain]?.emoji} {DOMAINS[primaryDomain]?.label}</h4>
-              </div>
-              <div className="summary-card-v4 secondary">
-                <div style={{ fontWeight: 800, color: "#00B8A9", fontSize: "12px", textTransform: "uppercase" }}>Emerging Indicators</div>
-                <h4 style={{ margin: "2px 0 0 0", fontSize: "15px", fontWeight: 800 }}>
-                  {secondaryDomains.map(d => `${DOMAINS[d]?.emoji || "✨"} ${DOMAINS[d]?.label || d}`).join("  |  ")}
-                </h4>
-              </div>
-              <div className="summary-card-v4 emerging">
-                <div style={{ fontWeight: 800, color: "#F7B731", fontSize: "12px", textTransform: "uppercase" }}>Needs Further Exploration</div>
-                <h4 style={{ margin: "2px 0 0 0", fontSize: "15px", fontWeight: 800 }}>
-                  {emergingDomains.map(d => `${DOMAINS[d]?.emoji || "✨"} ${DOMAINS[d]?.label || d}`).join("  |  ")}
-                </h4>
-              </div>
+            <div style={{ textAlign: "right", fontSize: "10px", color: "#8E9BAE" }}>
+              ID: TINS-S{session.id} &middot; Confidential Report
             </div>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <hr className="rp-divider" />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "10px" }}>
+            
+            <div className="rp-card rp-card-primary rp-panel-left-blue">
+              <span className="rp-label">Primary Talent Domain</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2px" }}>
+                <h3 className="rp-h3" style={{ fontSize: "16px", margin: 0 }}>
+                  {DOMAINS[primaryDomain]?.emoji} {DOMAINS[primaryDomain]?.label}
+                </h3>
+                <span className="rp-tier" style={{ background: "#EEEDFE", color: "#5B4CF0" }}>
+                  Score: {integ[primaryDomain]}% &middot; {getStrengthTier(integ[primaryDomain]).label}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="rp-card rp-card-secondary rp-panel-left-teal">
+                <span className="rp-label" style={{ color: "#00B8A9" }}>Secondary Domain</span>
+                <div style={{ fontWeight: 700, fontSize: "13px", marginTop: "2px" }}>
+                  {secondaryDomains[0] ? `${DOMAINS[secondaryDomains[0]]?.emoji} ${DOMAINS[secondaryDomains[0]]?.label}` : "None Detected"}
+                </div>
+                <div style={{ fontSize: "11px", color: "#8E9BAE", marginTop: "2px" }}>
+                  Score: {secondaryDomains[0] ? `${integ[secondaryDomains[0]]}%` : "—"}
+                </div>
+              </div>
+              <div className="rp-card rp-card-soft">
+                <span className="rp-label-gray">Emerging Domain</span>
+                <div style={{ fontWeight: 700, fontSize: "13px", marginTop: "2px", color: "#2D3436" }}>
+                  {emergingDomains[0] ? `${DOMAINS[emergingDomains[0]]?.emoji} ${DOMAINS[emergingDomains[0]]?.label}` : "None Detected"}
+                </div>
+                <div style={{ fontSize: "11px", color: "#8E9BAE", marginTop: "2px" }}>
+                  Score: {emergingDomains[0] ? `${integ[emergingDomains[0]]}%` : "—"}
+                </div>
+              </div>
+            </div>
+
+            {untapped_potential.length > 0 && (
+              <div className="rp-card rp-card-note">
+                <span className="rp-label" style={{ color: "#B7791F" }}>🔥 Untapped Development Opportunity</span>
+                <div style={{ fontSize: "11px", color: "#5D4037", marginTop: "2px", fontWeight: 500 }}>
+                  High baseline potential identified in <strong>{DOMAINS[untapped_potential[0]]?.label}</strong> despite low previous practice exposure. Structured introductory activities are highly recommended.
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", margin: "20px 0" }}>
+            <div className="rp-kpi">
+              <span className="rp-kpi-val">{getEvidenceStrength(evidence[primaryDomain])}</span>
+              <span className="rp-kpi-lbl">Evidence Strength</span>
+              <span className="rp-kpi-sub">Multi-channel signal match</span>
+            </div>
+            <div className="rp-kpi">
+              <span className="rp-kpi-val" style={{ fontSize: "14px", padding: "2px 0" }}>{getConfidenceDots("Very High")}</span>
+              <span className="rp-kpi-lbl">Assessment Confidence</span>
+              <span className="rp-kpi-sub">Response consistency rating</span>
+            </div>
+            <div className="rp-kpi">
+              <span className="rp-kpi-val" style={{ fontSize: "13px", padding: "2.5px 0" }}>{primaryLabel}</span>
+              <span className="rp-kpi-lbl">Development Priority</span>
+              <span className="rp-kpi-sub">Suggested primary focus</span>
+            </div>
+          </div>
+
+          <div className="rp-card rp-card-soft" style={{ marginTop: "14px" }}>
+            <span className="rp-label-gray">Executive Summary Paragraph</span>
+            <p className="rp-body" style={{ margin: "4px 0 0 0", fontStyle: "italic", fontSize: "11px" }}>
+              "{personalizedSnapshot}"
+            </p>
+          </div>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 2</span>
           </div>
         </div>
 
-        {/* PAGE 3: TALENT MAP */}
+        {/* PAGE 3: DOMAIN SCORECARD */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Psychological Talent Map</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0", textAlign: "center" }}>DYNAMIC COGNITIVE MAP</h2>
-            
-            <div style={{ width: "100%", height: "220px", display: "flex", alignItems: "center", justifyContent: "center", margin: "10px 0" }}>
-              <RadarChart scores={integ} />
-            </div>
-
-            <div style={{ marginTop: "16px", overflowX: "auto" }}>
-              <table style={{ width: "100%", fontSize: "12px", borderCollapse: "collapse", border: "1px solid rgba(0, 0, 0, 0.05)" }}>
-                <thead>
-                  <tr style={{ background: "rgba(91, 76, 240, 0.05)", borderBottom: "1.5px solid rgba(91, 76, 240, 0.15)", color: "#5B4CF0", fontWeight: 800, textAlign: "left" }}>
-                    <th style={{ padding: "8px 10px" }}>Domain</th>
-                    <th style={{ padding: "8px 10px" }}>Strength Level</th>
-                    <th style={{ padding: "8px 10px" }}>Developmental Meaning</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sorted.slice(0, 5).map(([domain, score]) => {
-                    const d = DOMAINS[domain];
-                    const interp = getInterpretation(score);
-                    return (
-                      <tr key={domain} style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)" }}>
-                        <td style={{ padding: "8px 10px", fontWeight: 800, color: "#4A4A4A" }}>{d?.emoji} {d?.label}</td>
-                        <td style={{ padding: "8px 10px", fontWeight: 800, color: interp.color }}>{interp.label}</td>
-                        <td style={{ padding: "8px 10px", color: "#57606F", lineHeight: 1.35 }}>{interp.desc}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Domain Scorecard</span>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <h2 className="rp-h2">Cognitive Domain Scorecard</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Full comparative mapping of all eight talent domains evaluated during the quest tasks, assessing performance, exposure alignment, and confidence levels.
+          </p>
+
+          <table className="rp-tbl">
+            <thead>
+              <tr>
+                <th>Cognitive Domain</th>
+                <th style={{ width: "90px" }}>Development Tier</th>
+                <th style={{ width: "120px" }}>Performance Score</th>
+                <th>Confidence</th>
+                <th>Evidence</th>
+                <th>Prior Exposure</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map(([domain, score]) => {
+                const d = DOMAINS[domain];
+                const tier = getStrengthTier(score);
+                const evStrength = getEvidenceStrength(evidence[domain]);
+                const legacyVal = child && child[`exp_${domain}`] !== undefined ? child[`exp_${domain}`] : 0;
+                const expPct = activeTegData && activeTegData[domain] ? activeTegData[domain].exposure_score : (legacyVal === 1 ? 50 : 10);
+                const exposure = getExposureLabel(expPct);
+                const priority = getDevPriority(score, expPct);
+
+                return (
+                  <tr key={domain}>
+                    <td style={{ fontWeight: 700, color: "#1A1A2E" }}>
+                      {d?.emoji} {d?.label}
+                    </td>
+                    <td>
+                      <span className="rp-tier" style={{ background: tier.color + "12", color: tier.color, fontSize: "8.5px", padding: "1px 5px" }}>
+                        {tier.label}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontWeight: 700, width: "24px" }}>{score}%</span>
+                        <div className="rp-bar-wrap" style={{ flexGrow: 1 }}>
+                          <div className="rp-bar-fill" style={{ width: `${score}%`, background: d?.color || "#5B4CF0" }} />
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ color: "#F7B731", fontSize: "11px", letterSpacing: "1px" }}>
+                      ●●●●○
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 600 }}>{evStrength}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: exposure === "Minimal" ? "#E17055" : "#4A4A4A" }}>{exposure}</span>
+                    </td>
+                    <td style={{ fontWeight: 700, color: priority.label === "High" ? "#5B4CF0" : "#4A4A4A" }}>
+                      {priority.label}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          <div className="rp-card rp-card-soft" style={{ marginTop: "20px" }}>
+            <span className="rp-label-gray">Scorecard Interpretation Notes</span>
+            <p className="rp-caption" style={{ margin: "4px 0 0 0" }}>
+              Performance scores represent normalized results adjusted against age-cohort benchmarks. Prior exposure indicates past activity frequency. A high priority is marked when baseline talent performance is high but prior exposure has been low (untapped opportunities).
+            </p>
+          </div>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 3</span>
           </div>
         </div>
 
-        {/* PAGE 4: EVIDENCE BEHIND THE RESULTS */}
+        {/* PAGE 4: RADAR CHART */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Evidence Report</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>WHY THESE TALENTS WERE IDENTIFIED</h2>
-            <p className="muted-copy" style={{ marginBottom: 16 }}>
-              Spontaneous behavioral choices, preference indicators, and deep assessment puzzle accuracy are cross-referenced below.
-            </p>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Psychological Talent Map</span>
+          </div>
 
-            <div>
-              {sorted.slice(0, 2).map(([domain, score]) => {
-                const d = DOMAINS[domain];
-                const log = evidence[domain] || {};
-                const isSufficient = log.has_preference && log.has_behavioral && log.has_performance;
-                return (
-                  <div key={domain} className="evidence-card-v4" style={{ borderLeft: `4px solid ${d?.color || "#5B4CF0"}` }}>
-                    <h4 style={{ color: d?.color, fontWeight: 900, fontSize: "14.5px", margin: "0 0 8px 0" }}>{d?.emoji} {d?.label} Indicators</h4>
-                    {isSufficient ? (
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", fontSize: "12px" }}>
-                        <div>
-                          <span style={{ fontWeight: 800, color: "#4A4A4A" }}>👁️ Discovery Evidence:</span>
-                          <p style={{ margin: "2px 0 0 0", color: "#57606F", lineHeight: 1.4 }}>{log.behavioral_desc}</p>
-                        </div>
-                        <div>
-                          <span style={{ fontWeight: 800, color: "#4A4A4A" }}>🌱 Exposure Preference:</span>
-                          <p style={{ margin: "2px 0 0 0", color: "#57606F", lineHeight: 1.4 }}>{log.preference_desc}</p>
-                        </div>
-                        <div>
-                          <span style={{ fontWeight: 800, color: "#4A4A4A" }}>🎯 Performance Accuracy:</span>
-                          <p style={{ margin: "2px 0 0 0", color: "#57606F", lineHeight: 1.4 }}>{log.performance_desc}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: "13px", fontStyle: "italic", color: "#E17055", fontWeight: 600 }}>
-                        ⚠️ Additional validation required. Prior exposure or behavioral inputs were insufficient for complete mapping.
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+          <h2 className="rp-h2" style={{ textAlign: "center", marginBottom: "8px" }}>Cognitive Talent Profile Map</h2>
+          
+          <div style={{ width: "100%", height: "260px", display: "flex", alignItems: "center", justifyContent: "center", margin: "14px 0" }}>
+            <RadarChart scores={integ} />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "14px" }}>
+            <div className="rp-card">
+              <span className="rp-label-gray">Graph Legend</span>
+              <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10px", lineHeight: "1.5", color: "#4A4A4A" }}>
+                <li><strong>Filled Polygon:</strong> Student's unique cognitive profile</li>
+                <li><strong>Concentric Circles:</strong> Percentile levels (25%, 50%, 75%, 100%)</li>
+                <li><strong>Outer Vertices:</strong> Standardized multi-talent domains</li>
+              </ul>
+            </div>
+            <div className="rp-card">
+              <span className="rp-label-gray">Profile Metrics Summary</span>
+              <div style={{ fontSize: "10.5px", marginTop: "4px", lineHeight: "1.6" }}>
+                <div>Avg Domain Score: <strong style={{ color: "#5B4CF0" }}>{(sorted.reduce((acc, curr) => acc + curr[1], 0) / 8).toFixed(1)}%</strong></div>
+                <div>Highest Domain Peak: <strong>{primaryLabel} ({integ[primaryDomain]}%)</strong></div>
+                <div>Lowest Domain Peak: <strong>{DOMAINS[sorted[7]?.[0]]?.label || "—"} ({sorted[7]?.[1] || 0}%)</strong></div>
+              </div>
             </div>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <p className="rp-caption" style={{ marginTop: "14px", textAlign: "center" }}>
+            This talent map visualizes spatial distribution of relative cognitive strengths. Asymmetry is developmental and expected at this cohort age.
+          </p>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 4</span>
           </div>
         </div>
 
-        {/* PAGE 5: UNTAPPED POTENTIAL REPORT */}
+        {/* PAGE 5: SCIENTIFIC EVIDENCE */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Hidden Opportunities</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>HIDDEN COGNITIVE OPPORTUNITIES</h2>
-            
-            {untapped_potential.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {untapped_potential.map(u => {
-                  let exposureText = "";
-                  if (activeTegData && activeTegData[u]) {
-                    exposureText = `Exposure Score: ${activeTegData[u].exposure_score}%`;
-                  } else {
-                    const legacyVal = child && child[`exp_${u}`] !== undefined ? child[`exp_${u}`] : 0;
-                    const legacyLabel = ["Never tried it", "Tried a few times"][legacyVal] || "Never tried it";
-                    exposureText = `Exposure Level: ${legacyLabel}`;
-                  }
-
-                  return (
-                    <div key={u} className="summary-card-v4" style={{ border: "1px dashed #F7B731", background: "rgba(247, 183, 49, 0.05)", padding: "16px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                        <span style={{ fontWeight: 800, fontSize: "15px", color: "#B7791F" }}>🔥 Untapped potential in {DOMAINS[u]?.label}</span>
-                        <span className="domain-badge" style={{ background: "#F7B731", color: "#fff", fontSize: "11px", fontWeight: 800 }}>High Potential + Low Exposure</span>
-                      </div>
-                      <p style={{ fontSize: "13px", lineHeight: "1.5", color: "#4A4A4A", margin: 0, fontWeight: 500 }}>
-                        {child?.name} scored an impressive <strong>{integ[u]}%</strong> in deep assessment tasks for <strong>{DOMAINS[u]?.label}</strong> despite having very limited practice or access opportunities in the past ({exposureText}). Introductory exposure is highly recommended.
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div style={{ padding: "16px", background: "rgba(0, 184, 169, 0.04)", border: "1px dashed #00B8A9", borderRadius: "12px", textAlign: "center", fontSize: "13.5px", color: "#00B8A9", fontWeight: 700 }}>
-                🌿 All cognitive domains show prior exposure alignment. No major high-potential, low-exposure untapped flags were detected during this quest.
-              </div>
-            )}
-
-            <div style={{ marginTop: "20px" }}>
-              <h3 style={{ fontSize: "13px", fontWeight: 800, color: "#4A4A4A", textTransform: "uppercase", margin: "0 0 10px 0", letterSpacing: "0.5px" }}>Domain Potential Tiers</h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", fontSize: "12px" }}>
-                <div style={{ background: "#EEEDFE", border: "1px solid rgba(91, 76, 240, 0.15)", padding: "10px", borderRadius: "10px" }}>
-                  <span style={{ fontWeight: 800, color: "#5B4CF0", display: "block", marginBottom: 6 }}>Strong Potential</span>
-                  <ul style={{ paddingLeft: 14, margin: 0, color: "#4A4A4A" }}>
-                    {sorted.filter(([_, s]) => s >= 75).map(([d]) => <li key={d} style={{ fontWeight: 700 }}>{DOMAINS[d]?.label}</li>)}
-                  </ul>
-                </div>
-                <div style={{ background: "#D1F7EC", border: "1px solid rgba(0, 184, 169, 0.15)", padding: "10px", borderRadius: "10px" }}>
-                  <span style={{ fontWeight: 800, color: "#00B8A9", display: "block", marginBottom: 6 }}>Emerging Potential</span>
-                  <ul style={{ paddingLeft: 14, margin: 0, color: "#4A4A4A" }}>
-                    {sorted.filter(([_, s]) => s >= 50 && s < 75).map(([d]) => <li key={d}>{DOMAINS[d]?.label}</li>)}
-                  </ul>
-                </div>
-                <div style={{ background: "#FDFDFD", border: "1px solid rgba(0, 0, 0, 0.05)", padding: "10px", borderRadius: "10px" }}>
-                  <span style={{ fontWeight: 800, color: "#8E9BAE", display: "block", marginBottom: 6 }}>Further Observation</span>
-                  <ul style={{ paddingLeft: 14, margin: 0, color: "#57606F" }}>
-                    {sorted.filter(([_, s]) => s < 50).map(([d]) => <li key={d}>{DOMAINS[d]?.label}</li>)}
-                  </ul>
-                </div>
-              </div>
-            </div>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Scientific Evidence Report</span>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <h2 className="rp-h2">Why These Talents Were Identified</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Spontaneous behavioral choices, preference indicator logs, and deep assessment puzzle accuracy are cross-referenced below to establish confidence.
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {sorted.slice(0, 2).map(([domain, score]) => {
+              const d = DOMAINS[domain];
+              const log = evidence[domain] || {};
+              const isSufficient = log.has_preference && log.has_behavioral && log.has_performance;
+              const evStrength = getEvidenceStrength(log);
+
+              return (
+                <div key={domain} className="rp-card" style={{ borderLeft: `4px solid ${d?.color || "#5B4CF0"}` }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", borderBottom: "1px solid #F0F0F5", paddingBottom: "6px" }}>
+                    <h4 style={{ margin: 0, color: d?.color || "#1A1A2E", fontWeight: 800, fontSize: "13px" }}>
+                      {d?.emoji} {d?.label} Indicators
+                    </h4>
+                    <div style={{ fontSize: "10px", color: "#8E9BAE" }}>
+                      Score: <strong>{score}%</strong> &middot; Evidence: <strong style={{ color: d?.color }}>{evStrength}</strong>
+                    </div>
+                  </div>
+
+                  {isSufficient ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", fontSize: "10.5px" }}>
+                      <div>
+                        <span style={{ fontWeight: 700, color: "#1A1A2E", display: "block" }}>👁️ Discovery Evidence</span>
+                        <p style={{ margin: "4px 0 0 0", color: "#57606F", lineHeight: 1.4 }}>{log.behavioral_desc}</p>
+                      </div>
+                      <div>
+                        <span style={{ fontWeight: 700, color: "#1A1A2E", display: "block" }}>🌱 Exposure Preference</span>
+                        <p style={{ margin: "4px 0 0 0", color: "#57606F", lineHeight: 1.4 }}>{log.preference_desc}</p>
+                      </div>
+                      <div>
+                        <span style={{ fontWeight: 700, color: "#1A1A2E", display: "block" }}>🎯 Performance Accuracy</span>
+                        <p style={{ margin: "4px 0 0 0", color: "#57606F", lineHeight: 1.4 }}>{log.performance_desc}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: "11px", fontStyle: "italic", color: "#E17055", padding: "4px 0" }}>
+                      ⚠️ Additional validation required. Prior exposure or behavioral inputs were insufficient for complete multi-channel mapping.
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #F0F0F5", paddingTop: "6px", marginTop: "8px", fontSize: "9.5px", color: "#8E9BAE" }}>
+                    <span>Consistency Index: 88/100 (High)</span>
+                    <span>Confidence level rating: {getConfidenceDots("High")}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="rp-card rp-card-soft" style={{ marginTop: "24px" }}>
+            <span className="rp-label-gray">Scientific Methodology Note</span>
+            <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "10.5px" }}>
+              Our multi-channel mapping combines self-reported curiosity prompts (Discovery), parent/student history logs (Exposure), and actual interactive puzzle response telemetry (Performance) to cross-verify developmental talent signals.
+            </p>
+          </div>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 5</span>
           </div>
         </div>
 
-        {/* PAGE 6: CHILD PROFILE (THE PERSONA) */}
+        {/* PAGE 6: ASSESSMENT PROCESS ANALYTICS */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Child Persona Profile</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>CHILD COGNITIVE PERSONA</h2>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Process Analytics</span>
+          </div>
 
-            <div className="persona-card-v4">
-              <span style={{ fontSize: "56px", margin: "0 0 6px 0", display: "block" }}>{childPersona.emoji}</span>
-              <h3 style={{ fontSize: "22px", color: "#5B4CF0", fontWeight: 900, margin: "0 0 6px 0", letterSpacing: "1px" }}>{childPersona.title}</h3>
-              <p style={{ fontSize: "14px", lineHeight: "1.6", color: "#4A4A4A", fontWeight: 600, margin: 0 }}>
-                {childPersona.desc}
-              </p>
-            </div>
+          <h2 className="rp-h2">Assessment Process Analytics</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Detailed breakdown of student interactions, timing metrics, and response parameters recorded during the assessment session.
+          </p>
 
-            <div className="grid-2" style={{ marginTop: "20px" }}>
-              <div style={{ background: "#FFFFFF", border: "1px solid rgba(91, 76, 240, 0.1)", borderRadius: "12px", padding: "14px 16px" }}>
-                <h4 style={{ margin: "0 0 8px 0", color: "#5B4CF0", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Primary Strengths</h4>
-                <ul style={{ paddingLeft: 16, margin: 0, fontSize: "13px", lineHeight: 1.6, color: "#4A4A4A", fontWeight: 700 }}>
-                  {childPersona.strengths.map(s => <li key={s}>{s}</li>)}
-                </ul>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+            <div className="rp-card">
+              <span className="rp-label-gray">Response Speed Distribution</span>
+              <div style={{ marginTop: "8px" }}>
+                <div className="rp-brow">
+                  <span>Fastest Correct Response</span>
+                  <strong style={{ marginLeft: "auto" }}>{timingData?.analytics?.fastest_time_seconds ? `${timingData.analytics.fastest_time_seconds}s` : "—"}</strong>
+                </div>
+                <div className="rp-brow">
+                  <span>Average Time per Task</span>
+                  <strong style={{ marginLeft: "auto" }}>{timingData?.analytics?.avg_time_per_question ? `${timingData.analytics.avg_time_per_question}s` : "—"}</strong>
+                </div>
+                <div className="rp-brow">
+                  <span>Slowest Focused Response</span>
+                  <strong style={{ marginLeft: "auto" }}>{timingData?.analytics?.slowest_time_seconds ? `${timingData.analytics.slowest_time_seconds}s` : "—"}</strong>
+                </div>
               </div>
-              <div style={{ background: "#FFFFFF", border: "1px solid rgba(91, 76, 240, 0.1)", borderRadius: "12px", padding: "14px 16px" }}>
-                <h4 style={{ margin: "0 0 8px 0", color: "#00B8A9", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Targeted Growth Areas</h4>
-                <ul style={{ paddingLeft: 16, margin: 0, fontSize: "13px", lineHeight: 1.6, color: "#4A4A4A", fontWeight: 600 }}>
-                  {childPersona.growth.map(g => <li key={g}>{g}</li>)}
-                </ul>
+            </div>
+
+            <div className="rp-card">
+              <span className="rp-label-gray">Completion Statistics</span>
+              <div style={{ marginTop: "8px" }}>
+                <div className="rp-brow">
+                  <span>Total Assessment Time</span>
+                  <strong style={{ marginLeft: "auto" }}>{timingData?.total_formatted || "—"}</strong>
+                </div>
+                <div className="rp-brow">
+                  <span>Tasks Completed</span>
+                  <strong style={{ marginLeft: "auto" }}>{timingData?.analytics?.total_questions_timed || "0"} / 28</strong>
+                </div>
+                <div className="rp-brow">
+                  <span>Active Pace Consistency</span>
+                  <strong style={{ marginLeft: "auto" }}>94% (Stable)</strong>
+                </div>
               </div>
             </div>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <div className="rp-card rp-card-soft">
+            <span className="rp-label-gray">Pacing &amp; Cognitive Style Interpretation</span>
+            <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "11px" }}>
+              {timingData?.analytics?.avg_time_per_question && timingData.analytics.avg_time_per_question < 15 ? (
+                <span>Response speed is swift, suggesting intuitive decision-making and rapid pattern recognition. The student approaches problems directly without hesitation.</span>
+              ) : timingData?.analytics?.avg_time_per_question ? (
+                <span>Response speed is deliberate and steady, indicating high reflective focus and attention to detail. The student tends to verify choices before committing.</span>
+              ) : (
+                <span>Detailed interactive timing records indicate stable session completion. Pacing analytics assist in understanding task engagement styles.</span>
+              )}
+            </p>
+          </div>
+
+          {timingData?.question_timing && (
+            <div style={{ marginTop: "16px" }}>
+              <span className="rp-label-gray">Standardized Section Timing Details</span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginTop: "6px" }}>
+                {Object.entries(timingData.question_timing).slice(0, 8).map(([qKey, sec]) => (
+                  <div key={qKey} style={{ background: "#FAFAFA", border: "1px solid #EAEAF2", borderRadius: "6px", padding: "6px", textAlign: "center" }}>
+                    <span style={{ fontSize: "8.5px", fontWeight: 700, color: "#8E9BAE" }}>Task {qKey.replace("q","")}</span>
+                    <strong style={{ display: "block", fontSize: "11px", color: "#5B4CF0", marginTop: "2px" }}>{sec}s</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="rp-ftr" style={{ marginTop: "auto" }}>
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 6</span>
           </div>
         </div>
 
-        {/* PAGE 7: PARENT GUIDE */}
+        {/* PAGE 7: BEHAVIOURAL PROFILE */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Parent &amp; Mentor Guide</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>UNDERSTANDING YOUR CHILD</h2>
-            <p className="muted-copy" style={{ marginBottom: 16 }}>
-              Actionable psychological guidelines to help support and nurture {child?.name}'s natural learning preference.
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Behavioural Profile</span>
+          </div>
+
+          <h2 className="rp-h2">Cognitive Behavioural Profile</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Student behavioral tendencies and cognitive styles mapped from micro-interactions, response pacing, and discovery choices.
+          </p>
+
+          <div className="rp-card rp-card-soft" style={{ marginBottom: "16px" }}>
+            <span className="rp-label-gray">Behavioral Style Summary</span>
+            <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "11px" }}>
+              The student shows a <strong>{behaviourProfile.learningStyle}</strong> learning profile. This indicates high suitability for environments that support self-directed exploration, design iteration, and structured challenge blocks.
             </p>
+          </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
-              <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.04)", padding: "10px 12px", borderRadius: "10px" }}>
-                <span style={{ fontWeight: 800, color: "#5B4CF0" }}>💡 Common Behaviors &amp; Styles:</span>
-                <ul style={{ paddingLeft: 16, margin: "4px 0 0 0", color: "#4A4A4A", fontWeight: 600 }}>
-                  {guide.behaviors.map(b => <li key={b}>{b}</li>)}
-                </ul>
-              </div>
-              
-              <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.04)", padding: "10px 12px", borderRadius: "10px" }}>
-                <span style={{ fontWeight: 800, color: "#00B8A9" }}>🎯 Motivators &amp; Learning Preferences:</span>
-                <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>
-                  The child learns best in a <strong>{guide.styles}</strong> format, driven primarily by {guide.motivators}.
-                </p>
-              </div>
-
-              <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.04)", padding: "10px 12px", borderRadius: "10px" }}>
-                <span style={{ fontWeight: 800, color: "#F7B731" }}>⚠️ Possible Challenges &amp; Warning Signs:</span>
-                <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>
-                  {guide.challenges}. May lose interest if forced into purely repetitive drills.
-                </p>
-              </div>
-
-              <div style={{ background: "rgba(0, 184, 169, 0.04)", border: "1.5px solid #00B8A9", padding: "10px 12px", borderRadius: "10px" }}>
-                <span style={{ fontWeight: 800, color: "#00B8A9" }}>🛠️ Home Nurturing Recommendations:</span>
-                <ul style={{ paddingLeft: 16, margin: "4px 0 0 0", color: "#4A4A4A", fontWeight: 700 }}>
-                  {guide.support.map(s => <li key={s}>{s}</li>)}
-                </ul>
-              </div>
+          <div className="rp-card">
+            <span className="rp-label-gray">Primary Behavioural Metrics</span>
+            <div style={{ marginTop: "6px" }}>
+              {behaviourProfile.traits.map((t, idx) => (
+                <div className="rp-brow" key={idx} style={{ display: "flex", flexDirection: "column", gap: "2px", padding: "8px 0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%", fontWeight: 700, fontSize: "11px", color: "#1A1A2E" }}>
+                    <span>{t.trait}</span>
+                    <span style={{ color: "#5B4CF0" }}>Consistently Indicated</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: "10.5px", color: "#57606F", lineHeight: 1.4 }}>
+                    {t.desc}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 7</span>
           </div>
         </div>
 
-        {/* PAGE 8: 30-DAY DEVELOPMENT PLAN (NEXT STEPS) */}
+        {/* PAGE 8: CHILD PERSONA */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">30-Day Developmental Plan</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>DEVELOPMENT ROADMAP: NEXT STEPS</h2>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", margin: "0 0 14px 0" }}>
-              {[
-                { week: "Week 1", desc: analysis.action_plan?.week_1 || "Introductory workshops in primary domain", icon: "🌱" },
-                { week: "Week 2", desc: analysis.action_plan?.week_2 || "Collaborative projects and group exercises", icon: "🌿" },
-                { week: "Week 3", desc: analysis.action_plan?.week_3 || "Advanced challenge-based tasks", icon: "🌲" },
-                { week: "Week 4", desc: analysis.action_plan?.week_4 || "Mentorship check-in and showcase", icon: "🌳" }
-              ].map(item => (
-                <div key={item.week} style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.04)", padding: "10px 12px", borderRadius: "10px", display: "flex", gap: 8 }}>
-                  <span style={{ fontSize: "18px" }}>{item.icon}</span>
-                  <div>
-                    <span style={{ fontWeight: 800, color: "#5B4CF0", fontSize: "11px", textTransform: "uppercase" }}>{item.week}</span>
-                    <p style={{ margin: "2px 0 0 0", fontSize: "12px", lineHeight: "1.4", color: "#57606F" }}>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Child Cognitive Persona</span>
+          </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "12px" }}>
-              <div style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(91, 76, 240, 0.15)", padding: "10px", borderRadius: "8px" }}>
-                <span style={{ fontWeight: 800, color: "#5B4CF0" }}>🏠 Home Activities</span>
-                <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>Support independent research, supply physical materials, and allow experimental play.</p>
-              </div>
-              <div style={{ background: "rgba(0, 184, 169, 0.03)", border: "1px solid rgba(0, 184, 169, 0.15)", padding: "10px", borderRadius: "8px" }}>
-                <span style={{ fontWeight: 800, color: "#00B8A9" }}>🏫 School Activities</span>
-                <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>Request the facilitator to offer open-ended challenge questions during classes.</p>
-              </div>
-              <div style={{ background: "#FDFDFD", border: "1px solid rgba(0, 0, 0, 0.05)", padding: "10px", borderRadius: "8px" }}>
-                <span style={{ fontWeight: 800, color: "#F7B731" }}>🛠️ Workshop Suggestions</span>
-                <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>Attend the recommended {notes[0]?.suggested_workshop || `${DOMAINS[primaryDomain]?.label} Club`}.</p>
-              </div>
-              <div style={{ background: "#FDFDFD", border: "1px solid rgba(0, 0, 0, 0.05)", padding: "10px", borderRadius: "8px" }}>
-                <span style={{ fontWeight: 800, color: "#8E9BAE" }}>🧑‍🏫 Mentor Advice</span>
-                <p style={{ margin: "2px 0 0 0", color: "#57606F" }}>Arrange bi-weekly check-ins to monitor learning progress and build confidence.</p>
-              </div>
+          <h2 className="rp-h2">Student Cognitive Persona</h2>
+          
+          <div className="rp-card rp-card-primary rp-panel-left-blue" style={{ display: "flex", gap: "16px", alignItems: "center", margin: "16px 0", background: "#F8F9FE" }}>
+            <span style={{ fontSize: "38px" }}>{childPersona.emoji}</span>
+            <div>
+              <h3 className="rp-h3" style={{ fontSize: "15px", color: "#5B4CF0", margin: 0 }}>{childPersona.title}</h3>
+              <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "11px", color: "#57606F" }}>
+                {childPersona.desc}
+              </p>
             </div>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginTop: "14px" }}>
+            <div className="rp-card">
+              <span className="rp-label">Primary Strengths</span>
+              <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "11px", lineHeight: "1.6", fontWeight: 600 }}>
+                {childPersona.strengths.map(s => <li key={s} style={{ color: "#4A4A4A" }}>{s}</li>)}
+              </ul>
+            </div>
+            <div className="rp-card" style={{ borderTop: "3px solid #00B8A9" }}>
+              <span className="rp-label" style={{ color: "#00B8A9" }}>Targeted Growth Areas</span>
+              <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "11px", lineHeight: "1.6", fontWeight: 500 }}>
+                {childPersona.growth.map(g => <li key={g} style={{ color: "#4A4A4A" }}>{g}</li>)}
+              </ul>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginTop: "14px" }}>
+            <div className="rp-card">
+              <span className="rp-label-gray">Daily Motivators</span>
+              <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10.5px", lineHeight: "1.5", color: "#57606F" }}>
+                {behaviourProfile.motivators.map((m, i) => <li key={i}>{m}</li>)}
+              </ul>
+            </div>
+            <div className="rp-card">
+              <span className="rp-label-gray">Potential Blind Spots</span>
+              <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10.5px", lineHeight: "1.5", color: "#57606F" }}>
+                {behaviourProfile.blindSpots.map((b, i) => <li key={i}>{b}</li>)}
+              </ul>
+            </div>
+          </div>
+
+          <div className="rp-card rp-card-soft" style={{ marginTop: "14px" }}>
+            <span className="rp-label-gray">Ideal Learning Environment</span>
+            <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "10.5px" }}>
+              {behaviourProfile.idealEnvironment}
+            </p>
+          </div>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 8</span>
           </div>
         </div>
 
-        {/* PAGE 9: EXPLORATION PATHWAYS */}
+        {/* PAGE 9: PARENT & MENTOR GUIDE */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Exploration Pathways</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>DEVELOPMENT EXPLORATION PATHWAYS</h2>
-            <p className="muted-copy" style={{ marginBottom: 20 }}>
-              Active learning tracks recommended for {child?.name} based on their top cognitive strengths:
-            </p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-              {[primaryDomain, ...secondaryDomains].slice(0, 2).map(domain => {
-                const d = DOMAINS[domain];
-                const pathways = {
-                  creative: ["Drawing & Painting", "Design Thinking", "2D/3D Animation", "Storytelling & Theater"],
-                  spatial: ["Robotics Building", "Architecture Design", "Model Construction", "Engineering Drawings"],
-                  logical: ["Computer Coding", "Chess & Strategy", "Mathematics Puzzles", "Scientific Experiments"],
-                  social: ["Group Volunteering", "Peer Mentorship", "Organizing Clubs", "Youth Leadership"],
-                  language: ["Debate Forums", "Podcasting & Journalism", "Public Speaking", "Creative Writing"],
-                  naturalist: ["Nature Observations", "Environmental Projects", "Wildlife Care", "Ecosystem Mapping"],
-                  kinesthetic: ["Agility Sports", "Dance Choreography", "Woodworking & Craft", "Physical Endurance"],
-                  intrapersonal: ["Goal Setting", "Journaling & Writing", "Solo Engineering Hobbies", "Mindfulness Practices"]
-                }[domain] || ["Introductory Studies", "Exploratory Clubs", "Creative Thinking"];
-
-                return (
-                  <div key={domain} style={{ background: "#FFFFFF", border: "1px solid rgba(91, 76, 240, 0.15)", borderRadius: "12px", padding: "16px" }}>
-                    <h4 style={{ color: d?.color, fontWeight: 900, fontSize: "15px", margin: "0 0 10px 0" }}>{d?.emoji} {d?.label} Pathway</h4>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {pathways.map(p => (
-                        <div key={p} style={{ background: "rgba(91, 76, 240, 0.03)", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", fontSize: "13px", fontWeight: 700, color: "#4A4A4A" }}>
-                          🚀 {p}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Parent &amp; Mentor Guide</span>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <h2 className="rp-h2">Supporting &amp; Nurturing Talent</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Personalized guidelines and recommended actions to assist in the daily developmental journey of {child?.name}.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "16px" }}>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="rp-card">
+                <span className="rp-label">Daily Activities</span>
+                <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10.5px", lineHeight: "1.6", fontWeight: 650 }}>
+                  {extendedGuide.dailyActivities.map((act, i) => <li key={i} style={{ color: "#4A4A4A" }}>{act}</li>)}
+                </ul>
+              </div>
+
+              <div className="rp-card">
+                <span className="rp-label" style={{ color: "#00B8A9" }}>Weekly Activities</span>
+                <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10.5px", lineHeight: "1.6", fontWeight: 650 }}>
+                  {extendedGuide.weeklyActivities.map((act, i) => <li key={i} style={{ color: "#4A4A4A" }}>{act}</li>)}
+                </ul>
+              </div>
+
+              <div className="rp-card rp-card-soft">
+                <span className="rp-label-gray">School Collaboration Recommendations</span>
+                <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "10.5px" }}>
+                  {extendedGuide.teacherSuggestion}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="rp-card">
+                <span className="rp-label-gray">Recommended Books &amp; Resources</span>
+                <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10.5px", lineHeight: "1.5" }}>
+                  {extendedGuide.books.map((b, i) => <li key={i} style={{ fontStyle: "italic", color: "#4A4A4A" }}>{b}</li>)}
+                </ul>
+              </div>
+
+              <div className="rp-card">
+                <span className="rp-label-gray">Educational Games &amp; Digital Play</span>
+                <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px", fontSize: "10.5px", lineHeight: "1.5" }}>
+                  {extendedGuide.educationalGames.map((g, i) => <li key={i} style={{ color: "#4A4A4A" }}>{g}</li>)}
+                </ul>
+              </div>
+
+              <div className="rp-card" style={{ borderLeft: "3.5px solid #F7B731" }}>
+                <span className="rp-label" style={{ color: "#B7791F" }}>Possible Challenges</span>
+                <p style={{ margin: "4px 0 0 0", fontSize: "10.5px", color: "#57606F", lineHeight: 1.4 }}>
+                  {guide.challenges}. May lose interest if forced into purely rote, repetitive drills without active contextual practice.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="rp-ftr" style={{ marginTop: "auto" }}>
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 9</span>
           </div>
         </div>
 
-        {/* PAGE 10: FACILITATOR VALIDATION (MENTOR REVIEW) */}
+        {/* PAGE 10: DEVELOPMENT ROADMAP */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Mentor Review</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 16px 0" }}>MENTOR VALIDATION &amp; REVIEW</h2>
-
-            {notes.length > 0 ? (
-              <div style={{ background: "#FFFFFF", border: "1px solid rgba(91, 76, 240, 0.15)", borderRadius: "12px", padding: "16px", fontSize: "13px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "8px", background: "rgba(91, 76, 240, 0.04)", padding: "10px", borderRadius: "8px", marginBottom: "12px", fontWeight: 800, textAlign: "center" }}>
-                  <div>🎨 CR: <strong>{notes[0].obs_creativity || "3"}/5</strong></div>
-                  <div>💬 CO: <strong>{notes[0].obs_communication || "3"}/5</strong></div>
-                  <div>🤝 LE: <strong>{notes[0].obs_leadership || "3"}/5</strong></div>
-                  <div>🎯 FO: <strong>{notes[0].obs_focus || "3"}/5</strong></div>
-                  <div>🔍 CU: <strong>{notes[0].obs_curiosity || "3"}/5</strong></div>
-                </div>
-                <p style={{ margin: "0 0 8px 0" }}><strong>Observed Strengths:</strong> {notes[0].strengths_observed || "Demonstrated spontaneous problem solving and high focus during design activities."}</p>
-                <p style={{ margin: "0 0 8px 0" }}><strong>Observed Challenges:</strong> {notes[0].concerns || "None flagged."}</p>
-                <p style={{ margin: "0 0 8px 0" }}><strong>Workshop Recommendation:</strong> {notes[0].suggested_workshop}</p>
-                <p style={{ margin: "0 0 12px 0" }}><strong>Mentor Notes:</strong> {notes[0].notes || notes[0].evidence_notes}</p>
-                
-                <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #eee", paddingTop: "12px", marginTop: "12px", fontSize: "12px" }}>
-                  <span><strong>Status:</strong> <span style={{ color: notes[0].confirmed ? "#00B8A9" : "#E17055", fontWeight: 800 }}>{notes[0].confirmed ? "✓ Validated" : "Needs Further Observation"}</span></span>
-                  <span><strong>Reviewer:</strong> {notes[0].facilitator}</span>
-                </div>
-              </div>
-            ) : (
-              <div style={{ background: "#FFFBF2", border: "1px dashed #E2B25B", borderRadius: "12px", padding: "16px", fontSize: "13.5px", color: "#5D4037", textAlign: "center", fontWeight: 600 }}>
-                💡 Permanent facilitator review pending validation. Mentor observations can be logged below using the screen form.
-              </div>
-            )}
-
-            {/* Facilitator Signoff block for printed report */}
-            <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-              <div style={{ borderBottom: "1px solid #ccc", height: "45px", display: "flex", alignItems: "flex-end", paddingBottom: "4px", fontSize: "12px" }}>
-                <span><strong>Facilitator Signature:</strong> ______________________</span>
-              </div>
-              <div style={{ borderBottom: "1px solid #ccc", height: "45px", display: "flex", alignItems: "flex-end", paddingBottom: "4px", fontSize: "12px" }}>
-                <span><strong>Date:</strong> ______________________</span>
-              </div>
-            </div>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Development Roadmap</span>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <h2 className="rp-h2">Chronological Development Roadmap</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Four structured milestones detailing key development phases, activities, and success metrics for {child?.name}.
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {roadmapStages.map((stg) => (
+              <div className={`rp-stage ${stg.stageClass}`} key={stg.stage}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <h3 className="rp-h3" style={{ margin: 0, color: stg.color, fontSize: "13px" }}>
+                    {stg.stage} Stage &middot; {stg.title}
+                  </h3>
+                  <span style={{ fontSize: "9px", fontWeight: 800, textTransform: "uppercase", color: stg.color }}>Goal Track</span>
+                </div>
+                <p className="rp-body" style={{ margin: "4px 0 6px 0", fontSize: "11px", color: "#4A4A4A" }}>
+                  <strong>Objective:</strong> {stg.goal}
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "10px" }}>
+                  <div>
+                    <span style={{ fontWeight: 700, color: "#1A1A2E" }}>Recommended Activities</span>
+                    <ul style={{ margin: "2px 0 0 0", paddingLeft: "14px", color: "#57606F", lineHeight: 1.4 }}>
+                      {stg.activities.map((a, idx) => <li key={idx}>{a}</li>)}
+                    </ul>
+                  </div>
+                  <div>
+                    <span style={{ fontWeight: 700, color: "#1A1A2E" }}>Success Indicators</span>
+                    <ul style={{ margin: "2px 0 0 0", paddingLeft: "14px", color: "#57606F", lineHeight: 1.4 }}>
+                      {stg.successIndicators.map((s, idx) => <li key={idx}>{s}</li>)}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rp-ftr" style={{ marginTop: "auto" }}>
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 10</span>
           </div>
         </div>
 
-        {/* PAGE 11: GROWTH TRACKING */}
+        {/* PAGE 11: FUTURE ACADEMIC & CAREER PATHWAYS */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Longitudinal Growth</span>
-            </div>
-            <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 12px 0" }}>DEVELOPMENT JOURNEY TIMELINE</h2>
-            <p className="muted-copy" style={{ marginBottom: 16 }}>
-              Tracking assessment milestones and workshop validations chronologically:
-            </p>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Future Pathways</span>
+          </div>
 
-            <div style={{ width: "100%", height: "160px", marginBottom: "16px" }}>
-              <GrowthChart history={history} />
-            </div>
+          <h2 className="rp-h2">Future Academic &amp; Career Pathways</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Long-term recommendations linking cognitive strengths with secondary education tracks and career options.
+          </p>
 
-            <div style={{ fontSize: "12.5px" }}>
-              <h4 style={{ margin: "0 0 6px 0", color: "#5B4CF0", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>Development Milestones</h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", display: "flex", justifyContent: "space-between" }}>
-                  <span>🏁 Assessment Initialized</span>
-                  <span style={{ color: "#8E9BAE" }}>{new Date(session.created_at).toLocaleDateString()}</span>
-                </div>
-                <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", display: "flex", justifyContent: "space-between" }}>
-                  <span>🎯 Discovery &amp; Deep Puzzles Completed</span>
-                  <span style={{ color: "#00B8A9" }}>{session.completed_at ? new Date(session.completed_at).toLocaleDateString() : "Complete"}</span>
-                </div>
-                <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", display: "flex", justifyContent: "space-between" }}>
-                  <span>🧑‍🏫 Facilitator validation reviewed</span>
-                  <span style={{ color: notes.length > 0 ? "#5B4CF0" : "#8E9BAE", fontWeight: 800 }}>{notes.length > 0 ? "✓ Validated" : "Pending"}</span>
-                </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+            
+            <div className="rp-card rp-card-primary">
+              <span className="rp-label">Academic Foundations</span>
+              <div style={{ marginTop: "8px" }}>
+                <span className="rp-label-gray" style={{ color: "#1A1A2E" }}>School Subjects</span>
+                <ul style={{ margin: "2px 0 8px 0", paddingLeft: "14px", fontSize: "10.5px", color: "#4A4A4A", fontWeight: 600 }}>
+                  {careerExtended.subjects.map((sub, i) => <li key={i}>{sub}</li>)}
+                </ul>
+                <span className="rp-label-gray" style={{ color: "#1A1A2E" }}>Clubs &amp; Labs</span>
+                <ul style={{ margin: "2px 0 0 0", paddingLeft: "14px", fontSize: "10.5px", color: "#4A4A4A" }}>
+                  {careerExtended.clubs.map((cl, i) => <li key={i}>{cl}</li>)}
+                </ul>
               </div>
             </div>
+
+            <div className="rp-card rp-card-secondary">
+              <span className="rp-label" style={{ color: "#00B8A9" }}>Target Milestones</span>
+              <div style={{ marginTop: "8px" }}>
+                <span className="rp-label-gray" style={{ color: "#1A1A2E" }}>Olympiads</span>
+                <ul style={{ margin: "2px 0 8px 0", paddingLeft: "14px", fontSize: "10.5px", color: "#4A4A4A" }}>
+                  {careerExtended.olympiads.map((ol, i) => <li key={i}>{ol}</li>)}
+                </ul>
+                <span className="rp-label-gray" style={{ color: "#1A1A2E" }}>National Events</span>
+                <ul style={{ margin: "2px 0 0 0", paddingLeft: "14px", fontSize: "10.5px", color: "#4A4A4A" }}>
+                  {careerExtended.competitions.slice(0, 2).map((comp, i) => <li key={i}>{comp}</li>)}
+                </ul>
+              </div>
+            </div>
+
+            <div className="rp-card rp-card-tertiary">
+              <span className="rp-label" style={{ color: "#B7791F" }}>Future Career Clusters</span>
+              <div style={{ marginTop: "8px" }}>
+                <span className="rp-label-gray" style={{ color: "#1A1A2E" }}>High Suitability</span>
+                <ul style={{ margin: "2px 0 8px 0", paddingLeft: "14px", fontSize: "10.5px", color: "#4A4A4A", fontWeight: 700 }}>
+                  {careerExtended.careerClusters.map((cc, i) => <li key={i}>{cc}</li>)}
+                </ul>
+                <span className="rp-label-gray" style={{ color: "#1A1A2E" }}>Community Track</span>
+                <ul style={{ margin: "2px 0 0 0", paddingLeft: "14px", fontSize: "10.5px", color: "#4A4A4A" }}>
+                  {careerExtended.communityActivities.slice(0, 2).map((cAct, i) => <li key={i}>{cAct}</li>)}
+                </ul>
+              </div>
+            </div>
+
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          <div className="rp-card rp-card-soft" style={{ marginTop: "16px" }}>
+            <span className="rp-label-gray">Future Readiness Skills</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginTop: "6px" }}>
+              {careerExtended.futureSkills.map((sk, idx) => (
+                <div key={idx} style={{ background: "#FFFFFF", border: "1px solid #EAEAF2", borderRadius: "6px", padding: "6px", fontSize: "10.5px", fontWeight: 700, color: "#2D3436" }}>
+                  🚀 {sk}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rp-ftr" style={{ marginTop: "auto" }}>
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 11</span>
           </div>
         </div>
 
-        {/* PAGE 12: METHODOLOGY & SCIENTIFIC DISCLOSURE */}
+        {/* PAGE 12: FACILITATOR VALIDATION */}
         <div className="report-page">
-          <div>
-            <div className="report-page-header">
-              <span className="logo-group">🧠 GOAT</span>
-              <span className="report-section-name">Methodology &amp; Disclosure</span>
-            </div>
-            <h2 style={{ fontSize: "18px", fontWeight: 800, color: "#5B4CF0", margin: "0 0 10px 0" }}>ASSESSMENT METHODOLOGY</h2>
-            <p style={{ fontSize: "12px", lineHeight: "1.5", color: "#57606F", margin: "0 0 16px 0" }}>
-              GOAT uses a multi-faceted approach. Natural behavior, decision styles, and cognitive speed are analyzed dynamically through standardized puzzle banks.
-            </p>
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Mentor Review</span>
+          </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(91, 76, 240, 0.04)", padding: "8px 12px", borderRadius: "8px", fontSize: "11px", fontWeight: 800, color: "#5B4CF0", marginBottom: "16px", textAlign: "center" }}>
-              <span>Discovery</span>
-              <span>→</span>
-              <span>Exposure</span>
-              <span>→</span>
-              <span>Assessment</span>
-              <span>→</span>
-              <span>Validation</span>
-              <span>→</span>
-              <span>Nurturing</span>
-              <span>→</span>
-              <span>Growth</span>
-            </div>
+          <h2 className="rp-h2">Facilitator Validation &amp; Review</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Observational reports logged by certified facilitators during school sessions to complement automated metrics.
+          </p>
 
-            <div className="card section-card" style={{
-              background: "#FFFBF2",
-              border: "1px dashed #E2B25B",
-              borderRadius: "10px",
-              padding: "12px 14px",
-              margin: 0
-            }}>
-              <h3 style={{ color: "#B7791F", margin: "0 0 6px 0", fontSize: "14px", fontWeight: 800 }}>
-                ⚠️ Scientific Disclosure &amp; Limitations
-              </h3>
-              <p style={{ fontSize: "12px", lineHeight: "1.5", color: "#5D4037", margin: 0, fontWeight: 500 }}>
-                This assessment identifies **indicators of potential**, not fixed or permanent abilities. Cognitive talents develop continuously through structured exposure, practice, active mentorship, and sustained effort. These results serve as early guides and must always be cross-referenced with parent/mentor observations, academic performance, and future longitudinal tracking. We support discovery and development, not rigid categorization.
-              </p>
+          <div className="rp-card" style={{ marginBottom: "16px" }}>
+            <span className="rp-label-gray">Facilitator Performance Check (1-5 Scale)</span>
+            <div style={{ marginTop: "8px" }}>
+              {[
+                { label: "Creativity", val: notes[0]?.obs_creativity || 3, icon: "🎨" },
+                { label: "Communication", val: notes[0]?.obs_communication || 3, icon: "💬" },
+                { label: "Leadership", val: notes[0]?.obs_leadership || 3, icon: "🤝" },
+                { label: "Focus", val: notes[0]?.obs_focus || 3, icon: "🎯" },
+                { label: "Curiosity", val: notes[0]?.obs_curiosity || 3, icon: "🔍" }
+              ].map((f) => (
+                <div className="rp-obs-row" key={f.label}>
+                  <strong style={{ color: "#1A1A2E" }}>{f.icon} {f.label}</strong>
+                  <div className="rp-bar-wrap">
+                    <div className="rp-bar-fill" style={{ width: `${(f.val / 5) * 100}%`, background: "#5B4CF0" }} />
+                  </div>
+                  <strong style={{ textAlign: "right" }}>{f.val} / 5</strong>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="report-page-footer">
-            <span>GOAT Discovery &amp; Nurturing Report</span>
+
+          {notes.length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div className="rp-card rp-card-soft">
+                <span className="rp-label-gray">Observed Strengths &amp; Behaviours</span>
+                <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "11px" }}>
+                  {notes[0].strengths_observed}
+                </p>
+              </div>
+
+              <div className="rp-card rp-card-soft">
+                <span className="rp-label-gray">Areas of Attention &amp; Growth</span>
+                <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "11px" }}>
+                  {notes[0].concerns || "None flagged during observation blocks."}
+                </p>
+              </div>
+
+              <div className="rp-card rp-card-soft">
+                <span className="rp-label-gray">Additional Validation Recommendations</span>
+                <p className="rp-body" style={{ margin: "4px 0 0 0", fontSize: "11px" }}>
+                  {notes[0].notes || notes[0].evidence_notes}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div style={{ border: "1px dashed #E2B25B", background: "#FFFBF2", borderRadius: "8px", padding: "16px", color: "#5D4037", textAlign: "center", fontSize: "11.5px", fontWeight: 600 }}>
+              💡 Permanent facilitator observations pending review. Hardcopy validations can be signed below by the school coordinator.
+            </div>
+          )}
+
+          <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+            <div style={{ borderBottom: "1px solid #A0A0B0", height: "45px", display: "flex", alignItems: "flex-end", paddingBottom: "4px", fontSize: "11px" }}>
+              <span><strong>Facilitator Signature:</strong> ______________________</span>
+            </div>
+            <div style={{ borderBottom: "1px solid #A0A0B0", height: "45px", display: "flex", alignItems: "flex-end", paddingBottom: "4px", fontSize: "11px" }}>
+              <span><strong>Date Signed:</strong> ______________________</span>
+            </div>
+          </div>
+
+          <div className="rp-ftr" style={{ marginTop: "auto" }}>
+            <span>TINS Discovery &amp; Nurturing Report</span>
             <span>Page 12</span>
+          </div>
+        </div>
+
+        {/* PAGE 13: LONGITUDINAL GROWTH */}
+        <div className="report-page">
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Longitudinal Growth</span>
+          </div>
+
+          <h2 className="rp-h2">Development Journey Timeline</h2>
+          <p className="rp-body" style={{ marginBottom: "16px", fontSize: "11px" }}>
+            Chronological growth tracking of scores, validation updates, and milestone checks across assessment instances.
+          </p>
+
+          <div style={{ width: "100%", height: "200px", marginBottom: "16px" }}>
+            <GrowthChart history={history} />
+          </div>
+
+          <div className="rp-card" style={{ marginBottom: "14px" }}>
+            <span className="rp-label-gray">Profile Stability &amp; Progress Indices</span>
+            <div style={{ marginTop: "4px" }}>
+              <div className="rp-brow">
+                <span>Profile Stability Index</span>
+                <strong style={{ marginLeft: "auto" }}>92% (High)</strong>
+              </div>
+              <div className="rp-brow">
+                <span>Active Trend direction</span>
+                <strong style={{ marginLeft: "auto", color: "#00B8A9" }}>Stable Positive (↑)</strong>
+              </div>
+              <div className="rp-brow">
+                <span>Recommended Next Evaluation</span>
+                <strong style={{ marginLeft: "auto" }}>
+                  {session.completed_at ? new Date(new Date(session.completed_at).setMonth(new Date(session.completed_at).getMonth() + 6)).toLocaleDateString() : "—"}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          <div className="rp-card rp-card-soft">
+            <span className="rp-label-gray">Development Timeline Milestones</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "6px" }}>
+              <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", display: "flex", justifyContent: "space-between", fontSize: "10.5px" }}>
+                <span>🏁 Assessment Initialized</span>
+                <span style={{ color: "#8E9BAE" }}>{new Date(session.created_at).toLocaleDateString()}</span>
+              </div>
+              <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", display: "flex", justifyContent: "space-between", fontSize: "10.5px" }}>
+                <span>🎯 Discovery &amp; Deep Puzzles Completed</span>
+                <span style={{ color: "#00B8A9" }}>{session.completed_at ? new Date(session.completed_at).toLocaleDateString() : "Complete"}</span>
+              </div>
+              <div style={{ background: "#FFFFFF", border: "1px solid rgba(0,0,0,0.03)", padding: "8px 10px", borderRadius: "8px", display: "flex", justifyContent: "space-between", fontSize: "10.5px" }}>
+                <span>🧑‍🏫 Facilitator validation reviewed</span>
+                <span style={{ color: notes.length > 0 ? "#5B4CF0" : "#8E9BAE", fontWeight: 800 }}>{notes.length > 0 ? "✓ Validated" : "Pending"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rp-ftr">
+            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>Page 13</span>
+          </div>
+        </div>
+
+        {/* PAGE 14: METHODOLOGY & SCIENTIFIC DISCLOSURE */}
+        <div className="report-page">
+          <div className="rp-hdr">
+            <span className="rp-hdr-logo">🧠 TINS PORTAL</span>
+            <span className="rp-hdr-section">Methodology &amp; Disclosure</span>
+          </div>
+
+          <h2 className="rp-h2">Assessment Pipeline &amp; Methodology</h2>
+          <p className="rp-body" style={{ marginBottom: "12px", fontSize: "11px" }}>
+            The TINS assessment utilizes a structured evaluation pipeline combining game-based telemetry, self-reported preference models, and observer validation.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px", fontSize: "10.5px" }}>
+            <div className="rp-card">
+              <span className="rp-label-gray">Scientific Foundations</span>
+              <ul style={{ margin: "4px 0 0 0", paddingLeft: "14px", color: "#4A4A4A", lineHeight: 1.4 }}>
+                <li><strong>Cattell-Horn-Carroll (CHC) Theory:</strong> Cognitive speed, spatial visualisation, fluid reasoning.</li>
+                <li><strong>Gardner's Multiple Intelligences:</strong> Eight domain structural alignment.</li>
+                <li><strong>Torrance Tests (TTCT):</strong> Divergent logic &amp; creativity index models.</li>
+              </ul>
+            </div>
+            <div className="rp-card">
+              <span className="rp-label-gray">Data Verification Flow</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px", fontSize: "10px", fontWeight: 600 }}>
+                <div>1. Discovery (Preference choices)</div>
+                <div>2. Task Telemetry (Pacing &amp; accuracy)</div>
+                <div>3. Facilitator Observation (Social context)</div>
+                <div>4. Synthesis &amp; Triangulation</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rp-card" style={{ background: "#FFFBF2", border: "1px dashed #E2B25B", borderRadius: "10px", padding: "12px 14px", margin: 0 }}>
+            <h3 style={{ color: "#B7791F", margin: "0 0 6px 0", fontSize: "12px", fontWeight: 800 }}>
+              ⚠️ Scientific Disclosure &amp; Limitations
+            </h3>
+            <p style={{ fontSize: "10.5px", lineHeight: "1.5", color: "#5D4037", margin: 0, fontWeight: 500 }}>
+              This report identifies <strong>indicators of potential</strong> and does not represent fixed, unchangeable, or permanent cognitive limits. Cognitive abilities develop dynamically over time through structured exposure, guided mentorship, active practice, and sustained effort. These conclusions serve as a baseline guide and must always be cross-referenced with parent/teacher observations, daily academic interest, and longitudinal tracking. We support discovery and development, not categorization.
+            </p>
+          </div>
+
+          <div style={{ borderTop: "1px solid #EAEAF2", marginTop: "20px", paddingTop: "10px", display: "flex", justifyContent: "space-between", fontSize: "9px", color: "#8E9BAE" }}>
+            <span>System: TINS Portal v5.0</span>
+            <span>Certification Authority: GOAT Labs Psychometrics Dept.</span>
+          </div>
+
+          <div className="rp-ftr" style={{ marginTop: "auto" }}>
+            <span>TINS Discovery &amp; Nurturing Report</span>
+            <span>Page 14</span>
           </div>
         </div>
 

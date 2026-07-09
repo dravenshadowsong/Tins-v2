@@ -868,3 +868,88 @@ label { font-size: 13px; font-weight: 500; color: var(--text-mid); margin-bottom
   .aps-timer-value { font-size: 13px; }
   .app-main.with-assessment-strip { padding-top: calc(20px + 44px); }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   TINS Report Print Design System — rp- prefix (v5.0)
+   Professional scientific report styles for print/screen
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Page & Layout ───────────────────────────────────────────── */
+.rp-divider { border: none; border-top: 1px solid #EAEAF2; margin: 12px 0; }
+
+/* ─── Header & Footer ─────────────────────────────────────────── */
+.rp-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1.5px solid #EAEAF2; padding-bottom: 10px; margin-bottom: 20px;
+}
+.rp-hdr-logo { font-size: 12px; font-weight: 800; color: #5B4CF0; letter-spacing: 0.4px; }
+.rp-hdr-section { font-size: 9px; font-weight: 800; color: #00B8A9; text-transform: uppercase; letter-spacing: 1.5px; }
+.rp-ftr {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid #EAEAF2; padding-top: 8px; margin-top: 14px;
+  font-size: 9.5px; color: #A0A0B0;
+}
+
+/* ─── Typography ──────────────────────────────────────────────── */
+.rp-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #5B4CF0; margin-bottom: 4px; }
+.rp-label-gray { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #8E9BAE; margin-bottom: 4px; }
+.rp-h2 { font-size: 17px; font-weight: 700; color: #1A1A2E; margin: 0 0 4px 0; line-height: 1.25; letter-spacing: -0.3px; }
+.rp-h3 { font-size: 13px; font-weight: 700; color: #2D3436; margin: 0 0 6px 0; }
+.rp-body { font-size: 11.5px; color: #4A4A4A; line-height: 1.65; }
+.rp-caption { font-size: 9.5px; color: #A0A0B0; font-style: italic; line-height: 1.5; }
+
+/* ─── Cards & Boxes ───────────────────────────────────────────── */
+.rp-card {
+  border: 1px solid #EAEAF2; border-radius: 8px; padding: 10px 14px;
+}
+.rp-card-primary { border-top: 3px solid #5B4CF0; }
+.rp-card-secondary { border-top: 3px solid #00B8A9; }
+.rp-card-tertiary { border-top: 3px solid #F7B731; }
+.rp-card-note { border: 1px dashed #F7B731; background: rgba(247,183,49,0.04); border-radius: 8px; padding: 10px 14px; }
+.rp-card-soft { background: #F8F9FE; border: 1px solid #EAEAF2; border-radius: 8px; padding: 12px 14px; }
+.rp-panel-left-blue { border-left: 2.5px solid #5B4CF0; padding-left: 12px; }
+.rp-panel-left-teal { border-left: 2.5px solid #00B8A9; padding-left: 12px; }
+
+/* ─── Score Bars ──────────────────────────────────────────────── */
+.rp-bar-wrap { height: 4px; background: #EAEAF2; border-radius: 99px; overflow: hidden; }
+.rp-bar-fill { height: 100%; border-radius: 99px; background: #5B4CF0; }
+
+/* ─── KPI Cards ───────────────────────────────────────────────── */
+.rp-kpi { border: 1px solid #EAEAF2; border-radius: 8px; padding: 12px 14px; text-align: center; background: #FAFAFA; }
+.rp-kpi-val { font-size: 18px; font-weight: 700; color: #5B4CF0; line-height: 1.1; display: block; }
+.rp-kpi-lbl { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #8E9BAE; margin: 4px 0 2px 0; display: block; }
+.rp-kpi-sub { font-size: 9px; color: #A0A0B0; font-style: italic; display: block; }
+
+/* ─── Scorecard Table ─────────────────────────────────────────── */
+.rp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+.rp-tbl th { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #8E9BAE; padding: 6px 8px; border-bottom: 1.5px solid #EAEAF2; text-align: left; }
+.rp-tbl td { padding: 7px 8px; border-bottom: 1px solid #F2F2F8; vertical-align: middle; }
+.rp-tbl tr:last-child td { border-bottom: none; }
+.rp-tbl tr:nth-child(even) td { background: #FAFAFA; }
+
+/* ─── Behaviour rows ──────────────────────────────────────────── */
+.rp-brow { display: flex; gap: 8px; align-items: flex-start; border-bottom: 1px solid #F5F5F8; padding: 7px 0; }
+.rp-brow:last-child { border-bottom: none; }
+
+/* ─── Timeline / Roadmap ──────────────────────────────────────── */
+.rp-stage { border-left: 2px solid #EAEAF2; padding-left: 14px; margin-bottom: 14px; }
+.rp-stage-1 { border-left-color: #5B4CF0; }
+.rp-stage-2 { border-left-color: #00B8A9; }
+.rp-stage-3 { border-left-color: #F7B731; }
+.rp-stage-4 { border-left-color: #E17055; }
+
+/* ─── Observation Bars ────────────────────────────────────────── */
+.rp-obs-row { display: grid; grid-template-columns: 120px 1fr 36px; gap: 10px; align-items: center; padding: 5px 0; border-bottom: 1px solid #F5F5F8; font-size: 10.5px; }
+.rp-obs-row:last-child { border-bottom: none; }
+
+/* ─── Tag / Badge ─────────────────────────────────────────────── */
+.rp-tier { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; padding: 2px 7px; border-radius: 4px; }
+
+/* ─── Monogram Cover ──────────────────────────────────────────── */
+.rp-monogram {
+  width: 76px; height: 76px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.28);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 900; color: rgba(255,255,255,0.92);
+  margin-bottom: 22px;
+}
