@@ -4,13 +4,14 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.graphics.shapes import Drawing, Rect
 
-# Premium Style Palette
-primary_color = colors.HexColor("#5B4CF0")    # Indigo
-secondary_color = colors.HexColor("#00B8A9")  # Teal
-text_color = colors.HexColor("#2D3436")       # Dark Charcoal
-light_bg = colors.HexColor("#F8F9FA")         # Light Grey
-border_color = colors.HexColor("#E2E8F0")     # Light Border
-accent_gold = colors.HexColor("#F7B731")      # Gold
+# Premium Psychometric Color Palette (Minimal & Grayscale-safe)
+primary_color = colors.HexColor("#4F46E5")    # TINS Indigo
+secondary_color = colors.HexColor("#0D9488")  # TINS Teal
+text_color = colors.HexColor("#1E293B")       # Dark Charcoal
+slate_label = colors.HexColor("#64748B")      # Muted Slate
+light_bg = colors.HexColor("#F8FAFC")         # Neutral Light Grey
+border_color = colors.HexColor("#E2E8F0")     # Soft Border
+accent_gold = colors.HexColor("#D97706")      # Amber/Gold
 
 # Default Sample Stylesheet
 styles = getSampleStyleSheet()
@@ -22,7 +23,7 @@ title_style = ParagraphStyle(
     fontName='Helvetica-Bold',
     fontSize=24,
     leading=30,
-    textColor=primary_color,
+    textColor=text_color,
     spaceAfter=15,
     alignment=1  # Center
 )
@@ -33,7 +34,7 @@ h1_style = ParagraphStyle(
     fontName='Helvetica-Bold',
     fontSize=18,
     leading=22,
-    textColor=primary_color,
+    textColor=text_color,
     spaceBefore=5,
     spaceAfter=10,
     keepWithNext=True
@@ -65,7 +66,7 @@ italic_style = ParagraphStyle(
     'ReportItalic',
     parent=body_style,
     fontName='Helvetica-Oblique',
-    textColor=colors.HexColor("#4A4A4A")
+    textColor=slate_label
 )
 
 section_header_style = ParagraphStyle(
@@ -74,7 +75,7 @@ section_header_style = ParagraphStyle(
     fontName='Helvetica-Bold',
     fontSize=8.5,
     leading=10,
-    textColor=secondary_color,
+    textColor=primary_color,
     spaceAfter=4,
     textTransform='uppercase'
 )
@@ -128,131 +129,131 @@ DOMAINS_MAP = {
 }
 
 DOMAIN_COLORS = {
-    "kinesthetic": colors.HexColor("#FF7675"),
-    "creative": colors.HexColor("#6C5CE7"),
-    "logical": colors.HexColor("#0984E3"),
-    "spatial": colors.HexColor("#FD9644"),
-    "social": colors.HexColor("#00B894"),
-    "language": colors.HexColor("#D63031"),
-    "naturalist": colors.HexColor("#26DE81"),
-    "intrapersonal": colors.HexColor("#A55EEA")
+    "kinesthetic": colors.HexColor("#EF4444"), # Red-500
+    "creative": colors.HexColor("#6366F1"),    # Indigo-500
+    "logical": colors.HexColor("#3B82F6"),     # Blue-500
+    "spatial": colors.HexColor("#F59E0B"),     # Amber-500
+    "social": colors.HexColor("#10B981"),      # Emerald-500
+    "language": colors.HexColor("#EC4899"),    # Pink-500
+    "naturalist": colors.HexColor("#22C55E"),  # Green-500
+    "intrapersonal": colors.HexColor("#8B5CF6") # Violet-500
 }
 
 PERSONAS = {
     "creative": {
         "title": "THE CREATOR",
         "emoji": "🎨",
-        "desc": "This child enjoys generating original ideas, imagining possibilities, and expressing thoughts through visual and artistic mediums.",
-        "strengths": ["Vivid Imagination", "Divergent Thinking", "Original Expression"],
-        "growth": ["Structured Completion", "Attention to Rote Rules"]
+        "desc": "Generates highly original and divergent pathways, visualizing abstract ideas and mapping spatial patterns with high fluid intelligence.",
+        "strengths": ["Original Thinking", "Divergent Ideation", "Visual Pattern Reasoning"],
+        "growth": ["Structured Implementation", "Attention to Repetitive Protocols"]
     },
     "spatial": {
         "title": "THE BUILDER",
         "emoji": "🔧",
-        "desc": "This child thinks in three dimensions, loves constructing physical or mental models, and naturally understands design structures.",
-        "strengths": ["3D Visualization", "Structural Logic", "Spatial Transformation"],
-        "growth": ["Verbalizing Concepts", "Patience with Abstract Theory"]
+        "desc": "Thinks natively in three dimensions, excelling at mental rotation, structural assemblies, and modeling mechanical relationships.",
+        "strengths": ["3D Mental Rotation", "Structural Assembly", "Spatial Logic Modeling"],
+        "growth": ["Verbal Translation of Spatial Concepts", "Sedentary Abstract Lectures"]
     },
     "logical": {
         "title": "THE THINKER",
         "emoji": "🧠",
-        "desc": "This child is highly analytical, naturally notices logical patterns, loves solving puzzles, and thrives on structured reasoning.",
-        "strengths": ["Pattern Recognition", "Reasoning & Logic", "Systematic Problem-Solving"],
-        "growth": ["Handling Vague Goals", "Accepting Open-Ended Ambiguity"]
+        "desc": "Excels in systematic logical deductions, pattern classification, rule inference, and breaking down complex problems.",
+        "strengths": ["Rule Induction", "Logical Pattern Extraction", "Systematic Problem Breakdown"],
+        "growth": ["Ambiguous Creative Goals", "Non-linear Dynamic Situations"]
     },
     "social": {
         "title": "THE LEADER",
         "emoji": "🤝",
-        "desc": "This child possesses natural social intelligence, easily connects with others, coordinates collaborative activities, and guides groups.",
-        "strengths": ["Empathy & Influence", "Group Organization", "Collaborative Coordination"],
-        "growth": ["Delegating Tasks", "Sustaining Quiet Focus"]
+        "desc": "Exhibits strong interpersonal cues, coordinating peer groups, mediating collaborations, and guiding group problem-solving.",
+        "strengths": ["Interpersonal Insight", "Peer Group Coordination", "Mediated Collaboration"],
+        "growth": ["Sustained Isolation Tasks", "Detailed Individual Research"]
     },
     "language": {
         "title": "THE COMMUNICATOR",
         "emoji": "💬",
-        "desc": "This child has a natural affinity for words, excels in verbal storytelling, expresses ideas with high clarity, and loves debate.",
-        "strengths": ["Verbal Fluency", "Narrative Structure", "Persuasive Explanation"],
-        "growth": ["Listening Without Interrupting", "Silent Individual Practice"]
+        "desc": "Demonstrates high verbal fluency, rich semantic structures, narrative articulation, and persuasive conceptual explanations.",
+        "strengths": ["Semantic Precision", "Narrative Articulation", "Conceptual Explanations"],
+        "growth": ["Visual-Spatial Map Translation", "Prolonged Silent Data Entry"]
     },
     "naturalist": {
         "title": "THE OBSERVER",
         "emoji": "🌱",
-        "desc": "This child has unusual detail-awareness in nature, notices micro-patterns in ecosystems, and loves classifying biological details.",
-        "strengths": ["Sensory Observation", "Taxonomic Classification", "Environmental Empathy"],
-        "growth": ["Abstract Symbolic Tasks", "Prolonged Desk-Bound Study"]
+        "desc": "Demonstrates high visual categorization, detail discrimination in environmental structures, and eco-system mapping.",
+        "strengths": ["Micro-Detail Discrimination", "Structural Categorization", "Ecosystem Pattern Matching"],
+        "growth": ["Highly Abstract Decontextualized Systems", "Sedentary Indoor Workspaces"]
     },
     "kinesthetic": {
         "title": "THE EXPLORER",
         "emoji": "🏃",
-        "desc": "This child learns best through physical doing, movement, and hands-on trial-and-error, demonstrating great fine-motor control.",
-        "strengths": ["Fine-Motor Precision", "Coordination & Agility", "Kinesthetic Intuition"],
-        "growth": ["Passive Auditory Learning", "Prolonged Sitting Work"]
+        "desc": "Learns best through sensory-motor feedback loop integration, demonstrating excellent motor speed and fine-motor control.",
+        "strengths": ["Fine-Motor Coordination", "Proprioceptive Feedback Loop", "Dynamic Physical Manipulation"],
+        "growth": ["Passive Auditory Lectures", "Prolonged Text-Based Memorization"]
     },
     "intrapersonal": {
         "title": "THE RESEARCHER",
         "emoji": "🧘",
-        "desc": "This child exhibits deep self-awareness, prefers reflecting in quiet spaces, understands personal motivations, and sets thoughtful goals.",
-        "strengths": ["Emotional Reflexivity", "Independent Planning", "Goal-Oriented Perseverance"],
-        "growth": ["Highly Competitive Groups", "Spontaneous Public Speaking"]
+        "desc": "Possesses deep self-reflective capacities, excels in individual goal setting, and demonstrates high task-persistence.",
+        "strengths": ["Task-Persistence", "Metacognitive Self-Reflection", "Self-Guided Strategy Plan"],
+        "growth": ["High-Competition Public Spaces", "Spontaneous Collaborative Ideation"]
     }
 }
 
 parentGuides = {
     "creative": {
-        "behaviors": ["Imagines highly unusual possibilities", "Enjoys open-ended tasks and abstract games", "Prefers visual creation over pure memorization"],
-        "motivators": "Original expression, visual challenges, autonomy in choices",
-        "styles": "Divergent and visual-first",
-        "challenges": "Can easily become bored by highly repetitive or rigid work",
-        "support": ["Provide diverse physical and digital design materials", "Allow space for experimentation without immediate grading"]
+        "behaviors": ["Explores unconventional puzzle designs", "Prefers open-ended sandbox settings", "Shows high fluid visualization style"],
+        "motivators": "Novelty in choices, design autonomy, open-ended problem exploration",
+        "styles": "Visual, exploratory, non-linear",
+        "challenges": "May lose engagement if constrained by rigid task repetition",
+        "support": ["Provide design tools and creative platforms", "Acknowledge original approaches rather than standardized solutions"]
     },
     "spatial": {
-        "behaviors": ["Likes physical construction and model-building", "Enjoys visualizing shapes and three-dimensional blocks", "Notices minute structural details in drawings"],
-        "motivators": "Building, assembling, transforming structures, design tasks",
-        "styles": "Three-dimensional and hands-on",
-        "challenges": "May sometimes struggle to explain spatial concepts in written text",
-        "support": ["Encourage model building and tinkering workshops", "Use visual diagrams and physical models for academic study"]
+        "behaviors": ["Enjoys assembling mechanical models", "Exhibits rapid mental rotation of shapes", "Intuitively understands structural blueprints"],
+        "motivators": "3D construction, material tinkering, visualization challenges",
+        "styles": "Hands-on, spatial-tactile",
+        "challenges": "May struggle to express spatial reasoning in purely verbal terms",
+        "support": ["Provide 3D puzzles, engineering toys, and architectural grids", "Encourage drawing visual schemas to outline logical problems"]
     },
     "logical": {
-        "behaviors": ["Enjoys solving complex riddles and puzzles", "Notices mathematical patterns spontaneously", "Structures thoughts sequentially and logically"],
-        "motivators": "Systematic patterns, numerical puzzles, clear cause-and-effect rules",
-        "styles": "Analytical, sequence-based",
-        "challenges": "May get frustrated by vague directions or emotional debates",
-        "support": ["Provide math puzzles and logic-based board games", "Structure daily tasks with clear sequences and logical rules"]
+        "behaviors": ["Deducts abstract patterns and rules", "Enjoys math puzzles and sequential logic", "Categorizes collections systematically"],
+        "motivators": "Algorithmic rules, pattern decoding, clear causal systems",
+        "styles": "Sequential, inductive, logic-driven",
+        "challenges": "May feel uncomfortable with vague prompts lacking definite parameters",
+        "support": ["Introduce coding logic, strategy games, and pattern puzzles", "Provide clear step-by-step frameworks for multi-phase tasks"]
     },
     "social": {
-        "behaviors": ["Naturally organizes peers and group activities", "Shows high empathy and notices others' emotions", "Takes active initiative in coordinating events"],
-        "motivators": "Collaborative projects, peer coordination, group problem-solving",
-        "styles": "Interpersonal, leadership-driven",
-        "challenges": "May dominate discussions or take on too much responsibility",
-        "support": ["Provide leadership opportunities with guidance on delegation", "Encourage group games that require active listening and compromise"]
+        "behaviors": ["Assumes active leadership in peer workshops", "Senses peer emotions and mediates disagreements", "Thrives in group challenge modules"],
+        "motivators": "Team collaboration, group problem solving, interactive feedback",
+        "styles": "Collaborative, group-centric",
+        "challenges": "May experience fatigue or low focus in prolonged individual tasks",
+        "support": ["Structure team-based challenges and community service", "Encourage group reflections and shared project goals"]
     },
     "language": {
-        "behaviors": ["Expresses thoughts with high verbal clarity", "Enjoys telling stories and describing scenarios", "Has an extensive vocabulary and notices wordplay"],
-        "motivators": "Debate, verbal explanation, storytelling, theater performance",
-        "styles": "Verbal-auditory, narrative-driven",
-        "challenges": "May talk excessively or struggle with silent, individual tasks",
-        "support": ["Encourage storytelling, theater, or writing workshops", "Discuss complex topics together to challenge verbal expression"]
+        "behaviors": ["Articulates arguments with semantic rich vocabulary", "Enjoys narrative writing and conceptual debate", "Comprehends complex textual instructions rapidly"],
+        "motivators": "Verbal debate, narrative drafting, vocabulary games",
+        "styles": "Verbal-conceptual, story-driven",
+        "challenges": "May become restless in tasks lacking opportunities for verbal dialogue",
+        "support": ["Provide reading clubs, writing projects, and public speaking", "Engage in conceptual discussions to expand logic parameters"]
     },
     "naturalist": {
-        "behaviors": ["Notices details in plants, animals, and ecosystems", "Loves sorting, classifying, and organizing collections", "Shows deep empathy and interest in the natural world"],
-        "motivators": "Outdoor observations, wildlife exploration, environmental projects",
-        "styles": "Environmental-observational",
-        "challenges": "May get restless in closed, sedentary indoor spaces",
-        "support": ["Provide opportunities for regular nature exploration", "Use outdoor settings and animal themes for academic concepts"]
+        "behaviors": ["Observes environmental shifts in plant/animal life", "Categorizes visual elements by detailed patterns", "Enjoys outdoor learning modules"],
+        "motivators": "Environmental observation, taxonomic sorting, hands-on outdoors",
+        "styles": "Ecosystem-based, categorization-driven",
+        "challenges": "May experience difficulty focusing in sterile, closed rooms",
+        "support": ["Encourage gardening, bird watching, and nature collections", "Use environmental science themes for classroom learning"]
     },
     "kinesthetic": {
-        "behaviors": ["Demonstrates exceptional coordination and motor speed", "Learns concepts best by physically doing or moving", "Has strong fine-motor skills and tactile intuition"],
-        "motivators": "Physical movement, sports, hands-on construction, active games",
-        "styles": "Tactile-physical, experimental",
-        "challenges": "Needs regular physical breaks; may fidget in quiet lectures",
-        "support": ["Integrate physical movement and breaks into study routines", "Encourage sports, dance, or hands-on crafting workshops"]
+        "behaviors": ["Exhibits high manual dexterity and speed", "Prefers kinetic activities over desk tasks", "Learns through tactile trial-and-error"],
+        "motivators": "Kinetic movement, athletic challenges, manual crafts",
+        "styles": "Tactual-motor, trial-and-error",
+        "challenges": "May require periodic active breaks to maintain attention",
+        "support": ["Provide hands-on craft projects and kinetic breaks", "Integrate active physical gestures into study routines"]
     },
     "intrapersonal": {
-        "behaviors": ["Shows deep reflection and self-awareness of feelings", "Sets thoughtful personal goals and plans ahead", "Thrives when working independently on projects"],
-        "motivators": "Solo hobbies, personal reflection, self-directed goals",
-        "styles": "Reflective, self-guided",
-        "challenges": "May withdraw during highly competitive or chaotic group work",
-        "support": ["Provide quiet spaces for reflection and independent projects", "Encourage journaling or writing to process thoughts and emotions"]
+        "behaviors": ["Sets individual study goals and monitors progress", "Reflects quietly on personal achievements", "Demonstrates sustained individual task-persistence"],
+        "motivators": "Independent goals, self-paced challenges, quiet study spaces",
+        "styles": "Self-directed, reflective",
+        "challenges": "May feel overwhelmed in highly competitive or chaotic groups",
+        "support": ["Designate quiet individual work corners and study blocks", "Teach self-tracking tools for personal goals and plans"]
     }
 }
 
@@ -293,10 +294,10 @@ pathways_dict = {
 
 def draw_bar(rating, max_rating=5, width=120, height=8):
     d = Drawing(width, height)
-    # Background bar
-    d.add(Rect(0, 0, width, height, fillColor=colors.HexColor("#E2E8F0"), strokeColor=None))
-    # Foreground filled bar
+    # Background bar (soft gray)
+    d.add(Rect(0, 0, width, height, fillColor=colors.HexColor("#F1F5F9"), strokeColor=None))
+    # Foreground filled bar (indigo)
     fill_width = (rating / float(max_rating)) * width if rating else 0
     if fill_width > 0:
-        d.add(Rect(0, 0, fill_width, height, fillColor=colors.HexColor("#00B8A9"), strokeColor=None))
+        d.add(Rect(0, 0, fill_width, height, fillColor=primary_color, strokeColor=None))
     return d

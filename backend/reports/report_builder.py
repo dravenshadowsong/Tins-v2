@@ -1,6 +1,6 @@
 import io
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate
+from reportlab.platypus import SimpleDocTemplate, PageBreak
 from reportlab.lib import colors
 
 # Import all page building components
@@ -17,17 +17,21 @@ from reports import methodology
 
 def add_page_number(canvas, doc, data, styles_module):
     canvas.saveState()
-    canvas.setFont('Helvetica', 8.5)
-    canvas.setFillColor(colors.HexColor("#94A3B8"))
+    canvas.setFont('Helvetica-Bold', 7.5)
+    canvas.setFillColor(styles_module.slate_label)
     
     if doc.page > 1:
-        canvas.drawString(54, 750, "GOAT TALENT IDENTIFICATION SYSTEM REPORT")
-        canvas.drawRightString(letter[0]-54, 750, "PROJECT WHY / GOAT")
-        canvas.setStrokeColor(colors.HexColor("#CBD5E1"))
-        canvas.setLineWidth(0.5)
-        canvas.line(54, 742, letter[0]-54, 742)
+        # Running Page Header
+        canvas.drawString(54, 756, "TINS TALENT DISCOVERY & DEVELOPMENT REPORT")
+        canvas.drawRightString(letter[0]-54, 756, "PROJECT WHY / TINS")
         
+        canvas.setStrokeColor(styles_module.border_color)
+        canvas.setLineWidth(0.5)
+        canvas.line(54, 746, letter[0]-54, 746)
+        
+        # Running Page Footer
         page_num = canvas.getPageNumber()
+        canvas.setFont('Helvetica', 7.5)
         canvas.drawString(54, 36, "CONFIDENTIAL DEVELOPMENTAL REPORT")
         canvas.drawRightString(letter[0]-54, 36, f"Page {page_num} of 12")
     canvas.restoreState()
@@ -42,31 +46,46 @@ def build_pdf_report(data):
     
     story = []
     
-    # Page 1: Cover Page
+    # Page 1: Cover Page (identity information only)
     cover.build_page(story, data, styles)
     
-    # Page 2: Child Snapshot & Talent Summary
+    # Page 2: Executive Summary (One-page overview)
     executive_summary.build_page(story, data, styles)
     
-    # Page 3: Psychological Talent Map (Radar chart & scorecard table)
+    # Page 3: Talent Dashboard (Domain ranking progress bars, small radar)
     dashboard.build_page(story, data, styles)
     
-    # Page 4: Evidence Report
+    # Page 4: Evidence Dashboard (triangulated evidence cards, no paragraphs)
     evidence.build_page(story, data, styles)
     
-    # Page 5 & 6: Hidden Opportunities & Child Cognitive Persona
-    persona.build_page(story, data, styles)
+    # Page 5: Behaviour Profile (10 observed behaviors and metrics)
+    persona.build_behaviour_profile_page(story, data, styles)
+    story.append(PageBreak())
     
-    # Page 7: Parent & Mentor Guide
-    parent_guide.build_page(story, data, styles)
+    # Page 6: Persona (learning/motivator/blind spot grid)
+    persona.build_persona_page(story, data, styles)
+    story.append(PageBreak())
     
-    # Page 8 & 9: 30-Day Development Roadmap & Exploration Pathways
+    # Page 7: Hidden Potential (current ability/exposure/opportunity indices)
+    parent_guide.build_hidden_potential_page(story, data, styles)
+    story.append(PageBreak())
+    
+    # Page 8: Development Plan (30d/90d/6m/12m milestones)
     development.build_page(story, data, styles)
     
-    # Page 10 & 11: Facilitator Validation & Longitudinal Growth
-    facilitator.build_page(story, data, styles)
+    # Page 9: Parent & School Guide (Home vs Classroom columns)
+    parent_guide.build_parent_school_guide_page(story, data, styles)
+    story.append(PageBreak())
     
-    # Page 12: Methodology & Disclosure
+    # Page 10: Assessment Analytics (KPI telemetry matrix)
+    facilitator.build_analytics_page(story, data, styles)
+    story.append(PageBreak())
+    
+    # Page 11: Facilitator Validation (observational notes narrative, signature lines)
+    facilitator.build_mentor_review_page(story, data, styles)
+    story.append(PageBreak())
+    
+    # Page 12: System Methodology (Pipeline steps flow & disclosure warning)
     methodology.build_page(story, data, styles)
     
     # Wrapping callbacks with data and styles closures
