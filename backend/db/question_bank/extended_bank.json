@@ -514,7 +514,9 @@
           "Hindi": "गेंद उठाओ और खुद गेंद फेंककर दिखाओ"
         },
         "value": 0,
-        "domains": ["kinesthetic"]
+        "domains": [
+          "kinesthetic"
+        ]
       },
       {
         "label": {
@@ -522,7 +524,10 @@
           "Hindi": "कागज पर हाथ की पकड़ और पैरों की जगह का चित्र बनाओ"
         },
         "value": 1,
-        "domains": ["spatial", "logical"]
+        "domains": [
+          "spatial",
+          "logical"
+        ]
       },
       {
         "label": {
@@ -530,7 +535,10 @@
           "Hindi": "नियम बताओ और बताओ कि कौन सी गलतियाँ न करें"
         },
         "value": 2,
-        "domains": ["language", "logical"]
+        "domains": [
+          "language",
+          "logical"
+        ]
       },
       {
         "label": {
@@ -538,7 +546,9 @@
           "Hindi": "उनसे कहो कि वीडियो देखें और खुद समझें"
         },
         "value": 3,
-        "domains": ["intrapersonal"]
+        "domains": [
+          "intrapersonal"
+        ]
       }
     ],
     "metric": "preference",
@@ -565,7 +575,9 @@
           "Hindi": "पेड़ पर चढ़ने की कोशिश करो या लंबी छड़ी खोजो"
         },
         "value": 0,
-        "domains": ["kinesthetic"]
+        "domains": [
+          "kinesthetic"
+        ]
       },
       {
         "label": {
@@ -573,7 +585,10 @@
           "Hindi": "धागे का कोण समझो और उसे एक खास दिशा में खींचो"
         },
         "value": 1,
-        "domains": ["logical", "spatial"]
+        "domains": [
+          "logical",
+          "spatial"
+        ]
       },
       {
         "label": {
@@ -581,7 +596,9 @@
           "Hindi": "पास के दोस्तों को बुलाओ और मिलकर हल सोचो"
         },
         "value": 2,
-        "domains": ["social"]
+        "domains": [
+          "social"
+        ]
       },
       {
         "label": {
@@ -589,7 +606,10 @@
           "Hindi": "इसे छोड़ दो और मान लो पतंग गई, फिर नई पतंग बनाओ"
         },
         "value": 3,
-        "domains": ["intrapersonal", "creative"]
+        "domains": [
+          "intrapersonal",
+          "creative"
+        ]
       }
     ],
     "metric": "preference",
@@ -809,47 +829,47 @@
     "domain": "logical",
     "component": "core_deep",
     "title": {
-      "English": "Animal Legs",
-      "Hindi": "जानवरों के पैर"
+      "English": "Odd One Out",
+      "Hindi": "अलग कौन?"
     },
     "prompt": {
-      "English": "A duck has 2 legs, a dog has 4 legs, and a spider has 8 legs. Which of these fits the pattern of legs (2, 4, 8) increasing?",
-      "Hindi": "एक बत्तख के 2 पैर होते हैं, एक कुत्ते के 4 पैर होते हैं, और एक मकड़ी के 8 पैर होते हैं। इनमें से कौन पैरों के बढ़ते हुए पैटर्न (2, 4, 8) में फिट बैठता है?"
+      "English": "Cow, horse, dog, crow — which one is different from the rest, and why?",
+      "Hindi": "गाय, घोड़ा, कुत्ता, कौवा — इनमें से कौन सा अलग है और क्यों?"
     },
     "options": [
       {
         "label": {
-          "English": "A sparrow (2 legs), a cat (4 legs), a crab (10 legs)",
-          "Hindi": "एक गौरैया (2 पैर), एक बिल्ली (4 पैर), एक केकड़ा (10 पैर)"
+          "English": "Crow — it is the only one with wings and two legs, not four",
+          "Hindi": "कौवा — सिर्फ इसी के पंख हैं और दो पैर हैं, न कि चार"
         },
         "value": 4
       },
       {
         "label": {
-          "English": "A snake (0 legs), a monkey (2 legs), a horse (4 legs)",
-          "Hindi": "एक सांप (0 पैर), एक बंदर (2 पैर), एक घोड़ा (4 पैर)"
+          "English": "Dog — it is the only pet that lives inside a house",
+          "Hindi": "कुत्ता — वह अकेला घर के अंदर रहने वाला पालतू जानवर है"
         },
         "value": 1
       },
       {
         "label": {
-          "English": "A fish (0 legs), a bird (2 legs), a spider (8 legs)",
-          "Hindi": "एक मछली (0 पैर), एक पक्षी (2 पैर), एक मकड़ी (8 पैर)"
+          "English": "Horse — it is the biggest and fastest animal in the list",
+          "Hindi": "घोड़ा — वह सूची में सबसे बड़ा और तेज जानवर है"
         },
         "value": 0
       },
       {
         "label": {
-          "English": "A goat (4 legs), an ant (6 legs), a centipede (many legs)",
-          "Hindi": "एक बकरी (4 पैर), एक चींटी (6 पैर), एक कनखजूरा (कई पैर)"
+          "English": "Cow — it is the only one that gives milk",
+          "Hindi": "गाय — वह अकेली दूध देने वाली है"
         },
-        "value": 2
+        "value": 0
       }
     ],
-    "answer": "A sparrow (2 legs), a cat (4 legs), a crab (10 legs)",
+    "answer": "Crow — it is the only one with wings and two legs, not four",
     "metric": "correctness",
     "difficulty": "medium",
-    "ai_interpretation_notes": "Pattern recognition and classification logic."
+    "ai_interpretation_notes": "Tests classification and categorical reasoning. The child must identify the structural property (leg count / body type) that groups cow, horse, and dog together and excludes the crow. Distractors test surface-level reasoning (size, domestication, usefulness) vs. structural logic."
   },
   {
     "key": "spatial_shape_match",
@@ -905,47 +925,47 @@
     "domain": "spatial",
     "component": "core_deep",
     "title": {
-      "English": "Clock Rotation",
-      "Hindi": "घड़ी का घूमना"
+      "English": "Spinning Arrow",
+      "Hindi": "घूमता तीर"
     },
     "prompt": {
-      "English": "A clock hand points straight UP (at 12). If it rotates a quarter turn (90 degrees) clockwise, where does it point?",
-      "Hindi": "एक घड़ी की सुई सीधे ऊपर (12 पर) इशारा करती है। यदि यह घड़ी की दिशा में एक चौथाई चक्कर (90 डिग्री) घूमती है, तो यह कहाँ इशारा करेगी?"
+      "English": "An arrow drawn on a piece of paper is pointing UPWARD. You pick up the paper and turn it around completely (like flipping a chapati). Which direction does the arrow point now?",
+      "Hindi": "एक कागज पर खींचा गया तीर ऊपर की ओर इशारा कर रहा है। आप कागज को उठाते हैं और उसे पूरी तरह पलट देते हैं (जैसे चपाती पलटते हैं)। अब तीर किस दिशा में इशारा करेगा?"
     },
     "options": [
       {
         "label": {
-          "English": "Right (at 3)",
-          "Hindi": "दाएँ (3 पर)"
+          "English": "Downward",
+          "Hindi": "नीचे की तरफ"
         },
         "value": 4
       },
       {
         "label": {
-          "English": "Down (at 6)",
-          "Hindi": "नीचे (6 पर)"
+          "English": "To the left",
+          "Hindi": "बाईं तरफ"
         },
         "value": 1
       },
       {
         "label": {
-          "English": "Left (at 9)",
-          "Hindi": "बाएँ (9 पर)"
+          "English": "Still upward — it does not change",
+          "Hindi": "अभी भी ऊपर की तरफ — यह नहीं बदलता"
         },
         "value": 0
       },
       {
         "label": {
-          "English": "It stays at 12",
-          "Hindi": "यह 12 पर ही रहती है"
+          "English": "To the right",
+          "Hindi": "दाईं तरफ"
         },
         "value": 0
       }
     ],
-    "answer": "Right (at 3)",
+    "answer": "Downward",
     "metric": "correctness",
     "difficulty": "easy",
-    "ai_interpretation_notes": "Measures 2D rotation and orientation tracking."
+    "ai_interpretation_notes": "Tests 2D spatial rotation and mental flipping using a concrete, everyday action (flipping a roti/chapati). Requires no academic knowledge of degrees — tests pure mental rotation ability. Children who visualise the physical action of flipping will immediately see the answer; children without spatial intuition will often choose 'still upward' or guess randomly."
   },
   {
     "key": "visualizer_memory_grid",

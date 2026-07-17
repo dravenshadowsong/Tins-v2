@@ -56,8 +56,7 @@ export const api = {
   // TMS Extensions
   getUsers:        ()          => req("GET",  "/admin/users"),
   createUser:      (data)      => req("POST", "/admin/users", data),
-  deleteUser:      (id)        => req("DELETE", `/admin/users/${id}`),
-  approveUser:     (id, data)  => req("PUT",    `/admin/users/${id}/approve`, data),
+  approveUser:     (id, data)  => req("POST", `/admin/users/${id}/approve`, data),
   getCenters:      ()          => req("GET",  "/centers"),
   getPublicCenters:()          => req("GET",  "/public/centers"),
   createCenter:    (data)      => req("POST", "/centers", data),

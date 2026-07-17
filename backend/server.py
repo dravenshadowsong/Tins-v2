@@ -1655,16 +1655,17 @@ LOCAL_PRIMARY_OVERRIDES = {
         }
     },
     "logical_riddle": {
-        "title": {"English": "The Leg Code", "Hindi": "पैरों का खेल"},
+        "title": {"English": "Odd One Out", "Hindi": "अलग कौन?"},
         "prompt": {
-            "English": "A cat is 4, a spider is 8, and an ant is 6. What number represents a snake? 🐍",
-            "Hindi": "बिल्ली 4 है, मकड़ी 8 है, चींटी 6 है। सांप का नंबर क्या होगा? 🐍"
+            "English": "Cow, horse, dog, crow — which one is different from the others? 🐦",
+            "Hindi": "गाय, घोड़ा, कुत्ता, कौवा — इनमें से कौन सा अलग है? 🐦"
         }
     },
     "spatial_rotation": {
+        "title": {"English": "Spinning Arrow", "Hindi": "घूमता तीर"},
         "prompt": {
-            "English": "A star pointer turns: first UP ↑, then RIGHT →, then DOWN ↓. Where will it point next?",
-            "Hindi": "तारे की सुई घूमती है: पहले ऊपर इशारा करती है ↑, फिर दाएं →, फिर नीचे ↓। आगे कहाँ इशारा करेगी?"
+            "English": "An arrow on paper points UP. You flip the paper over (like flipping a chapati). Which way does the arrow point now? ↓",
+            "Hindi": "कागज पर एक तीर ऊपर की ओर इशारा कर रहा है। आप कागज को पलट देते हैं (चपाती की तरह)। अब तीर किधर इशारा करेगा? ↓"
         }
     },
     "spatial_perspective": {
