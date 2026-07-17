@@ -2274,6 +2274,15 @@ def get_adaptive_questions_route(sid):
         dom_puzzles = [p for p in adaptive_bank if p["domain"] == dom]
         # Sort or take first 2
         selected_adaptive.extend(dom_puzzles[:2])
+
+    # Fix: Always guarantee at least 1 adaptive kinesthetic question is served.
+    # Without this, if kinesthetic didn't emerge as top-3 after discovery it would
+    # receive zero adaptive weight (15% of blended score silently absent), making
+    # it almost impossible for physical-learners to surface as a top domain.
+    selected_keys = {p["key"] for p in selected_adaptive}
+    kinesthetic_adaptive = [p for p in adaptive_bank if p["domain"] == "kinesthetic" and p["key"] not in selected_keys]
+    if kinesthetic_adaptive:
+        selected_adaptive.append(kinesthetic_adaptive[0])
         
     # Append to existing generated tasks in the session
     existing_tasks = []
@@ -3947,7 +3956,10 @@ def score_responses(responses, child, discovery_answers=None, facilitator_note=N
         "q_discovery_5": {0: ["kinesthetic", "creative"], 1: ["logical", "naturalist"], 2: ["social", "language"], 3: ["intrapersonal"]},
         "q_discovery_6": {0: ["naturalist", "logical"], 1: ["creative", "naturalist"], 2: ["language", "social"], 3: ["intrapersonal"]},
         "q_discovery_7": {0: ["language", "social"], 1: ["kinesthetic", "social"], 2: ["intrapersonal"], 3: ["creative", "social"]},
-        "q_discovery_8": {0: ["intrapersonal", "logical"], 1: ["creative"], 2: ["social", "language"], 3: ["kinesthetic"]}
+        "q_discovery_8": {0: ["intrapersonal", "logical"], 1: ["creative"], 2: ["social", "language"], 3: ["kinesthetic"]},
+        # Two new questions that give kinesthetic a solo-signal channel
+        "q_discovery_9": {0: ["kinesthetic"], 1: ["logical", "spatial"], 2: ["creative"], 3: ["intrapersonal"]},
+        "q_discovery_10": {0: ["social", "language"], 1: ["kinesthetic"], 2: ["naturalist"], 3: ["intrapersonal"]}
     }
     
     discovery_counts = {

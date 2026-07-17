@@ -495,6 +495,108 @@
     "ai_interpretation_notes": "Measures intrapersonal, logical, creative, social, language, and kinesthetic preferences."
   },
   {
+    "key": "q_discovery_9",
+    "type": "choice",
+    "domain": "kinesthetic",
+    "component": "discovery",
+    "title": {
+      "English": "Explaining to a Friend",
+      "Hindi": "दोस्त को समझाना"
+    },
+    "prompt": {
+      "English": "When you want to explain how to do something, what feels most natural to you?",
+      "Hindi": "जब आप किसी को कुछ करने का तरीका समझाना चाहते हैं, तो आपको क्या सबसे आसान लगता है?"
+    },
+    "options": [
+      {
+        "label": {
+          "English": "Act it out or demonstrate it with your body",
+          "Hindi": "खुद करके या शरीर से दिखाना"
+        },
+        "value": 0,
+        "domains": ["kinesthetic"]
+      },
+      {
+        "label": {
+          "English": "Draw a diagram or write the steps",
+          "Hindi": "आरेख बनाना या चरण लिखना"
+        },
+        "value": 1,
+        "domains": ["logical", "spatial"]
+      },
+      {
+        "label": {
+          "English": "Make up a creative story or example",
+          "Hindi": "एक रचनात्मक कहानी या उदाहरण बनाना"
+        },
+        "value": 2,
+        "domains": ["creative"]
+      },
+      {
+        "label": {
+          "English": "Think quietly about it first before saying anything",
+          "Hindi": "पहले चुपचाप सोचना फिर कहना"
+        },
+        "value": 3,
+        "domains": ["intrapersonal"]
+      }
+    ],
+    "metric": "preference",
+    "difficulty": "easy",
+    "ai_interpretation_notes": "Measures kinesthetic, logical, spatial, creative, and intrapersonal preferences for explanation style."
+  },
+  {
+    "key": "q_discovery_10",
+    "type": "choice",
+    "domain": "kinesthetic",
+    "component": "discovery",
+    "title": {
+      "English": "Weekend Activity",
+      "Hindi": "सप्ताहांत की गतिविधि"
+    },
+    "prompt": {
+      "English": "Which activity sounds most exciting for a free afternoon?",
+      "Hindi": "एक खाली दोपहर के लिए कौन सी गतिविधि सबसे रोमांचक लगती है?"
+    },
+    "options": [
+      {
+        "label": {
+          "English": "Talking and laughing with a group of friends",
+          "Hindi": "दोस्तों के साथ बातें करना और हँसना"
+        },
+        "value": 0,
+        "domains": ["social", "language"]
+      },
+      {
+        "label": {
+          "English": "Playing a sport, doing gymnastics, or dancing",
+          "Hindi": "खेल खेलना, जिमनास्टिक करना या नाचना"
+        },
+        "value": 1,
+        "domains": ["kinesthetic"]
+      },
+      {
+        "label": {
+          "English": "Exploring nature — bugs, plants, or the sky",
+          "Hindi": "प्रकृति की खोज — कीड़े, पौधे या आसमान"
+        },
+        "value": 2,
+        "domains": ["naturalist"]
+      },
+      {
+        "label": {
+          "English": "Sitting quietly with a journal or personal project",
+          "Hindi": "चुपचाप बैठकर डायरी लिखना या निजी प्रोजेक्ट करना"
+        },
+        "value": 3,
+        "domains": ["intrapersonal"]
+      }
+    ],
+    "metric": "preference",
+    "difficulty": "easy",
+    "ai_interpretation_notes": "Measures social, language, kinesthetic, naturalist, and intrapersonal leisure preferences."
+  },
+  {
     "key": "language_race",
     "type": "order_steps",
     "domain": "language",
@@ -848,7 +950,7 @@
   {
     "key": "visualizer_memory_grid",
     "type": "memory_grid",
-    "domain": "kinesthetic",
+    "domain": "spatial",
     "component": "core_deep",
     "title": {
       "English": "Step Memory",
@@ -916,6 +1018,54 @@
     "metric": "correctness",
     "difficulty": "easy",
     "ai_interpretation_notes": "Biomechanical coordinate reasoning and anticipation."
+  },
+  {
+    "key": "kinesthetic_motor_planning",
+    "type": "choice",
+    "domain": "kinesthetic",
+    "component": "core_deep",
+    "title": {
+      "English": "The Rope Bridge",
+      "Hindi": "रस्सी का पुल"
+    },
+    "prompt": {
+      "English": "You are on a wobbling rope bridge. Strong wind blows from the right! What is the best way to balance?",
+      "Hindi": "आप एक हिलते हुए रस्सी के पुल पर हैं। दाईं ओर से तेज हवा चलती है! सुरक्षित रहने के लिए आप क्या करेंगे?"
+    },
+    "options": [
+      {
+        "label": {
+          "English": "Bend knees, spread arms, and lean slightly right",
+          "Hindi": "घुटनों को मोड़ें, हाथ फैलाएं और थोड़ा दाईं ओर झुकें"
+        },
+        "value": 4
+      },
+      {
+        "label": {
+          "English": "Stand straight and close eyes",
+          "Hindi": "बिल्कुल सीधे खड़े रहें और आंखें बंद करें"
+        },
+        "value": 0
+      },
+      {
+        "label": {
+          "English": "Run fast to the other side",
+          "Hindi": "जितनी तेजी से हो सके दूसरी तरफ दौड़ें"
+        },
+        "value": 1
+      },
+      {
+        "label": {
+          "English": "Sit down and shout for help",
+          "Hindi": "रस्सी के पुल पर बैठ जाएं और मदद के लिए चिल्लाएं"
+        },
+        "value": 2
+      }
+    ],
+    "answer": "Bend knees, spread arms, and lean slightly right",
+    "metric": "correctness",
+    "difficulty": "medium",
+    "ai_interpretation_notes": "Motor planning and body stabilisation under dynamic conditions."
   },
   {
     "key": "naturalist_weather",
