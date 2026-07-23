@@ -1321,6 +1321,7 @@ export default function Dashboard() {
                   <tr>
                     <th>Student Name</th>
                     <th>Age</th>
+                    <th>Class</th>
                     <th>Gender</th>
                     <th>Centre</th>
                     <th>Assessed Top Talent</th>
@@ -1334,7 +1335,7 @@ export default function Dashboard() {
                   ))}
                   {filteredChildren.length === 0 && (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: "center", color: "#9ca3af", padding: "20px 0" }}>
+                      <td colSpan={8} style={{ textAlign: "center", color: "#9ca3af", padding: "20px 0" }}>
                         No children registered in this centre yet.
                       </td>
                     </tr>
@@ -1579,6 +1580,7 @@ function ChildRecordRow({ child, navigate, role }) {
     <tr>
       <td style={{ fontWeight: 600 }}>{child.name}</td>
       <td>{child.age}</td>
+      <td>{child.school_year || "—"}</td>
       <td>{child.gender || "Not specified"}</td>
       <td>{child.center_name || "Unassigned"}</td>
       <td>
