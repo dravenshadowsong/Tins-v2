@@ -3,6 +3,21 @@ import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { DOMAINS } from "../data/questions";
 
+const spinStyle = {
+  display: "inline-block",
+  animation: "mentorSpin 0.8s linear infinite",
+  marginRight: 6,
+  fontSize: 18,
+  lineHeight: 1,
+};
+
+const spinKeyframes = `
+@keyframes mentorSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+`;
+
 export default function MentorMatch() {
   const { cid } = useParams();
   const [params] = useSearchParams();
@@ -45,6 +60,7 @@ export default function MentorMatch() {
 
   return (
     <div>
+      <style>{spinKeyframes}</style>
       <div className="page-header">
         <h1>Mentor Matching</h1>
         <p>Connect {child?.name} with a mentor in their top talent domain.</p>
@@ -90,7 +106,12 @@ export default function MentorMatch() {
             onClick={doMatch}
             disabled={!selected || matching}
           >
-            {matching ? "Creating match..." : "Confirm Mentor Match"}
+            {matching ? (
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={spinStyle}>↻</span>
+                Creating match...
+              </span>
+            ) : "Confirm Mentor Match"}
           </button>
         </>
       ) : (
