@@ -5236,6 +5236,837 @@ def export_session_pdf(sid):
     )
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INVENT IT — Performance Evidence Module
+# ═══════════════════════════════════════════════════════════════════════════════
+
+import uuid as _uuid
+
+# ── Invent It: SQLite migration helper ───────────────────────────────────────
+def _invent_it_init_sqlite():
+    """Ensure Invent It tables exist in SQLite fallback DB."""
+    try:
+        db = get_db()
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS invent_it_sessions (
+                id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id                INTEGER,
+                session_uuid              TEXT UNIQUE NOT NULL,
+                experience_id             TEXT DEFAULT 'invent_it_v1',
+                facilitator_id            INTEGER,
+                language                  TEXT DEFAULT 'en',
+                status                    TEXT DEFAULT 'in_progress',
+                start_ts                  TEXT DEFAULT (datetime('now')),
+                end_ts                    TEXT,
+                total_duration_ms         INTEGER,
+                time_to_first_response_ms INTEGER,
+                number_of_ideas           INTEGER DEFAULT 0,
+                number_of_submissions     INTEGER DEFAULT 0,
+                number_of_revisions       INTEGER DEFAULT 0,
+                number_of_voice_responses INTEGER DEFAULT 0,
+                number_of_text_responses  INTEGER DEFAULT 0,
+                number_of_drawings        INTEGER DEFAULT 0,
+                hint_count                INTEGER DEFAULT 0,
+                round1_output             TEXT,
+                round2_output             TEXT,
+                raw_metrics               TEXT,
+                created_at                TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS invent_it_responses (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid     TEXT NOT NULL,
+                round_id         INTEGER NOT NULL,
+                idea_index       INTEGER,
+                input_type       TEXT NOT NULL,
+                text_content     TEXT,
+                drawing_url      TEXT,
+                voice_url        TEXT,
+                voice_transcript TEXT,
+                language         TEXT,
+                duration_ms      INTEGER,
+                submitted_at     TEXT DEFAULT (datetime('now')),
+                revised          INTEGER DEFAULT 0,
+                revision_of      INTEGER
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS invent_it_events (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid TEXT NOT NULL,
+                round_id     INTEGER,
+                event_type   TEXT NOT NULL,
+                event_data   TEXT,
+                ts           TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS invent_it_ai_analysis (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid       TEXT NOT NULL,
+                response_id        INTEGER,
+                idea_id            TEXT,
+                behaviour_evidence TEXT,
+                evidence_quality   TEXT,
+                reasoning          TEXT,
+                model_version      TEXT,
+                analysed_at        TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS invent_it_behaviour_evidence (
+                id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid             TEXT UNIQUE NOT NULL,
+                o1_score                 REAL,
+                o2_score                 REAL,
+                o3_score                 REAL,
+                o4_score                 REAL,
+                o5_score                 REAL,
+                o6_score                 REAL,
+                provisional_rubric_score INTEGER,
+                evidence_confidence      TEXT,
+                round1_ideas             INTEGER DEFAULT 0,
+                round2_ideas             INTEGER DEFAULT 0,
+                cross_round_analysis     TEXT,
+                notes                    TEXT,
+                computed_at              TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS invent_it_facilitator_obs (
+                id                               INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid                     TEXT NOT NULL,
+                facilitator_id                   INTEGER,
+                obs_continued_without_prompting  INTEGER DEFAULT -1,
+                obs_multiple_ideas               INTEGER DEFAULT -1,
+                obs_revised_idea                 INTEGER DEFAULT -1,
+                obs_experimented_alternatives    INTEGER DEFAULT -1,
+                obs_stuck_after_first            INTEGER DEFAULT -1,
+                obs_persisted_after_difficulty   INTEGER DEFAULT -1,
+                obs_explained_reasoning          INTEGER DEFAULT -1,
+                additional_notes                 TEXT,
+                submitted_at                     TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.commit()
+    except Exception as e:
+        print(f"[INVENT IT] SQLite table init warning: {e}")
+
+# ── AI Evidence Classification ────────────────────────────────────────────────
+_GEMINI_MODEL = None
+_GEMINI_AVAILABLE = False
+
+def _init_gemini():
+    global _GEMINI_MODEL, _GEMINI_AVAILABLE
+    try:
+        import google.generativeai as genai
+        api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if api_key:
+            genai.configure(api_key=api_key)
+            _GEMINI_MODEL = genai.GenerativeModel("gemini-1.5-flash")
+            _GEMINI_AVAILABLE = True
+            print("[INVENT IT] Gemini AI classifier initialised.")
+        else:
+            print("[INVENT IT] No GEMINI_API_KEY found — using heuristic classifier.")
+    except ImportError:
+        print("[INVENT IT] google-generativeai not installed — using heuristic classifier.")
+    except Exception as e:
+        print(f"[INVENT IT] Gemini init failed: {e} — using heuristic classifier.")
+
+_init_gemini()
+
+_COMMON_USES_CARDBOARD_BOX = {
+    "storage box", "box", "store things", "keep things", "container", "put things in",
+    "storage", "keep clothes", "keep books", "trash can", "dustbin", "garbage bin",
+    "rakhna", "dabba", "samaan rakhna", "box mein rakhna"
+}
+
+def _heuristic_classify(text, round_id):
+    """Rule-based fallback classifier returning O1-O6 scores 0-3."""
+    if not text or not text.strip():
+        return {"O1":0,"O2":0,"O3":0,"O4":0,"O5":0,"O6":0}
+
+    t = text.lower().strip()
+    scores = {"O1":0,"O2":0,"O3":0,"O4":0,"O5":0,"O6":0}
+    words = set(t.split())
+
+    # O1 — Uncommon Idea Generation
+    is_common = any(cu in t for cu in _COMMON_USES_CARDBOARD_BOX)
+    if not is_common:
+        scores["O1"] = 2
+        if len(words) > 15:
+            scores["O1"] = 3
+
+    # O2 — Concept Combination (multiple domains mentioned)
+    domain_keywords = [
+        ["water","liquid","wet","pour","bucket","carry"],
+        ["light","lamp","torch","solar","electricity","power"],
+        ["music","sound","drum","instrument","beat"],
+        ["plant","garden","soil","seed","grow"],
+        ["toy","play","game","puppet","robot"],
+        ["house","home","shelter","roof","bed"],
+        ["chair","seat","sit","furniture","table"],
+        ["art","paint","draw","canvas","picture"]
+    ]
+    domains_hit = sum(1 for kw_list in domain_keywords if any(kw in t for kw in kw_list))
+    scores["O2"] = min(domains_hit, 3)
+
+    # O3 — Transformation (modifies or repurposes)
+    transform_words = ["turn","make","convert","change","add","attach","connect","combine","fold","cut","paint","decorate","redesign"]
+    scores["O3"] = min(sum(1 for w in transform_words if w in t), 3)
+
+    # O4 — Non-obvious approach
+    unusual_angles = ["help someone","others","poor","rain","disaster","emergency","solar","tech","digital","robot","smart"]
+    scores["O4"] = min(sum(1 for ua in unusual_angles if ua in t), 3)
+
+    # O5 — Independent generation (inferred from idea count — set externally, placeholder here)
+    scores["O5"] = 1 if len(words) > 5 else 0
+
+    # O6 — Meaningful novelty = O1 AND has context/usefulness
+    useful_words = ["because","so that","can be used","helps","useful","would","could","to carry","to hold","to store","to make"]
+    has_usefulness = any(uw in t for uw in useful_words)
+    scores["O6"] = min(scores["O1"] + (1 if has_usefulness else 0), 3)
+
+    return scores
+
+def _ai_classify_idea(text, round_id, constraint_text=""):
+    """Classify a single idea using Gemini or heuristic fallback."""
+    if not text or not text.strip():
+        return {
+            "O1":0,"O2":0,"O3":0,"O4":0,"O5":0,"O6":0,
+            "evidence_quality":"low",
+            "reasoning":"Empty response",
+            "model":"none"
+        }
+
+    if _GEMINI_AVAILABLE and _GEMINI_MODEL:
+        try:
+            constraint_note = ""
+            if round_id == 2 and constraint_text:
+                constraint_note = f"\nRound 2 adds this constraint: {constraint_text}"
+
+            prompt = f"""You are a psychometric researcher analysing a child's creative response (ages 10-14).
+
+Task context: The child was shown a cardboard box and asked to invent new uses for it.
+Round: {round_id}{constraint_note}
+
+Child's response: "{text}"
+
+Rate each indicator on a 0-3 scale ONLY:
+0 = Not present
+1 = Emerging / weak
+2 = Clear / moderate
+3 = Strong / highly evident
+
+Indicators:
+O1: Uncommon Idea Generation — does the child move beyond obvious uses (storage, trash can, keeping things)?
+O2: Concept Combination — does the child combine the box with unrelated concepts (e.g. solar energy + box = lamp)?
+O3: Transformation — does the child meaningfully modify or repurpose rather than just rename?
+O4: Non-obvious Approach — does the child come from an unexpected or creative angle?
+O5: Independent Generation — does the response show self-driven elaboration without prompting?
+O6: Meaningful Novelty — is the idea BOTH unusual AND reasonably meaningful/useful in context?
+
+IMPORTANT RULES:
+- A bizarre answer (e.g. "eat the box") is NOT automatically original. Score O6=0 if meaningless.
+- Do NOT penalise for limited vocabulary, Hindi words, or simple language.
+- Do NOT reward long answers that just list obvious uses.
+- Score honestly even if the idea seems simple.
+
+Return ONLY valid JSON, no explanation outside it:
+{{"O1":N,"O2":N,"O3":N,"O4":N,"O5":N,"O6":N,"evidence_quality":"high|moderate|low","reasoning":"one sentence"}}"""
+
+            response = _GEMINI_MODEL.generate_content(prompt)
+            raw = response.text.strip()
+            # Extract JSON from response
+            import re
+            json_match = re.search(r'\{[^{}]*\}', raw, re.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+                result["model"] = "gemini-1.5-flash"
+                return result
+        except Exception as e:
+            print(f"[INVENT IT] Gemini classification error: {e}. Falling back to heuristic.")
+
+    # Heuristic fallback
+    scores = _heuristic_classify(text, round_id)
+    eq = "moderate" if sum(scores.values()) >= 6 else ("low" if sum(scores.values()) <= 2 else "moderate")
+    return {**scores, "evidence_quality": eq, "reasoning": "Heuristic classification (AI unavailable)", "model": "heuristic"}
+
+def _compute_behaviour_evidence(session_uuid):
+    """Aggregate all AI analyses into provisional rubric + confidence score."""
+    db = get_db()
+    analyses = db.execute(
+        "SELECT behaviour_evidence, evidence_quality, session_uuid FROM invent_it_ai_analysis WHERE session_uuid=?",
+        (session_uuid,)
+    ).fetchall()
+
+    responses = db.execute(
+        "SELECT round_id, input_type FROM invent_it_responses WHERE session_uuid=?",
+        (session_uuid,)
+    ).fetchall()
+
+    round1_count = sum(1 for r in responses if dict(r)["round_id"] == 1)
+    round2_count = sum(1 for r in responses if dict(r)["round_id"] == 2)
+    total = len(analyses)
+
+    if total == 0:
+        return None
+
+    indicator_sums = {"O1":0,"O2":0,"O3":0,"O4":0,"O5":0,"O6":0}
+    indicator_counts = {"O1":0,"O2":0,"O3":0,"O4":0,"O5":0,"O6":0}
+    quality_counts = {"high":0,"moderate":0,"low":0}
+
+    for row in analyses:
+        d = dict(row)
+        be = d.get("behaviour_evidence") or "{}"
+        if isinstance(be, str):
+            try:
+                be = json.loads(be)
+            except Exception:
+                be = {}
+        eq = d.get("evidence_quality", "low")
+        quality_counts[eq] = quality_counts.get(eq, 0) + 1
+        for k in indicator_sums:
+            val = be.get(k.lower(), be.get(k, None))
+            if val is not None:
+                indicator_sums[k] += int(val)
+                indicator_counts[k] += 1
+
+    # Average scores per indicator
+    avg = {}
+    for k in indicator_sums:
+        avg[k] = round(indicator_sums[k] / indicator_counts[k], 2) if indicator_counts[k] > 0 else 0.0
+
+    # Provisional rubric (0-4 scale)
+    composite = sum(avg.values()) / 6.0
+    if composite >= 2.5:
+        rubric = 4
+    elif composite >= 1.8:
+        rubric = 3
+    elif composite >= 1.0:
+        rubric = 2
+    elif composite >= 0.3:
+        rubric = 1
+    else:
+        rubric = 0
+
+    # Evidence confidence
+    if total >= 4 and quality_counts.get("high", 0) >= 2:
+        confidence = "high"
+    elif total >= 2:
+        confidence = "moderate"
+    else:
+        confidence = "low"
+
+    # O5 — boost if child generated many independent ideas
+    if round1_count + round2_count >= 4:
+        avg["O5"] = min(avg["O5"] + 1, 3)
+
+    # Cross-round analysis
+    round1_analyses = []
+    round2_analyses = []
+    all_resp = db.execute(
+        "SELECT id, round_id, text_content FROM invent_it_responses WHERE session_uuid=?",
+        (session_uuid,)
+    ).fetchall()
+    for r in all_resp:
+        rd = dict(r)
+        if rd["round_id"] == 1:
+            round1_analyses.append(rd.get("text_content",""))
+        else:
+            round2_analyses.append(rd.get("text_content",""))
+
+    cross = {
+        "round1_idea_count": round1_count,
+        "round2_idea_count": round2_count,
+        "continued_in_round2": round2_count > 0,
+        "generated_new_in_round2": round2_count > 0,
+        "round2_ideas_sample": round2_analyses[:2]
+    }
+
+    return {
+        "o1": avg["O1"], "o2": avg["O2"], "o3": avg["O3"],
+        "o4": avg["O4"], "o5": avg["O5"], "o6": avg["O6"],
+        "provisional_rubric_score": rubric,
+        "evidence_confidence": confidence,
+        "round1_ideas": round1_count,
+        "round2_ideas": round2_count,
+        "cross_round_analysis": cross,
+        "notes": f"[PROVISIONAL] Based on {total} AI-classified response(s). Rubric not empirically validated. Pilot data required."
+    }
+
+# ── Route: Create Game Session ────────────────────────────────────────────────
+@app.route("/api/invent-it/sessions", methods=["POST", "OPTIONS"])
+def invent_it_create_session():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+    data = request.json or {}
+    session_uuid = str(_uuid.uuid4())
+    student_id = data.get("student_id")
+    language = data.get("language", "en")
+    facilitator_id = data.get("facilitator_id")
+
+    try:
+        if supabase_client:
+            row = supabase_client.table("invent_it_sessions").insert({
+                "session_uuid": session_uuid,
+                "student_id": student_id,
+                "language": language,
+                "facilitator_id": facilitator_id,
+                "status": "in_progress",
+                "experience_id": "invent_it_v1"
+            }).execute()
+            if row.data:
+                return jsonify({"session_uuid": session_uuid, "id": row.data[0].get("id")}), 201
+    except Exception as e:
+        print(f"[INVENT IT] Supabase create session error: {e}")
+
+    # Fallback to local DB
+    _invent_it_init_sqlite()
+    db = get_db()
+    db.execute("""
+        INSERT INTO invent_it_sessions (session_uuid, student_id, language, facilitator_id, status, experience_id)
+        VALUES (?,?,?,?,?,?)
+    """, (session_uuid, student_id, language, facilitator_id, "in_progress", "invent_it_v1"))
+    db.commit()
+    return jsonify({"session_uuid": session_uuid}), 201
+
+# ── Route: Submit Response ────────────────────────────────────────────────────
+@app.route("/api/invent-it/sessions/<session_uuid>/round/<int:round_id>/response", methods=["POST","OPTIONS"])
+def invent_it_submit_response(session_uuid, round_id):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+    data = request.json or {}
+
+    input_type = data.get("input_type", "text")  # text | draw | voice
+    text_content = data.get("text_content", "")
+    drawing_url = data.get("drawing_url", "")
+    voice_url = data.get("voice_url", "")
+    voice_transcript = data.get("voice_transcript", "")
+    language = data.get("language", "en")
+    duration_ms = data.get("duration_ms", 0)
+    idea_index = data.get("idea_index", 0)
+    revised = bool(data.get("revised", False))
+    revision_of = data.get("revision_of")
+
+    resp_data = {
+        "session_uuid": session_uuid,
+        "round_id": round_id,
+        "idea_index": idea_index,
+        "input_type": input_type,
+        "text_content": text_content,
+        "drawing_url": drawing_url,
+        "voice_url": voice_url,
+        "voice_transcript": voice_transcript,
+        "language": language,
+        "duration_ms": duration_ms,
+        "revised": revised,
+        "revision_of": revision_of
+    }
+
+    response_id = None
+    try:
+        if supabase_client:
+            row = supabase_client.table("invent_it_responses").insert(resp_data).execute()
+            if row.data:
+                response_id = row.data[0].get("id")
+    except Exception as e:
+        print(f"[INVENT IT] Supabase insert response error: {e}")
+
+    if response_id is None:
+        db = get_db()
+        cur = db.execute("""
+            INSERT INTO invent_it_responses
+            (session_uuid, round_id, idea_index, input_type, text_content, drawing_url, voice_url, voice_transcript, language, duration_ms, revised, revision_of)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (session_uuid, round_id, idea_index, input_type, text_content, drawing_url, voice_url, voice_transcript, language, duration_ms, int(revised), revision_of))
+        db.commit()
+        response_id = cur.lastrowid
+
+    # Update session counters
+    try:
+        update_fields = {}
+        if input_type == "text":
+            update_fields["number_of_text_responses"] = 1
+        elif input_type == "draw":
+            update_fields["number_of_drawings"] = 1
+        elif input_type == "voice":
+            update_fields["number_of_voice_responses"] = 1
+        if supabase_client:
+            # Increment via RPC isn't easy; we'll do it at complete time
+            pass
+    except Exception:
+        pass
+
+    return jsonify({"response_id": response_id, "status": "saved"}), 201
+
+# ── Route: Log Events ─────────────────────────────────────────────────────────
+@app.route("/api/invent-it/sessions/<session_uuid>/events", methods=["POST","OPTIONS"])
+def invent_it_log_events(session_uuid):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+    data = request.json or {}
+    events = data.get("events", [])
+    if not events:
+        return jsonify({"status": "no events"}), 200
+
+    saved = 0
+    try:
+        if supabase_client:
+            rows = [{"session_uuid": session_uuid, "round_id": e.get("round_id"), "event_type": e.get("event_type",""), "event_data": e.get("event_data",{})} for e in events]
+            supabase_client.table("invent_it_events").insert(rows).execute()
+            saved = len(rows)
+    except Exception as e:
+        print(f"[INVENT IT] Supabase event log error: {e}")
+
+    if saved == 0:
+        db = get_db()
+        for ev in events:
+            db.execute("""
+                INSERT INTO invent_it_events (session_uuid, round_id, event_type, event_data)
+                VALUES (?,?,?,?)
+            """, (session_uuid, ev.get("round_id"), ev.get("event_type",""), json.dumps(ev.get("event_data",{}))))
+        db.commit()
+        saved = len(events)
+
+    return jsonify({"saved": saved}), 200
+
+# ── Route: Complete Session (triggers AI analysis + metrics) ──────────────────
+@app.route("/api/invent-it/sessions/<session_uuid>/complete", methods=["POST","OPTIONS"])
+def invent_it_complete_session(session_uuid):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+    data = request.json or {}
+
+    total_duration_ms = data.get("total_duration_ms", 0)
+    time_to_first_ms = data.get("time_to_first_response_ms", 0)
+    hint_count = data.get("hint_count", 0)
+    round1_output = data.get("round1_output", {})
+    round2_output = data.get("round2_output", {})
+
+    # Fetch all responses for this session
+    responses = []
+    try:
+        if supabase_client:
+            r = supabase_client.table("invent_it_responses").select("*").eq("session_uuid", session_uuid).execute()
+            responses = r.data or []
+    except Exception as e:
+        print(f"[INVENT IT] Supabase fetch responses error: {e}")
+
+    if not responses:
+        db = get_db()
+        rows = db.execute("SELECT * FROM invent_it_responses WHERE session_uuid=?", (session_uuid,)).fetchall()
+        responses = [dict(r) for r in rows]
+
+    # Compute deterministic metrics
+    n_text = sum(1 for r in responses if r.get("input_type") == "text")
+    n_draw = sum(1 for r in responses if r.get("input_type") == "draw")
+    n_voice = sum(1 for r in responses if r.get("input_type") == "voice")
+    n_revised = sum(1 for r in responses if r.get("revised") in [True, 1])
+    n_total = len(responses)
+    r1_count = sum(1 for r in responses if r.get("round_id") == 1)
+    r2_count = sum(1 for r in responses if r.get("round_id") == 2)
+
+    raw_metrics = {
+        "total_ideas": n_total,
+        "round1_ideas": r1_count,
+        "round2_ideas": r2_count,
+        "number_of_revisions": n_revised,
+        "number_of_text_responses": n_text,
+        "number_of_drawings": n_draw,
+        "number_of_voice_responses": n_voice,
+        "hint_count": hint_count,
+        "total_duration_ms": total_duration_ms,
+        "time_to_first_response_ms": time_to_first_ms
+    }
+
+    # AI analysis for each response
+    constraint_text = "help someone carry water without spilling it"
+    for resp in responses:
+        text = resp.get("text_content") or resp.get("voice_transcript") or ""
+        if not text.strip():
+            continue
+        rid = resp.get("round_id", 1)
+        resp_id = resp.get("id")
+
+        classification = _ai_classify_idea(text, rid, constraint_text if rid == 2 else "")
+        idea_id = f"INV{resp_id or _uuid.uuid4().hex[:6].upper()}"
+
+        be_data = {
+            "session_uuid": session_uuid,
+            "response_id": resp_id,
+            "idea_id": idea_id,
+            "behaviour_evidence": {k.lower(): v for k, v in classification.items() if k.startswith("O")},
+            "evidence_quality": classification.get("evidence_quality", "low"),
+            "reasoning": classification.get("reasoning", ""),
+            "model_version": classification.get("model", "heuristic")
+        }
+        try:
+            if supabase_client:
+                supabase_client.table("invent_it_ai_analysis").insert({
+                    **be_data,
+                    "behaviour_evidence": json.dumps(be_data["behaviour_evidence"])
+                }).execute()
+            else:
+                db = get_db()
+                db.execute("""
+                    INSERT INTO invent_it_ai_analysis
+                    (session_uuid, response_id, idea_id, behaviour_evidence, evidence_quality, reasoning, model_version)
+                    VALUES (?,?,?,?,?,?,?)
+                """, (session_uuid, resp_id, idea_id, json.dumps(be_data["behaviour_evidence"]),
+                      be_data["evidence_quality"], be_data["reasoning"], be_data["model_version"]))
+                db.commit()
+        except Exception as e:
+            print(f"[INVENT IT] AI analysis save error: {e}")
+
+    # Compute aggregated behavioural evidence
+    be_summary = _compute_behaviour_evidence(session_uuid)
+
+    if be_summary:
+        try:
+            if supabase_client:
+                existing = supabase_client.table("invent_it_behaviour_evidence").select("id").eq("session_uuid", session_uuid).execute()
+                be_row = {
+                    "session_uuid": session_uuid,
+                    "o1_score": be_summary["o1"], "o2_score": be_summary["o2"],
+                    "o3_score": be_summary["o3"], "o4_score": be_summary["o4"],
+                    "o5_score": be_summary["o5"], "o6_score": be_summary["o6"],
+                    "provisional_rubric_score": be_summary["provisional_rubric_score"],
+                    "evidence_confidence": be_summary["evidence_confidence"],
+                    "round1_ideas": be_summary["round1_ideas"],
+                    "round2_ideas": be_summary["round2_ideas"],
+                    "cross_round_analysis": json.dumps(be_summary["cross_round_analysis"]),
+                    "notes": be_summary["notes"]
+                }
+                if existing.data:
+                    supabase_client.table("invent_it_behaviour_evidence").update(be_row).eq("session_uuid", session_uuid).execute()
+                else:
+                    supabase_client.table("invent_it_behaviour_evidence").insert(be_row).execute()
+            else:
+                db = get_db()
+                db.execute("""
+                    INSERT OR REPLACE INTO invent_it_behaviour_evidence
+                    (session_uuid, o1_score, o2_score, o3_score, o4_score, o5_score, o6_score,
+                     provisional_rubric_score, evidence_confidence, round1_ideas, round2_ideas,
+                     cross_round_analysis, notes)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (session_uuid, be_summary["o1"], be_summary["o2"], be_summary["o3"],
+                      be_summary["o4"], be_summary["o5"], be_summary["o6"],
+                      be_summary["provisional_rubric_score"], be_summary["evidence_confidence"],
+                      be_summary["round1_ideas"], be_summary["round2_ideas"],
+                      json.dumps(be_summary["cross_round_analysis"]), be_summary["notes"]))
+                db.commit()
+        except Exception as e:
+            print(f"[INVENT IT] Behaviour evidence save error: {e}")
+
+    # Update session as complete
+    update_data = {
+        "status": "complete",
+        "end_ts": datetime.utcnow().isoformat(),
+        "total_duration_ms": total_duration_ms,
+        "time_to_first_response_ms": time_to_first_ms,
+        "number_of_ideas": n_total,
+        "number_of_submissions": n_total,
+        "number_of_revisions": n_revised,
+        "number_of_text_responses": n_text,
+        "number_of_drawings": n_draw,
+        "number_of_voice_responses": n_voice,
+        "hint_count": hint_count,
+        "round1_output": json.dumps(round1_output),
+        "round2_output": json.dumps(round2_output),
+        "raw_metrics": json.dumps(raw_metrics)
+    }
+    try:
+        if supabase_client:
+            supabase_client.table("invent_it_sessions").update(update_data).eq("session_uuid", session_uuid).execute()
+        else:
+            db = get_db()
+            db.execute("""
+                UPDATE invent_it_sessions SET
+                status=?, end_ts=?, total_duration_ms=?, time_to_first_response_ms=?,
+                number_of_ideas=?, number_of_submissions=?, number_of_revisions=?,
+                number_of_text_responses=?, number_of_drawings=?, number_of_voice_responses=?,
+                hint_count=?, round1_output=?, round2_output=?, raw_metrics=?
+                WHERE session_uuid=?
+            """, (update_data["status"], update_data["end_ts"], total_duration_ms, time_to_first_ms,
+                  n_total, n_total, n_revised, n_text, n_draw, n_voice, hint_count,
+                  update_data["round1_output"], update_data["round2_output"], update_data["raw_metrics"],
+                  session_uuid))
+            db.commit()
+    except Exception as e:
+        print(f"[INVENT IT] Session complete update error: {e}")
+
+    return jsonify({
+        "status": "complete",
+        "raw_metrics": raw_metrics,
+        "behaviour_evidence": be_summary,
+        "session_uuid": session_uuid
+    }), 200
+
+# ── Route: Get Session ────────────────────────────────────────────────────────
+@app.route("/api/invent-it/sessions/<session_uuid>", methods=["GET"])
+def invent_it_get_session(session_uuid):
+    session = None
+    try:
+        if supabase_client:
+            r = supabase_client.table("invent_it_sessions").select("*").eq("session_uuid", session_uuid).execute()
+            if r.data:
+                session = r.data[0]
+    except Exception as e:
+        print(f"[INVENT IT] Get session error: {e}")
+
+    if not session:
+        db = get_db()
+        row = db.execute("SELECT * FROM invent_it_sessions WHERE session_uuid=?", (session_uuid,)).fetchone()
+        if row:
+            session = dict(row)
+
+    if not session:
+        return jsonify({"error": "Session not found"}), 404
+
+    return jsonify(session), 200
+
+# ── Route: Facilitator Observation ────────────────────────────────────────────
+@app.route("/api/invent-it/sessions/<session_uuid>/facilitator-observation", methods=["POST","OPTIONS"])
+def invent_it_facilitator_obs(session_uuid):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+    user = current_user()
+    data = request.json or {}
+
+    obs_data = {
+        "session_uuid": session_uuid,
+        "facilitator_id": user["id"] if user else None,
+        "obs_continued_without_prompting": data.get("obs_continued_without_prompting", -1),
+        "obs_multiple_ideas": data.get("obs_multiple_ideas", -1),
+        "obs_revised_idea": data.get("obs_revised_idea", -1),
+        "obs_experimented_alternatives": data.get("obs_experimented_alternatives", -1),
+        "obs_stuck_after_first": data.get("obs_stuck_after_first", -1),
+        "obs_persisted_after_difficulty": data.get("obs_persisted_after_difficulty", -1),
+        "obs_explained_reasoning": data.get("obs_explained_reasoning", -1),
+        "additional_notes": data.get("additional_notes", "")
+    }
+
+    try:
+        if supabase_client:
+            supabase_client.table("invent_it_facilitator_obs").insert(obs_data).execute()
+            return jsonify({"status": "saved"}), 201
+    except Exception as e:
+        print(f"[INVENT IT] Facilitator obs save error: {e}")
+
+    db = get_db()
+    db.execute("""
+        INSERT INTO invent_it_facilitator_obs
+        (session_uuid, facilitator_id, obs_continued_without_prompting, obs_multiple_ideas,
+         obs_revised_idea, obs_experimented_alternatives, obs_stuck_after_first,
+         obs_persisted_after_difficulty, obs_explained_reasoning, additional_notes)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+    """, (session_uuid, obs_data["facilitator_id"],
+          obs_data["obs_continued_without_prompting"], obs_data["obs_multiple_ideas"],
+          obs_data["obs_revised_idea"], obs_data["obs_experimented_alternatives"],
+          obs_data["obs_stuck_after_first"], obs_data["obs_persisted_after_difficulty"],
+          obs_data["obs_explained_reasoning"], obs_data["additional_notes"]))
+    db.commit()
+    return jsonify({"status": "saved"}), 201
+
+# ── Route: Admin — List Sessions ──────────────────────────────────────────────
+@app.route("/api/invent-it/admin/sessions", methods=["GET"])
+def invent_it_admin_sessions():
+    user, error = require_user()
+    if error:
+        return error
+    if user.get("role") not in ("master_admin", "admin", "facilitator"):
+        return jsonify({"error": "Forbidden"}), 403
+
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 20))
+    offset = (page - 1) * limit
+
+    sessions = []
+    try:
+        if supabase_client:
+            q = supabase_client.table("invent_it_sessions").select(
+                "id, session_uuid, student_id, language, status, start_ts, end_ts, number_of_ideas, evidence_confidence:invent_it_behaviour_evidence(evidence_confidence)"
+            ).order("created_at", desc=True).range(offset, offset + limit - 1)
+            r = supabase_client.table("invent_it_sessions").select("*").order("created_at", desc=True).range(offset, offset + limit - 1).execute()
+            sessions = r.data or []
+    except Exception as e:
+        print(f"[INVENT IT] Admin sessions error: {e}")
+
+    if not sessions:
+        db = get_db()
+        rows = db.execute("""
+            SELECT s.*, be.evidence_confidence, be.provisional_rubric_score
+            FROM invent_it_sessions s
+            LEFT JOIN invent_it_behaviour_evidence be ON be.session_uuid = s.session_uuid
+            ORDER BY s.created_at DESC LIMIT ? OFFSET ?
+        """, (limit, offset)).fetchall()
+        sessions = [dict(r) for r in rows]
+
+    return jsonify({"sessions": sessions, "page": page, "limit": limit}), 200
+
+# ── Route: Admin — Research View ──────────────────────────────────────────────
+@app.route("/api/invent-it/admin/sessions/<session_uuid>/research", methods=["GET"])
+def invent_it_research_view(session_uuid):
+    user, error = require_user()
+    if error:
+        return error
+    if user.get("role") not in ("master_admin", "admin"):
+        return jsonify({"error": "Forbidden — Research Mode requires admin access"}), 403
+
+    result = {}
+
+    def _fetch(table, field="session_uuid"):
+        try:
+            if supabase_client:
+                r = supabase_client.table(table).select("*").eq(field, session_uuid).execute()
+                return r.data or []
+        except Exception as e:
+            print(f"[INVENT IT] Research fetch {table} error: {e}")
+        db = get_db()
+        rows = db.execute(f"SELECT * FROM {table} WHERE {field}=?", (session_uuid,)).fetchall()
+        return [dict(r) for r in rows]
+
+    result["session"] = (_fetch("invent_it_sessions") or [{}])[0]
+    result["responses"] = _fetch("invent_it_responses")
+    result["events"] = _fetch("invent_it_events")
+    result["ai_analysis"] = _fetch("invent_it_ai_analysis")
+    result["behaviour_evidence"] = (_fetch("invent_it_behaviour_evidence") or [{}])[0]
+    result["facilitator_observations"] = _fetch("invent_it_facilitator_obs")
+
+    # Attach child info if available
+    student_id = result["session"].get("student_id")
+    if student_id:
+        try:
+            db = get_db()
+            child = db.execute("SELECT id, name, age, gender, school_year FROM children WHERE id=?", (student_id,)).fetchone()
+            result["child"] = dict(child) if child else {}
+        except Exception:
+            result["child"] = {}
+
+    return jsonify(result), 200
+
+# ── Route: Hint usage update ──────────────────────────────────────────────────
+@app.route("/api/invent-it/sessions/<session_uuid>/hint", methods=["POST","OPTIONS"])
+def invent_it_hint(session_uuid):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+    try:
+        if supabase_client:
+            r = supabase_client.table("invent_it_sessions").select("hint_count").eq("session_uuid", session_uuid).execute()
+            current = (r.data or [{}])[0].get("hint_count", 0)
+            supabase_client.table("invent_it_sessions").update({"hint_count": current + 1}).eq("session_uuid", session_uuid).execute()
+        else:
+            db = get_db()
+            db.execute("UPDATE invent_it_sessions SET hint_count = hint_count + 1 WHERE session_uuid=?", (session_uuid,))
+            db.commit()
+    except Exception as e:
+        print(f"[INVENT IT] Hint update error: {e}")
+    return jsonify({"status": "ok"}), 200
+
+
 # Initialize database on import (Gunicorn/production compatibility)
 init_db()
 

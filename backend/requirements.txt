@@ -5,3 +5,4 @@ gunicorn==21.2.0
 supabase
 flask-cors
 reportlab
+google-generativeai

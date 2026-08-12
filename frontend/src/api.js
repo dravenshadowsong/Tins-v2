@@ -73,5 +73,17 @@ export const api = {
   getAnalytics:    ()          => req("GET",  "/analytics"),
   downloadPDF:     (sid)       => `${BASE}/sessions/${sid}/pdf`,
   getAdaptiveQuestions: (id, data) => req("POST", `/sessions/${id}/adaptive`, data),
-};
 
+  // ── Invent It — Performance Evidence Module ─────────────────────────────
+  inventIt: {
+    createSession:          (data)            => req("POST", "/invent-it/sessions", data),
+    submitResponse:         (uuid, round, d)  => req("POST", `/invent-it/sessions/${uuid}/round/${round}/response`, d),
+    logEvents:              (uuid, d)         => req("POST", `/invent-it/sessions/${uuid}/events`, d),
+    complete:               (uuid, d)         => req("POST", `/invent-it/sessions/${uuid}/complete`, d),
+    getSession:             (uuid)            => req("GET",  `/invent-it/sessions/${uuid}`),
+    hint:                   (uuid)            => req("POST", `/invent-it/sessions/${uuid}/hint`, {}),
+    submitFacilitatorObs:   (uuid, d)         => req("POST", `/invent-it/sessions/${uuid}/facilitator-observation`, d),
+    adminSessions:          (params)          => req("GET",  `/invent-it/admin/sessions?${new URLSearchParams(params || {})}`),
+    researchView:           (uuid)            => req("GET",  `/invent-it/admin/sessions/${uuid}/research`),
+  },
+};
