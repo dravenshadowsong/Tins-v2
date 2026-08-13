@@ -6067,6 +6067,648 @@ def invent_it_hint(session_uuid):
     return jsonify({"status": "ok"}), 200
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ARTSPARK — Gamified Adaptive Psychometric Module (Creative & Artistic)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Architecture:
+#   • Item bank: artspark_item_bank — 6 domains × 4 difficulty tiers
+#   • Session:   artspark_sessions  — tracks theta estimates, XP, medals, trail
+#   • Response:  artspark_responses — per-question answer log
+#
+# Adaptive algorithm: IRT-lite (1-parameter logistic approximation)
+#   θ ← θ + 0.4 × (correct - P(correct))
+#   P(correct) = 1 / (1 + exp(-1.7 × (θ - b)))   where b = item difficulty
+# ═══════════════════════════════════════════════════════════════════════════════
+
+import math as _math
+
+_ARTSPARK_DOMAINS   = ["visual_art","music","storytelling","drama","dance_movement","craft_design"]
+_ARTSPARK_TIERS     = {"easy":(-2.0,-0.5),"medium":(-0.5,0.5),"hard":(0.5,1.5),"expert":(1.5,2.5)}
+_ARTSPARK_MAX_Q     = 12   # questions per domain before session auto-completes
+_ARTSPARK_SE_CUTOFF = 0.30 # standard error convergence threshold (stops early)
+
+# ── Medal thresholds (theta) ──────────────────────────────────────────────────
+def _artspark_medal(theta):
+    if theta is None:
+        return "none"
+    if theta >= 1.5:
+        return "platinum"
+    if theta >= 0.8:
+        return "gold"
+    if theta >= 0.1:
+        return "silver"
+    if theta >= -0.5:
+        return "bronze"
+    return "none"
+
+# ── IRT 1PL probability ───────────────────────────────────────────────────────
+def _artspark_p_correct(theta, b):
+    return 1.0 / (1.0 + _math.exp(-1.7 * (theta - b)))
+
+# ── Theta update ──────────────────────────────────────────────────────────────
+def _artspark_update_theta(theta, b, correct):
+    """1PL EAP-lite update: move theta toward the ability implied by the response."""
+    p = _artspark_p_correct(theta, b)
+    delta = 0.4 * ((1 if correct else 0) - p)
+    new_theta = max(-3.0, min(3.0, theta + delta))
+    return round(new_theta, 4)
+
+# ── Standard error estimate ───────────────────────────────────────────────────
+def _artspark_se(theta, answered_bs):
+    """Approx Fisher information sum for SE calculation."""
+    if not answered_bs:
+        return 99.0
+    info = sum(_artspark_p_correct(theta, b) * (1 - _artspark_p_correct(theta, b)) for b in answered_bs)
+    return round(1.0 / _math.sqrt(max(info, 0.0001)), 4)
+
+# ── XP calculation ────────────────────────────────────────────────────────────
+def _artspark_xp(is_correct, tier, streak):
+    base     = {"easy":10,"medium":20,"hard":35,"expert":50}.get(tier, 15)
+    bonus    = base if is_correct else 0
+    streak_b = min(streak, 5) * 5  # +5 XP per streak level, capped at +25
+    return base + bonus + streak_b
+
+# ── Next question selector ─────────────────────────────────────────────────────
+def _artspark_next_question(theta, domain, answered_uuids, db):
+    """
+    Select the next item from the bank closest to the current theta,
+    excluding already-answered items and preferring the matching difficulty tier.
+    """
+    target_b = theta  # target difficulty = current ability estimate
+
+    if supabase_client:
+        try:
+            r = supabase_client.table("artspark_item_bank")\
+                .select("*")\
+                .eq("domain", domain)\
+                .eq("active", 1)\
+                .execute()
+            rows = r.data or []
+        except Exception as e:
+            print(f"[ARTSPARK] Supabase item fetch error: {e}")
+            rows = []
+        if not rows:
+            # Fallback to SQLite
+            rows = [dict(r) for r in db.execute(
+                "SELECT * FROM artspark_item_bank WHERE domain=? AND active=1", (domain,)
+            ).fetchall()]
+    else:
+        rows = [dict(r) for r in db.execute(
+            "SELECT * FROM artspark_item_bank WHERE domain=? AND active=1", (domain,)
+        ).fetchall()]
+
+    # Filter out already-answered
+    candidates = [r for r in rows if r["item_uuid"] not in answered_uuids]
+    if not candidates:
+        return None
+
+    # Pick the item with difficulty closest to theta
+    best = min(candidates, key=lambda r: abs(r["difficulty"] - target_b))
+    return best
+
+# ── SQLite table init ──────────────────────────────────────────────────────────
+def _artspark_init_sqlite():
+    """Ensure ArtSpark tables exist in SQLite fallback DB."""
+    try:
+        db = get_db()
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS artspark_item_bank (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_uuid   TEXT UNIQUE NOT NULL,
+                domain      TEXT NOT NULL,
+                tier        TEXT NOT NULL,
+                difficulty  REAL NOT NULL DEFAULT 0.0,
+                q_type      TEXT NOT NULL,
+                prompt      TEXT NOT NULL,
+                options     TEXT,
+                correct_key TEXT,
+                explanation TEXT,
+                tags        TEXT,
+                language    TEXT DEFAULT 'en',
+                active      INTEGER DEFAULT 1,
+                created_at  TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS artspark_sessions (
+                id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid        TEXT UNIQUE NOT NULL,
+                child_id            INTEGER,
+                student_id          INTEGER,
+                facilitator_id      INTEGER,
+                language            TEXT DEFAULT 'en',
+                status              TEXT DEFAULT 'in_progress',
+                domain_order        TEXT,
+                current_domain_idx  INTEGER DEFAULT 0,
+                current_q_idx       INTEGER DEFAULT 0,
+                theta               TEXT DEFAULT '{}',
+                medals              TEXT DEFAULT '{}',
+                xp_total            INTEGER DEFAULT 0,
+                streak_max          INTEGER DEFAULT 0,
+                questions_answered  INTEGER DEFAULT 0,
+                raw_item_trail      TEXT DEFAULT '[]',
+                start_ts            TEXT DEFAULT (datetime('now')),
+                end_ts              TEXT,
+                total_duration_ms   INTEGER,
+                created_at          TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS artspark_responses (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_uuid    TEXT NOT NULL,
+                item_uuid       TEXT NOT NULL,
+                domain          TEXT NOT NULL,
+                tier            TEXT NOT NULL,
+                difficulty      REAL,
+                q_type          TEXT,
+                response_value  TEXT,
+                is_correct      INTEGER,
+                response_ms     INTEGER,
+                theta_before    REAL,
+                theta_after     REAL,
+                xp_earned       INTEGER DEFAULT 0,
+                submitted_at    TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        db.commit()
+        print("[ARTSPARK] SQLite tables initialised.")
+    except Exception as e:
+        print(f"[ARTSPARK] SQLite init warning: {e}")
+
+# ── Helper: read/write session ─────────────────────────────────────────────────
+def _artspark_get_session(session_uuid, db):
+    if supabase_client:
+        try:
+            r = supabase_client.table("artspark_sessions").select("*").eq("session_uuid", session_uuid).execute()
+            if r.data:
+                return r.data[0]
+        except Exception:
+            pass
+    row = db.execute("SELECT * FROM artspark_sessions WHERE session_uuid=?", (session_uuid,)).fetchone()
+    return dict(row) if row else None
+
+def _artspark_update_session(session_uuid, fields, db):
+    if supabase_client:
+        try:
+            supabase_client.table("artspark_sessions").update(fields).eq("session_uuid", session_uuid).execute()
+            return
+        except Exception as e:
+            print(f"[ARTSPARK] Supabase session update error: {e}")
+    cols  = ", ".join(f"{k}=?" for k in fields)
+    vals  = list(fields.values()) + [session_uuid]
+    db.execute(f"UPDATE artspark_sessions SET {cols} WHERE session_uuid=?", vals)
+    db.commit()
+
+# ══ Route: Create Session ══════════════════════════════════════════════════════
+@app.route("/api/artspark/sessions", methods=["POST","OPTIONS"])
+def artspark_create_session():
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    data         = request.json or {}
+    child_id     = data.get("child_id")
+    student_id   = data.get("student_id") or child_id
+    language     = data.get("language", "en")
+    domains      = data.get("domains", _ARTSPARK_DOMAINS[:])
+    facilitator_id = None
+
+    # Optional auth (session can be anonymous like Invent It)
+    try:
+        user, _ = require_user()
+        if user:
+            facilitator_id = user.get("id")
+    except Exception:
+        pass
+
+    session_uuid  = str(_uuid.uuid4())
+    theta_init    = json.dumps({d: 0.0 for d in domains})
+    medals_init   = json.dumps({d: "none" for d in domains})
+    domain_order  = json.dumps(domains)
+
+    record = {
+        "session_uuid":     session_uuid,
+        "child_id":         child_id,
+        "student_id":       student_id,
+        "facilitator_id":   facilitator_id,
+        "language":         language,
+        "status":           "in_progress",
+        "domain_order":     domain_order,
+        "current_domain_idx": 0,
+        "current_q_idx":    0,
+        "theta":            theta_init,
+        "medals":           medals_init,
+        "xp_total":         0,
+        "streak_max":       0,
+        "questions_answered": 0,
+        "raw_item_trail":   "[]",
+    }
+
+    if supabase_client:
+        try:
+            supabase_client.table("artspark_sessions").insert(record).execute()
+        except Exception as e:
+            print(f"[ARTSPARK] Supabase create session error: {e}")
+    db = get_db()
+    try:
+        db.execute("""
+            INSERT OR IGNORE INTO artspark_sessions
+            (session_uuid,child_id,student_id,facilitator_id,language,status,
+             domain_order,current_domain_idx,current_q_idx,theta,medals,
+             xp_total,streak_max,questions_answered,raw_item_trail)
+            VALUES (?,?,?,?,?,?,?,0,0,?,?,0,0,0,'[]')
+        """, (session_uuid, child_id, student_id, facilitator_id, language,
+              "in_progress", domain_order, theta_init, medals_init))
+        db.commit()
+    except Exception as e:
+        print(f"[ARTSPARK] SQLite create session error: {e}")
+
+    # Fetch first question
+    domains_list = json.loads(domain_order)
+    domain       = domains_list[0]
+    theta_map    = json.loads(theta_init)
+    theta        = theta_map.get(domain, 0.0)
+    first_item   = _artspark_next_question(theta, domain, set(), db)
+
+    return jsonify({
+        "session_uuid":    session_uuid,
+        "domain":          domain,
+        "domain_idx":      0,
+        "q_idx":           0,
+        "domains":         domains_list,
+        "xp_total":        0,
+        "streak":          0,
+        "theta":           theta_map,
+        "next_question":   _artspark_format_item(first_item),
+    }), 201
+
+
+# ── Helper: strip correct_key before sending to client ───────────────────────
+def _artspark_format_item(item):
+    if not item:
+        return None
+    safe = {k: v for k, v in item.items() if k not in ("correct_key","explanation")}
+    # Parse options JSON string to list/dict
+    if safe.get("options") and isinstance(safe["options"], str):
+        try:
+            safe["options"] = json.loads(safe["options"])
+        except Exception:
+            pass
+    if safe.get("tags") and isinstance(safe["tags"], str):
+        try:
+            safe["tags"] = json.loads(safe["tags"])
+        except Exception:
+            pass
+    return safe
+
+
+# ══ Route: Get Session State ═══════════════════════════════════════════════════
+@app.route("/api/artspark/sessions/<session_uuid>", methods=["GET"])
+def artspark_get_session(session_uuid):
+    db  = get_db()
+    sess = _artspark_get_session(session_uuid, db)
+    if not sess:
+        return jsonify({"error": "Session not found"}), 404
+
+    domains      = json.loads(sess.get("domain_order") or "[]")
+    theta_map    = json.loads(sess.get("theta") or "{}")
+    medals_map   = json.loads(sess.get("medals") or "{}")
+    trail        = json.loads(sess.get("raw_item_trail") or "[]")
+    answered_ids = {t["item_uuid"] for t in trail}
+    dom_idx      = int(sess.get("current_domain_idx", 0))
+    domain       = domains[dom_idx] if dom_idx < len(domains) else None
+    theta        = theta_map.get(domain, 0.0) if domain else 0.0
+    next_item    = _artspark_next_question(theta, domain, answered_ids, db) if domain else None
+
+    return jsonify({
+        "session_uuid":      session_uuid,
+        "status":            sess.get("status"),
+        "domains":           domains,
+        "current_domain":    domain,
+        "domain_idx":        dom_idx,
+        "q_idx":             int(sess.get("current_q_idx", 0)),
+        "theta":             theta_map,
+        "medals":            medals_map,
+        "xp_total":          int(sess.get("xp_total", 0)),
+        "streak_max":        int(sess.get("streak_max", 0)),
+        "questions_answered":int(sess.get("questions_answered", 0)),
+        "next_question":     _artspark_format_item(next_item),
+    }), 200
+
+
+# ══ Route: Submit Response → Get Next Adaptive Question ════════════════════════
+@app.route("/api/artspark/sessions/<session_uuid>/respond", methods=["POST","OPTIONS"])
+def artspark_respond(session_uuid):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    data          = request.json or {}
+    item_uuid     = data.get("item_uuid")
+    response_val  = data.get("response_value", "")
+    response_ms   = int(data.get("response_ms", 0))
+
+    if not item_uuid:
+        return jsonify({"error": "item_uuid required"}), 400
+
+    db   = get_db()
+    sess = _artspark_get_session(session_uuid, db)
+    if not sess:
+        return jsonify({"error": "Session not found"}), 404
+    if sess.get("status") == "completed":
+        return jsonify({"error": "Session already completed"}), 400
+
+    # ── Fetch item from bank ──────────────────────────────────────────────────
+    item = None
+    if supabase_client:
+        try:
+            r = supabase_client.table("artspark_item_bank").select("*").eq("item_uuid", item_uuid).execute()
+            if r.data:
+                item = r.data[0]
+        except Exception:
+            pass
+    if not item:
+        row = db.execute("SELECT * FROM artspark_item_bank WHERE item_uuid=?", (item_uuid,)).fetchone()
+        if row:
+            item = dict(row)
+
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    domain      = item["domain"]
+    tier        = item["tier"]
+    b           = float(item["difficulty"])
+    q_type      = item["q_type"]
+    correct_key = item.get("correct_key")
+
+    # ── Score the response ────────────────────────────────────────────────────
+    if q_type in ("image_choice","sequence") and correct_key:
+        # sequence: correct_key is JSON array, response_value must match
+        if q_type == "sequence":
+            try:
+                correct_list = json.loads(correct_key) if isinstance(correct_key, str) else correct_key
+                resp_list    = json.loads(response_val) if isinstance(response_val, str) else response_val
+                is_correct   = (resp_list == correct_list)
+            except Exception:
+                is_correct = False
+        else:
+            is_correct = (str(response_val).strip().upper() == str(correct_key).strip().upper())
+        is_correct_int = 1 if is_correct else 0
+    elif q_type == "likert":
+        is_correct     = None   # open-ended
+        is_correct_int = None
+        is_correct     = None
+    else:
+        is_correct     = None   # open_text: human-scored
+        is_correct_int = None
+
+    # ── Update theta ──────────────────────────────────────────────────────────
+    theta_map    = json.loads(sess.get("theta") or "{}")
+    theta_before = theta_map.get(domain, 0.0)
+
+    if is_correct is not None:
+        theta_after = _artspark_update_theta(theta_before, b, is_correct)
+    else:
+        # Likert / open_text: soft nudge based on engagement (response length)
+        engagement = min(len(str(response_val)), 200) / 200.0  # 0..1
+        theta_after = round(min(theta_before + 0.1 * engagement, 3.0), 4)
+
+    theta_map[domain] = theta_after
+
+    # ── XP + streak ───────────────────────────────────────────────────────────
+    trail        = json.loads(sess.get("raw_item_trail") or "[]")
+    # Streak: count consecutive correct answers in this domain
+    domain_trail = [t for t in trail if t.get("domain") == domain]
+    streak       = 0
+    for t in reversed(domain_trail):
+        if t.get("correct") is True:
+            streak += 1
+        else:
+            break
+
+    xp_earned = _artspark_xp(bool(is_correct), tier, streak)
+    new_xp    = int(sess.get("xp_total", 0)) + xp_earned
+
+    if is_correct:
+        streak += 1
+    else:
+        streak = 0
+
+    new_streak_max = max(int(sess.get("streak_max", 0)), streak)
+
+    # ── Append to item trail ──────────────────────────────────────────────────
+    trail.append({
+        "item_uuid":  item_uuid,
+        "domain":     domain,
+        "tier":       tier,
+        "b":          b,
+        "response":   str(response_val)[:500],
+        "correct":    is_correct,
+        "theta_after":theta_after,
+        "xp":         xp_earned,
+    })
+
+    # ── Persist response row ──────────────────────────────────────────────────
+    resp_record = {
+        "session_uuid":  session_uuid,
+        "item_uuid":     item_uuid,
+        "domain":        domain,
+        "tier":          tier,
+        "difficulty":    b,
+        "q_type":        q_type,
+        "response_value":str(response_val)[:1000],
+        "is_correct":    is_correct_int,
+        "response_ms":   response_ms,
+        "theta_before":  theta_before,
+        "theta_after":   theta_after,
+        "xp_earned":     xp_earned,
+    }
+    if supabase_client:
+        try:
+            supabase_client.table("artspark_responses").insert(resp_record).execute()
+        except Exception as e:
+            print(f"[ARTSPARK] Supabase response insert error: {e}")
+    try:
+        db.execute("""
+            INSERT INTO artspark_responses
+            (session_uuid,item_uuid,domain,tier,difficulty,q_type,response_value,
+             is_correct,response_ms,theta_before,theta_after,xp_earned)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (session_uuid, item_uuid, domain, tier, b, q_type,
+              str(response_val)[:1000], is_correct_int, response_ms,
+              theta_before, theta_after, xp_earned))
+        db.commit()
+    except Exception as e:
+        print(f"[ARTSPARK] SQLite response insert error: {e}")
+
+    # ── Determine next question / domain advance ──────────────────────────────
+    domains      = json.loads(sess.get("domain_order") or "[]")
+    dom_idx      = int(sess.get("current_domain_idx", 0))
+    q_idx        = int(sess.get("current_q_idx", 0)) + 1
+    q_answered   = int(sess.get("questions_answered", 0)) + 1
+
+    answered_uuids = {t["item_uuid"] for t in trail}
+    domain_answered_bs = [t["b"] for t in trail if t["domain"] == domain]
+    se = _artspark_se(theta_after, domain_answered_bs)
+
+    # Advance domain if max questions reached or SE converged
+    domain_q_count = len([t for t in trail if t["domain"] == domain])
+    advance_domain = (domain_q_count >= _ARTSPARK_MAX_Q) or (se <= _ARTSPARK_SE_CUTOFF)
+    level_up       = False
+
+    if advance_domain:
+        dom_idx += 1
+        q_idx    = 0
+
+    # Detect tier level-up for gamification feedback
+    tier_before = "easy"
+    for t_name, (lo, hi) in _ARTSPARK_TIERS.items():
+        if lo <= theta_before < hi:
+            tier_before = t_name
+    tier_after = "easy"
+    for t_name, (lo, hi) in _ARTSPARK_TIERS.items():
+        if lo <= theta_after < hi:
+            tier_after = t_name
+    tier_order = ["easy","medium","hard","expert"]
+    if tier_order.index(tier_after) > tier_order.index(tier_before):
+        level_up = True
+
+    # Completed all domains?
+    session_complete = (dom_idx >= len(domains))
+
+    next_item = None
+    next_domain = None
+    if not session_complete:
+        next_domain = domains[dom_idx]
+        next_theta  = theta_map.get(next_domain, 0.0)
+        next_item   = _artspark_next_question(next_theta, next_domain, answered_uuids, db)
+
+    # ── Update session ────────────────────────────────────────────────────────
+    medals_map = json.loads(sess.get("medals") or "{}")
+    medals_map[domain] = _artspark_medal(theta_after)
+
+    update_fields = {
+        "theta":            json.dumps(theta_map),
+        "medals":           json.dumps(medals_map),
+        "xp_total":         new_xp,
+        "streak_max":       new_streak_max,
+        "questions_answered": q_answered,
+        "raw_item_trail":   json.dumps(trail),
+        "current_domain_idx": dom_idx,
+        "current_q_idx":    q_idx,
+    }
+    if session_complete:
+        update_fields["status"]  = "completed"
+        update_fields["end_ts"]  = datetime.utcnow().isoformat()
+    _artspark_update_session(session_uuid, update_fields, db)
+
+    return jsonify({
+        "scored":         is_correct,
+        "xp_earned":      xp_earned,
+        "xp_total":       new_xp,
+        "streak":         streak,
+        "streak_max":     new_streak_max,
+        "level_up":       level_up,
+        "tier_after":     tier_after,
+        "theta":          theta_map,
+        "medals":         medals_map,
+        "domain":         next_domain,
+        "domain_idx":     dom_idx,
+        "q_idx":          q_idx,
+        "session_complete": session_complete,
+        "next_question":  _artspark_format_item(next_item),
+        "explanation":    item.get("explanation") if is_correct is not None else None,
+    }), 200
+
+
+# ══ Route: Complete Session ════════════════════════════════════════════════════
+@app.route("/api/artspark/sessions/<session_uuid>/complete", methods=["POST","OPTIONS"])
+def artspark_complete_session(session_uuid):
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    db   = get_db()
+    sess = _artspark_get_session(session_uuid, db)
+    if not sess:
+        return jsonify({"error": "Session not found"}), 404
+
+    theta_map   = json.loads(sess.get("theta") or "{}")
+    medals_map  = {d: _artspark_medal(t) for d, t in theta_map.items()}
+    xp_total    = int(sess.get("xp_total", 0))
+    streak_max  = int(sess.get("streak_max", 0))
+    trail       = json.loads(sess.get("raw_item_trail") or "[]")
+
+    # Domain summary
+    domain_summary = {}
+    for d in json.loads(sess.get("domain_order") or "[]"):
+        d_trail = [t for t in trail if t["domain"] == d]
+        domain_summary[d] = {
+            "theta":        round(theta_map.get(d, 0.0), 3),
+            "medal":        medals_map.get(d, "none"),
+            "questions":    len(d_trail),
+            "correct":      sum(1 for t in d_trail if t.get("correct") is True),
+        }
+
+    update_fields = {
+        "status":  "completed",
+        "end_ts":  datetime.utcnow().isoformat(),
+        "medals":  json.dumps(medals_map),
+    }
+    _artspark_update_session(session_uuid, update_fields, db)
+
+    return jsonify({
+        "session_uuid":   session_uuid,
+        "status":         "completed",
+        "theta":          theta_map,
+        "medals":         medals_map,
+        "xp_total":       xp_total,
+        "streak_max":     streak_max,
+        "domain_summary": domain_summary,
+        "questions_answered": int(sess.get("questions_answered", 0)),
+    }), 200
+
+
+# ══ Route: Admin — List Sessions ═══════════════════════════════════════════════
+@app.route("/api/artspark/admin/sessions", methods=["GET"])
+def artspark_admin_sessions():
+    user, error = require_user()
+    if error:
+        return error
+    if user.get("role") not in ("master_admin", "admin"):
+        return jsonify({"error": "Forbidden"}), 403
+
+    page  = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 50))
+    offset = (page - 1) * limit
+
+    sessions = []
+    if supabase_client:
+        try:
+            r = supabase_client.table("artspark_sessions")\
+                .select("*")\
+                .order("created_at", desc=True)\
+                .range(offset, offset + limit - 1)\
+                .execute()
+            sessions = r.data or []
+        except Exception as e:
+            print(f"[ARTSPARK] Admin list error: {e}")
+
+    if not sessions:
+        db = get_db()
+        rows = db.execute(
+            "SELECT * FROM artspark_sessions ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            (limit, offset)
+        ).fetchall()
+        sessions = [dict(r) for r in rows]
+
+    return jsonify({"sessions": sessions, "page": page, "limit": limit}), 200
+
+
+# ══ ArtSpark SQLite init (called inside init_db) ════════════════════════════
+_artspark_init_sqlite()
+
+
 # Initialize database on import (Gunicorn/production compatibility)
 init_db()
 

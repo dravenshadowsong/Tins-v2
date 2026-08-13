@@ -49,6 +49,7 @@ export default function Nav() {
           {loggedIn ? (
             <>
               <Link to="/dashboard" className="btn btn-ghost btn-sm">Dashboard</Link>
+              <Link to="/art-spark" className="btn btn-ghost btn-sm" style={{ color: "#8b5cf6" }}>🎨 ArtSpark</Link>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(108, 92, 231, 0.05)", padding: "4px 10px", borderRadius: "20px", border: "1px solid rgba(108, 92, 231, 0.15)" }}>
                 <span style={{ fontSize: "11px", fontWeight: 800, background: "#5B4CF0", color: "#fff", padding: "2px 6px", borderRadius: "10px", textTransform: "uppercase" }}>
                   {getRoleLabel(user?.role)}

@@ -1,4 +1,4 @@
-// API helper — all calls to the backend in one place
+﻿// API helper — all calls to the backend in one place
 export const BASE = import.meta.env.DEV
   ? "/api"
   : (import.meta.env.VITE_API_URL || "https://tins-v2-1.onrender.com/api");
@@ -74,16 +74,25 @@ export const api = {
   downloadPDF:     (sid)       => `${BASE}/sessions/${sid}/pdf`,
   getAdaptiveQuestions: (id, data) => req("POST", `/sessions/${id}/adaptive`, data),
 
-  // ── Invent It — Performance Evidence Module ─────────────────────────────
+  // Invent It — Performance Evidence Module
   inventIt: {
-    createSession:          (data)            => req("POST", "/invent-it/sessions", data),
-    submitResponse:         (uuid, round, d)  => req("POST", `/invent-it/sessions/${uuid}/round/${round}/response`, d),
-    logEvents:              (uuid, d)         => req("POST", `/invent-it/sessions/${uuid}/events`, d),
-    complete:               (uuid, d)         => req("POST", `/invent-it/sessions/${uuid}/complete`, d),
-    getSession:             (uuid)            => req("GET",  `/invent-it/sessions/${uuid}`),
-    hint:                   (uuid)            => req("POST", `/invent-it/sessions/${uuid}/hint`, {}),
-    submitFacilitatorObs:   (uuid, d)         => req("POST", `/invent-it/sessions/${uuid}/facilitator-observation`, d),
-    adminSessions:          (params)          => req("GET",  `/invent-it/admin/sessions?${new URLSearchParams(params || {})}`),
-    researchView:           (uuid)            => req("GET",  `/invent-it/admin/sessions/${uuid}/research`),
+    createSession:        (data)           => req("POST", "/invent-it/sessions", data),
+    submitResponse:       (uuid, round, d) => req("POST", `/invent-it/sessions/${uuid}/round/${round}/response`, d),
+    logEvents:            (uuid, d)        => req("POST", `/invent-it/sessions/${uuid}/events`, d),
+    complete:             (uuid, d)        => req("POST", `/invent-it/sessions/${uuid}/complete`, d),
+    getSession:           (uuid)           => req("GET",  `/invent-it/sessions/${uuid}`),
+    hint:                 (uuid)           => req("POST", `/invent-it/sessions/${uuid}/hint`, {}),
+    submitFacilitatorObs: (uuid, d)        => req("POST", `/invent-it/sessions/${uuid}/facilitator-observation`, d),
+    adminSessions:        (params)         => req("GET",  `/invent-it/admin/sessions?${new URLSearchParams(params || {})}`),
+    researchView:         (uuid)           => req("GET",  `/invent-it/admin/sessions/${uuid}/research`),
+  },
+
+  // ArtSpark — Gamified Adaptive Psychometric Module
+  artSpark: {
+    createSession: (data)       => req("POST", "/artspark/sessions", data),
+    getSession:    (uuid)       => req("GET",  `/artspark/sessions/${uuid}`),
+    respond:       (uuid, data) => req("POST", `/artspark/sessions/${uuid}/respond`, data),
+    complete:      (uuid)       => req("POST", `/artspark/sessions/${uuid}/complete`, {}),
+    adminSessions: (params)     => req("GET",  `/artspark/admin/sessions?${new URLSearchParams(params || {})}`),
   },
 };

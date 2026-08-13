@@ -173,3 +173,64 @@ CREATE TABLE IF NOT EXISTS puzzles (
     data TEXT, -- JSON structure of the puzzle prompt/options
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- ARTSPARK — Gamified Adaptive Psychometric Module (Creative & Artistic)
+-- ═══════════════════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS artspark_item_bank (
+    id          SERIAL PRIMARY KEY,
+    item_uuid   VARCHAR(64) UNIQUE NOT NULL,
+    domain      VARCHAR(50) NOT NULL,      -- visual_art | music | storytelling | drama | dance_movement | craft_design
+    tier        VARCHAR(20) NOT NULL,      -- easy | medium | hard | expert
+    difficulty  REAL NOT NULL DEFAULT 0.0, -- IRT b-parameter (-2 to +2)
+    q_type      VARCHAR(30) NOT NULL,      -- image_choice | likert | open_text | sequence | match_pair
+    prompt      TEXT NOT NULL,
+    options     TEXT,                      -- JSON array for choice/sequence types
+    correct_key TEXT,                      -- answer key for auto-scored types
+    explanation TEXT,
+    tags        TEXT,                      -- JSON array of skill tags
+    language    VARCHAR(10) DEFAULT 'en',
+    active      INTEGER DEFAULT 1,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS artspark_sessions (
+    id                  SERIAL PRIMARY KEY,
+    session_uuid        VARCHAR(64) UNIQUE NOT NULL,
+    child_id            INTEGER REFERENCES children(id) ON DELETE SET NULL,
+    student_id          INTEGER,           -- mirrors child_id for anonymous sessions
+    facilitator_id      INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    language            VARCHAR(10) DEFAULT 'en',
+    status              VARCHAR(20) DEFAULT 'in_progress', -- in_progress | completed | abandoned
+    domain_order        TEXT,              -- JSON array: domains selected/order
+    current_domain_idx  INTEGER DEFAULT 0,
+    current_q_idx       INTEGER DEFAULT 0,
+    theta               TEXT,              -- JSON map domain->theta float
+    medals              TEXT,              -- JSON map domain->bronze|silver|gold|platinum
+    xp_total            INTEGER DEFAULT 0,
+    streak_max          INTEGER DEFAULT 0,
+    questions_answered  INTEGER DEFAULT 0,
+    raw_item_trail      TEXT,              -- JSON array of {item_uuid, response, correct, theta_after}
+    start_ts            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_ts              TIMESTAMP,
+    total_duration_ms   INTEGER,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS artspark_responses (
+    id              SERIAL PRIMARY KEY,
+    session_uuid    VARCHAR(64) NOT NULL,
+    item_uuid       VARCHAR(64) NOT NULL,
+    domain          VARCHAR(50) NOT NULL,
+    tier            VARCHAR(20) NOT NULL,
+    difficulty      REAL,
+    q_type          VARCHAR(30),
+    response_value  TEXT,                  -- raw answer (option key / likert int / text)
+    is_correct      INTEGER,               -- 1 | 0 | NULL (open_text not auto-scored)
+    response_ms     INTEGER,               -- latency in ms
+    theta_before    REAL,
+    theta_after     REAL,
+    xp_earned       INTEGER DEFAULT 0,
+    submitted_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

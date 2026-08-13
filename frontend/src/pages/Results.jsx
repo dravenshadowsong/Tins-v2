@@ -781,6 +781,69 @@ export default function Results() {
           </div>
         </div>
 
+        {/* ── INVENT IT CALL-TO-ACTION BANNER ── */}
+        <div className="hide-print" style={{
+          background: "linear-gradient(135deg, #FF9800 0%, #F57C00 40%, #E65100 100%)",
+          borderRadius: 18,
+          padding: "22px 28px",
+          marginBottom: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 16,
+          boxShadow: "0 8px 32px rgba(245, 124, 0, 0.35)",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          {/* Decorative background circles */}
+          <div style={{
+            position: "absolute", top: -30, right: 120, width: 130, height: 130,
+            borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute", bottom: -20, right: 40, width: 90, height: 90,
+            borderRadius: "50%", background: "rgba(255,255,255,0.05)", pointerEvents: "none",
+          }} />
+
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div style={{ fontSize: 48, lineHeight: 1 }}>🔧</div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.75)", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: 4 }}>
+                Next Step — Creativity Assessment
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#fff", marginBottom: 4 }}>
+                Try the Invent It Challenge!
+              </div>
+              <div style={{ fontSize: 13.5, color: "rgba(255,255,255,0.85)", lineHeight: 1.5, maxWidth: 480 }}>
+                This section was not completed yet. The Invent It workshop measures creative & divergent thinking — turn a cardboard box into something extraordinary! 🚀
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate(`/invent-it/${cid}`)}
+            style={{
+              background: "#fff",
+              color: "#E65100",
+              border: "none",
+              borderRadius: 12,
+              padding: "12px 28px",
+              fontFamily: "inherit",
+              fontWeight: 900,
+              fontSize: 15,
+              cursor: "pointer",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
+              whiteSpace: "nowrap",
+              transition: "transform 0.15s ease, box-shadow 0.15s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.22)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.18)"; }}
+          >
+            Start Invent It →
+          </button>
+        </div>
+
         {/* Master GTI Gauge Card & Persona Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24, marginBottom: 24 }}>
           {/* Executive GTI Summary Card */}

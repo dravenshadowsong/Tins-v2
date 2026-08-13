@@ -11,6 +11,7 @@ import Login                from "./pages/Login";
 import InventIt             from "./pages/InventIt";
 import InventItFacilitator  from "./pages/InventItFacilitator";
 import InventItAdmin        from "./pages/InventItAdmin";
+import ArtSpark             from "./pages/ArtSpark";
 import Nav                  from "./components/Nav";
 import "./App.css";
 
@@ -34,6 +35,8 @@ export default function App() {
             <Route path="/invent-it/:sid"             element={<InventIt />} />
             <Route path="/invent-it-facilitator/:sessionId" element={<InventItFacilitator />} />
             <Route path="/invent-it-admin"            element={<InventItAdmin />} />
+            <Route path="/art-spark"                  element={<ArtSpark />} />
+            <Route path="/art-spark/:uuid"            element={<ArtSpark />} />
             <Route path="*"                           element={<Navigate to="/" />} />
           </Routes>
         </main>
